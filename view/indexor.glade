@@ -21,10 +21,10 @@
                     <property name="visible">True</property>
                     <child>
                       <object class="GtkImageMenuItem" id="imgmnscan">
-                        <property name="label">gtk-new</property>
+                        <property name="label">Scan path</property>
                         <property name="visible">True</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
+                        <property name="image">image2</property>
+                        <property name="use_stock">False</property>
                         <property name="always_show_image">True</property>
                         <signal name="activate" handler="imgmnscan_activate_cb"/>
                       </object>
@@ -105,13 +105,13 @@
                   <object class="GtkMenu" id="menu2">
                     <property name="visible">True</property>
                     <child>
-                      <object class="GtkImageMenuItem" id="immnsettings">
+                      <object class="GtkImageMenuItem" id="imgmnsettings">
                         <property name="label" translatable="yes">_Settings</property>
                         <property name="visible">True</property>
                         <property name="use_underline">True</property>
                         <property name="image">image1</property>
                         <property name="use_stock">False</property>
-                        <signal name="activate" handler="immnsettings_activate_cb"/>
+                        <signal name="activate" handler="imgmnsettings_activate_cb"/>
                       </object>
                     </child>
                   </object>
@@ -1546,5 +1546,9 @@
     <child>
       <placeholder/>
     </child>
+  </object>
+  <object class="GtkImage" id="image2">
+    <property name="visible">True</property>
+    <property name="stock">gtk-new</property>
   </object>
 </interface>

@@ -27,6 +27,7 @@ from logic.midput.settings import SettingsLoader
 from logic.midput import LOADER, SETTINGS
 #from controller import LOGHANDLER
 from controller.loghandler import LogHandler
+from controller.abouthandler import AboutHandler
 from logic.logging import MANAGER
 
 #Regular imports
@@ -73,6 +74,9 @@ class MainHandler(object):
         self._window.connect("drag_motion", self.motion_cb)
         self._window.connect("drag_data_received", self.got_data_cb)
         self._window.connect("window-state-event", self.view_state)
+        self._imgmnscan = self._wtree.get_object("imgmnscan")
+        self._imgmnload = self._wtree.get_object("imgmnload")
+        self._imgmnsaveas = self._wtree.get_object("imgmnsaveas")
         self._tbsearch = self._wtree.get_object("tbsearch")
         self._tbsearch.set_sensitive(False)
         self._tbnewpath = self._wtree.get_object("tbnewpath")
@@ -522,10 +526,14 @@ class MainHandler(object):
             self._btncancel.show()
         self._tbnewpath.set_sensitive(sensitive)
         self._tbloadfile.set_sensitive(sensitive)
+        self._imgmnscan.set_sensitive(sensitive)
+        self._imgmnload.set_sensitive(sensitive)
         if hasattr(self, "_root") and self._root is not None:
             self._tbsave.set_sensitive(True)
+            self._imgmnsaveas.set_sensitive(True)
         else:
             self._tbsave.set_sensitive(False)
+            self._imgmnsaveas.set_sensitive(False)
 
     #################################
     #Callbacks
@@ -651,6 +659,8 @@ class MainHandler(object):
         
     def imgmnquit_activate_cb(self, widget):
         """Quits the program"""
+        if self._indexer is not None:
+            self.btncancel_clicked_cb(widget)
         self._destroy(widget)
         
     def chkmnlog_toggled_cb(self, widget):
@@ -672,13 +682,13 @@ class MainHandler(object):
         else:
             self._infopane.hide()
             
-    def immnsettings_activate_cb(self, widget):
+    def imgmnsettings_activate_cb(self, widget):
         """Shows the options window"""
         self._settings = SettingsHandler(self)
 
     def imgmnabout_activate_cb(self, widget):
         """Shows the about window"""
-        pass
+        AboutHandler(self)
 
     #Info pane labels size fix
     def hplistpane_size_allocate_cb(self, widget, alloc):

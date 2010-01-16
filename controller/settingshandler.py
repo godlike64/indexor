@@ -96,6 +96,7 @@ class SettingsHandler(object):
                                         get_object("chkinterfaceimagesoft")
         
         #Logs
+        self._chklogsdebug = self._wtree.get_object("chklogsdebug")
         self._chklogsmime = self._wtree.get_object("chklogsmime")
         self._chklogsreadio = self._wtree.get_object("chklogsreadio")
         self._chklogsreadmeta = self._wtree.get_object("chklogsreadmeta")
@@ -166,6 +167,7 @@ class SettingsHandler(object):
         self._chkinterfaceimgdate.set_active(SETTINGS.imgdate)
         self._chkinterfaceimgauthor.set_active(SETTINGS.imgauthor)
         self._chkinterfaceimgsoft.set_active(SETTINGS.imgsoft)
+        self._chklogsdebug.set_active(SETTINGS.debug)
         self._chklogsmime.set_active(SETTINGS.missingmime)
         self._chklogsreadio.set_active(SETTINGS.ioerror)
         self._chklogsreadmeta.set_active(SETTINGS.metadataerror)
@@ -253,6 +255,9 @@ class SettingsHandler(object):
         SETTINGS.gnuhidden = widget.get_active()
 
     #Logging
+    def chklogsdebug_toggled_cb(self, widget):
+        SETTINGS.debug = widget.get_active()
+        
     def chklogsthumb_toggled_cb(self, widget):
         SETTINGS.thumberror = widget.get_active()
         

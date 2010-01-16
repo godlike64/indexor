@@ -17,6 +17,8 @@ import datetime
 import time
 import inspect
 
+from logic.midput import SETTINGS
+
 
 TYPES = {
              1  :   "Missing mimetype",
@@ -91,6 +93,12 @@ class EventManager(object):
     #Methods
     #################################
     def append_event(self, msg, filename, err, type):
+        #SETTINGS.debug = True
+        if SETTINGS.debug is True:
+            for i in inspect.stack():
+                print "Function " +  i[3] + " on file " +\
+                                i[1] + " at line " + \
+                                str(i[2])
         location = "Function " +  inspect.stack()[1][3] + " on file " +\
                             inspect.stack()[1][1] + " at line " + \
                             str(inspect.stack()[1][2])

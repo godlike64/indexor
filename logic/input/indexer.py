@@ -20,7 +20,7 @@ import gobject
 import threading
 import datetime
 import mimetypes
-
+import inspect
 
 from fs.entries import File, Directory, Audio, Video, Photo, MIMES, \
 NOT_AUDIO, SEPARATOR
@@ -40,7 +40,7 @@ class Indexer(object):
     added easily as long as the structure is honored.
     """
 
-    def __init__(self, path, progress):
+    def __init__(self, path, progress, mainhandler):
         #mimetypes.init(['misc/mime.types'])
         mimetypes.add_type("audio/x-musepack", ".mpc", True)
         mimetypes.add_type("audio/x-spc", ".spc", True)
@@ -57,6 +57,8 @@ class Indexer(object):
         self._root = None
         self._position = 0
         self._lastfile = ""
+        self._stop = False
+        self._mainhandler = mainhandler
         if path[-1] == SEPARATOR:
             self._path = path[:-1]
         else:
@@ -111,6 +113,12 @@ class Indexer(object):
     def set_last(self, last):
         """Property"""
         self._last = last
+        
+    def get_stop(self):
+        return self._stop
+    
+    def set_stop(self, stop):
+        self._stop = stop
 
     root = property(get_root)
     list = property(get_list)
@@ -119,6 +127,7 @@ class Indexer(object):
     lastfile = property(get_lastfile, set_lastfile)
     position = property(get_position, set_position)
     last = property(get_last, set_last)
+    stop = property(get_stop, set_stop)
 
     #################################
     #Methods
@@ -147,13 +156,11 @@ class Indexer(object):
         bar update method using gobject.timeout_add. Returns the thread. It
         is called from the main handler class.
         """
-        print self._count
         fsindexthread = threading.Thread(target=self.do_index_process,
                                          args=(self._path, ""))
         fsindexthread.start()
         gobject.timeout_add(500, self.update_progressbar_indexing,
                             fsindexthread)
-        #while fsthread.is_alive():
         return fsindexthread
 
     def print_dirs(self, _dir):
@@ -217,12 +224,13 @@ class Indexer(object):
     def calculate_dir_size(self, _dir):
         """Calculates total directory size."""
         contentsize = 0
-        for _file in _dir.files:
-            contentsize += _file.size
-        for childdir in _dir.dirs:
-            self.calculate_dir_size(childdir)
-            contentsize += childdir.size
-        _dir.size = contentsize
+        if self._stop is False:
+            for _file in _dir.files:
+                contentsize += _file.size
+            for childdir in _dir.dirs:
+                self.calculate_dir_size(childdir)
+                contentsize += childdir.size
+            _dir.size = contentsize
 
     def do_index_process(self, path, relpath):
         """The bulk of the indexing process.
@@ -230,6 +238,8 @@ class Indexer(object):
         It is called recursively for every file and directory found, and
         appends it to the structure.
         """
+        if self._stop is True:
+            return None
         try:
             dirname = os.path.dirname(path)
             basename = os.path.basename(path)
@@ -252,12 +262,12 @@ class Indexer(object):
                 self.save_backup_linux_filter(ldir)
             relpath += basename
             for entry in ldir:
+                if self._stop is True:
+                    return None
                 try:
                     rpath = relpath + SEPARATOR
                     self.last = path + SEPARATOR + entry
-                    if os.path.islink(self.last) and self.last != "/mnt/local/warehouse/home":
-                        pass
-                    elif os.path.isfile(path + SEPARATOR + entry):
+                    if os.path.isfile(path + SEPARATOR + entry):
                         atime = datetime.datetime.fromtimestamp\
                                 (os.path.getatime(path + SEPARATOR + entry)
                                  ).strftime("%Y/%m/%d %H:%M:%S")
@@ -289,13 +299,17 @@ class Indexer(object):
                                          root.name, entry, rpath, mimetype,
                                          atime, mtime, size,
                                          self.parse_size(size))
-                        root.append_file(_file)
+                        if root is not None:
+                            root.append_file(_file)
                         self._position += 1
                     else:
-                        _dir = self.do_index_process(path + SEPARATOR +
-                                                     entry, relpath)
-                        root.append_dir(_dir)
-                        self._position += 1
+                        if self._stop is False:
+                            _dir = self.do_index_process(path + SEPARATOR +
+                                                         entry, relpath)
+                            root.append_dir(_dir)
+                            self._position += 1
+                        else:
+                            return None
                 except KeyError as error:
                     if SETTINGS.missingmime:
                         MANAGER.\
@@ -314,11 +328,12 @@ class Indexer(object):
                         print "Error indexing file: " + absname + SEPARATOR +\
                                 entry + ". I/O error."
                         print exc
-            self.calculate_dir_size(root)
-            root.strsize = self.parse_size(root.size)
-            if (root.__str__() == self._path):
-                self._root = root
-            return root
+            if root is not None:
+                self.calculate_dir_size(root)
+                root.strsize = self.parse_size(root.size)
+                if (root.__str__() == self._path):
+                    self._root = root
+                return root
         except Exception as exc:
             if SETTINGS.ioerror:
                 MANAGER.append_event("Error indexing directory. I/O error",
@@ -334,6 +349,8 @@ class Indexer(object):
         displayed, so the user has an idea of what the program has done so far
         """
         for root, dirs, files in os.walk(path):
+            if self._stop is True:
+                return None
             if SETTINGS.gnuhidden is True:
                 self.hidden_linux_filter(files)
                 self.hidden_linux_filter(dirs)
@@ -345,6 +362,8 @@ class Indexer(object):
 
     def update_progressbar_pulse(self, fscountthread):
         """Pulses the progress bar."""
+        if self._stop is True:
+            return False
         if not fscountthread.is_alive():
             self.progress.set_fraction(0)
             return False
@@ -354,6 +373,8 @@ class Indexer(object):
 
     def update_progressbar_counting(self, fscountthread):
         """Updates the progressbar while in counting mode."""
+        if self._stop is True:
+            return False
         if not fscountthread.is_alive():
             return False
         else:
@@ -363,10 +384,13 @@ class Indexer(object):
 
     def update_progressbar_indexing(self, fsthread):
         """Updates the progressbar while in indexing mode."""
+        if self._stop is True:
+            return False
         if not fsthread.is_alive():
             self.progress.set_text("Completed indexing "
                                    + str(self.count) + " files.")
             self.progress.set_fraction(1.0)
+            gobject.timeout_add(2000, self._mainhandler.hide_progressbar)
             return False
         else:
             self.progress.set_text(self.last)

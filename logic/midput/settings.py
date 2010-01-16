@@ -82,6 +82,12 @@ class Settings(object):
     savebackup = property(get_savebackup, set_savebackup)
     
     #Logs
+    def get_debug(self):
+        return self._debug
+    
+    def set_debug(self, debug):
+        self._debug = debug
+        
     def get_missingmime(self):
         return self._missingmime
     
@@ -112,6 +118,7 @@ class Settings(object):
     def set_thumberror(self, thumberror):
         self._thumberror = thumberror
     
+    debug = property(get_debug, set_debug)
     missingmime = property(get_missingmime, set_missingmime)
     ioerror = property(get_ioerror, set_ioerror)
     metadataerror = property(get_metadataerror, set_metadataerror)
@@ -419,6 +426,7 @@ class Settings(object):
         self._imgsoft = True
         
         #Events
+        self._debug = False
         self._missingmime = True
         self._ioerror = True
         self._metadataerror = True

@@ -62,7 +62,9 @@ class MainHandler(object):
         self._wtree = gtk.Builder()
         self._wtree.add_from_file(self._gladefile)
         self._window = self._wtree.get_object("mainwindow")
+        self._hbpbar = self._wtree.get_object("hbpbar")
         self._pbar = self._wtree.get_object("pbar")
+        self._btncancel = self._wtree.get_object("btncancel")
         self._tvhandler = TVHandler(self, self._wtree)
         self._window.drag_dest_set(gtk.DEST_DEFAULT_DROP,
                                    [('text/plain', 0, 0)], 0)
@@ -73,6 +75,8 @@ class MainHandler(object):
         self._window.connect("window-state-event", self.view_state)
         self._tbsearch = self._wtree.get_object("tbsearch")
         self._tbsearch.set_sensitive(False)
+        self._tbnewpath = self._wtree.get_object("tbnewpath")
+        self._tbsave = self._wtree.get_object("tbsave")
         self._tbloadfile = self._wtree.get_object("tbloadfile")
         self._current = None
         self._currentnode = None
@@ -88,7 +92,7 @@ class MainHandler(object):
         if SETTINGS.windowmax is True:
             self._window.maximize()
         self._window.show_all()
-        self._pbar.hide()
+        self._hbpbar.hide()
         self._infopane.hide()
         self._entrysearch.hide()
         self._tblmediainfo.hide()
@@ -387,19 +391,19 @@ class MainHandler(object):
         was already indexed, and clears the environment accordingly.
         """
         if (self._path is not None):
-            self._wtree.get_object("tbnewpath").set_sensitive(False)
+            self.set_buttons_sensitivity(False)
             self._indexer = Indexer(self._path, 
-                                    self._pbar)
+                                    self._pbar, self)
             fscountthread = self._indexer.start_counting()
             self._tvhandler.indexer = self._indexer
             gobject.timeout_add(500, self.check_if_counting_finished,
                                 fscountthread)
-        if (hasattr(self,"_root")):
+        if (hasattr(self, "_root")):
             self._root = None
             self._tvhandler.root = None
             self._tvhandler.clear_stores()
             self._pbar.set_text("")
-            self._pbar.show()
+            self._hbpbar.show()
         
     def find_dir_with_fs_path(self, path, root):
         """Finds a directory with a given path"""
@@ -507,6 +511,21 @@ class MainHandler(object):
             return True
         else:
             return False
+    
+    def hide_progressbar(self):
+        self._hbpbar.hide()
+        
+    def set_buttons_sensitivity(self, sensitive):
+        if sensitive is True:
+            self._btncancel.hide()
+        else:
+            self._btncancel.show()
+        self._tbnewpath.set_sensitive(sensitive)
+        self._tbloadfile.set_sensitive(sensitive)
+        if hasattr(self, "_root") and self._root is not None:
+            self._tbsave.set_sensitive(True)
+        else:
+            self._tbsave.set_sensitive(False)
 
     #################################
     #Callbacks
@@ -610,6 +629,12 @@ class MainHandler(object):
         """
         self._searchhandler = SearchHandler("view/search.glade", self,
                                             self._tvhandler)
+
+    def btncancel_clicked_cb(self, widget):
+        self._indexer.stop = True
+        self._pbar.set_text("Indexing process of " + self._path +
+                            " cancelled.")
+        gobject.timeout_add(2000, self.hide_progressbar)
 
     #Menu
     def imgmnscan_activate_cb(self, widget):

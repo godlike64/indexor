@@ -16,6 +16,7 @@
 """Module for the handler of the treeviews"""
 
 import gtk
+import gobject
 
 import fs.entries
 
@@ -33,6 +34,7 @@ class TVHandler(object):
         self._wtree = wtree
         self._mainhandler = mainhandler
         self._pbar = self._wtree.get_object("pbar")
+        self._btncancel = self._wtree.get_object("btncancel")
         self._tbsavetree = self._wtree.get_object("tbsave")
         self._tvdirtree = self._wtree.get_object("tvdirtree")
         self._entrysearch = self._wtree.get_object("entrysearch")
@@ -142,19 +144,17 @@ class TVHandler(object):
         self.clear_stores()
         if not self._root:
             self._root = self._indexer.get_root()
-        self._mainhandler.root = self._root
-        self._rootiter = self._tsdirtree.append(None, ['drive-harddisk', 
-                                                       self._root.name + 
-                                                       " (" + 
-                                                       self._root.strsize +
-                                                       ")",
-                                                        self._root.__str__()])
-        self.append_directories(self._rootiter, self._root)
-        self._tbsavetree.set_sensitive(True)
-        self._pbar.hide()
-        self._wtree.get_object("tbloadfile").set_sensitive(True)
-        self._wtree.get_object("tbnewpath").set_sensitive(True)
-        self._wtree.get_object("tbsearch").set_sensitive(True)
+        if self._root is not None:
+            self._mainhandler.root = self._root
+            self._rootiter = self._tsdirtree.append(None, ['drive-harddisk', 
+                                                           self._root.name + 
+                                                           " (" + 
+                                                           self._root.strsize +
+                                                           ")",
+                                                            self._root.__str__()])
+            self.append_directories(self._rootiter, self._root)
+            gobject.timeout_add(2000, self._mainhandler.hide_progressbar)
+        self._mainhandler.set_buttons_sensitivity(True)
         
         
     def generate_file_list(self, parent, lsfl):

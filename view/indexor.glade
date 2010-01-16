@@ -1499,12 +1499,36 @@
           </packing>
         </child>
         <child>
-          <object class="GtkProgressBar" id="pbar">
-            <property name="height_request">25</property>
+          <object class="GtkHBox" id="hbpbar">
             <property name="visible">True</property>
-            <property name="pulse_step">0.050000000000000003</property>
-            <property name="ellipsize">middle</property>
-            <property name="discrete_blocks">25</property>
+            <child>
+              <object class="GtkProgressBar" id="pbar">
+                <property name="height_request">25</property>
+                <property name="visible">True</property>
+                <property name="pulse_step">0.050000000000000003</property>
+                <property name="ellipsize">middle</property>
+                <property name="discrete_blocks">25</property>
+              </object>
+              <packing>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="btncancel">
+                <property name="label">gtk-cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="btncancel_clicked_cb"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="pack_type">end</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>

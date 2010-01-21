@@ -23,7 +23,6 @@ from logic.output.plaintext import PlainTextWriter
 from tvhandler import TVHandler
 from searchhandler import SearchHandler
 from settingshandler import SettingsHandler
-from logic.midput.settings import SettingsLoader
 from logic.midput import LOADER, SETTINGS
 #from controller import LOGHANDLER
 from controller.loghandler import LogHandler
@@ -35,7 +34,6 @@ import gobject
 import pygtk
 pygtk.require('2.0')
 import gtk
-import controller
 
 
 class MainHandler(object):
@@ -96,15 +94,8 @@ class MainHandler(object):
         if SETTINGS.windowmax is True:
             self._window.maximize()
         self._window.show_all()
-        self._hbpbar.hide()
-        self._infopane.hide()
-        self._entrysearch.hide()
-        self._tblmediainfo.hide()
-        self._tblimginfo.hide()
-        self._tblaudioinfo.hide()
-        self._tblsubinfo.hide()
-        self._tblvideoinfo.hide()
-        
+        self._hide_after_shown()
+
     #################################
     #Properties
     #################################
@@ -141,9 +132,11 @@ class MainHandler(object):
         self._root = root
         
     def get_chkmnlog(self):
+        """Property"""
         return self._chkmnlog
     
     def get_window(self):
+        """Property"""
         return self._window
 
     currentpath = property(get_currentpath, set_currentpath)
@@ -157,11 +150,24 @@ class MainHandler(object):
     #Methods
     #################################
     def _destroy(self, widget):
+        """Destroys the window."""
         SETTINGS.infopanesize = self._hplistpane.get_position()
         LOADER.save_settings()
         gtk.main_quit()
         
+    def _hide_after_shown(self):
+        """Hide things that should not be shown immediately."""
+        self._hbpbar.hide()
+        self._infopane.hide()
+        self._entrysearch.hide()
+        self._tblmediainfo.hide()
+        self._tblimginfo.hide()
+        self._tblaudioinfo.hide()
+        self._tblsubinfo.hide()
+        self._tblvideoinfo.hide()
+        
     def _load_infopane_variables(self):
+        """Create the objects needed for info pane handling."""
         #Pane and tables
         self._vwpinfoimg = self._wtree.get_object("vwpinfoimg")
         self._infopane = self._wtree.get_object("swinfopane")
@@ -253,6 +259,7 @@ class MainHandler(object):
 
 
     def _clear_infopane(self):
+        """Hides all non-common attributes from the info pane."""
         self._tblmediainfo.hide()
         self._tblaudioinfo.hide()
         self._tblaudiochaninfo.hide()
@@ -327,6 +334,7 @@ class MainHandler(object):
         self.set_infopanes_visibility()
 
     def set_infopanes_visibility(self):
+        """Sets the visibility of each label, according to stored settings"""
         self._geninfo.set_property("visible", SETTINGS.geninfo)
         self._tblinfoabspath.set_property("visible", SETTINGS.abspath)
         self._tblinforelpath.set_property("visible", SETTINGS.relpath)
@@ -382,6 +390,7 @@ class MainHandler(object):
         return result
     
     def set_pane_width(self, width):
+        """Sets the pane's width. Used when restoring settings"""
         firststep = self._hptreelist.get_position()
         idle = 12
         total = self._window.get_allocation().width
@@ -517,9 +526,14 @@ class MainHandler(object):
             return False
     
     def hide_progressbar(self):
+        """This is refactored into a method because other classes use it"""
         self._hbpbar.hide()
         
     def set_buttons_sensitivity(self, sensitive):
+        """Sets buttons (and menus) sensitivity according to value given
+        
+        This method is used when the indexing process begins or ends.
+        """
         if sensitive is True:
             self._btncancel.hide()
         else:
@@ -639,6 +653,7 @@ class MainHandler(object):
                                             self._tvhandler)
 
     def btncancel_clicked_cb(self, widget):
+        """Callback used when cancelling the indexing process"""
         self._indexer.stop = True
         self._pbar.set_text("Indexing process of " + self._path +
                             " cancelled.")
@@ -664,9 +679,7 @@ class MainHandler(object):
         self._destroy(widget)
         
     def chkmnlog_toggled_cb(self, widget):
-        #======================================================================
-        # LOGHANDLER.hide_or_show(widget.get_active())
-        #======================================================================
+        """Shows/hides the log viewer window"""
         if widget.get_active() is True:
             self._loghandler = LogHandler(self)
             MANAGER.loghandler = self._loghandler
@@ -716,10 +729,12 @@ class MainHandler(object):
         self.init_index_process()
         
     def view_state(self, widget, event):
+        """view state callback, to store wether the window is maximized"""
         if event.new_window_state == gtk.gdk.WINDOW_STATE_MAXIMIZED:
             SETTINGS.windowmax = True
         else:
             SETTINGS.windowmax = False
             
     def _configure(self, widget, event):
+        """Configure event callback, used to store the window size"""
         SETTINGS.windowsize = (event.width, event.height)

@@ -13,11 +13,15 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Indexor.  If not, see <http://www.gnu.org/licenses/>.
 
+"""Module for the handler of the About window"""
+
 import gtk
 
 from controller import VERSION
 
 class AboutHandler(object):
+    
+    """About window handler"""
     
     def __init__(self, mainhandler):
         self._mainhandler = mainhandler
@@ -37,6 +41,7 @@ class AboutHandler(object):
         self._window.show_all()
         
     def destroy(self, widget):
-        if self._window is not None:
-            self._window.destroy()
+        """Destroys the window."""
+        if widget is not None:
+            widget.destroy()
             self._window = None

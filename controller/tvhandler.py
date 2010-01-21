@@ -146,12 +146,13 @@ class TVHandler(object):
             self._root = self._indexer.get_root()
         if self._root is not None:
             self._mainhandler.root = self._root
-            self._rootiter = self._tsdirtree.append(None, ['drive-harddisk', 
-                                                           self._root.name + 
-                                                           " (" + 
-                                                           self._root.strsize +
-                                                           ")",
-                                                            self._root.__str__()])
+            self._rootiter = self._tsdirtree.append(None, 
+                                                    ['drive-harddisk',
+                                                     self._root.name +
+                                                     " (" +
+                                                     self._root.strsize +
+                                                     ")",
+                                                     self._root.__str__()])
             self.append_directories(self._rootiter, self._root)
             gobject.timeout_add(2000, self._mainhandler.hide_progressbar)
         self._mainhandler.set_buttons_sensitivity(True)

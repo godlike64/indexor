@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Indexor.  If not, see <http://www.gnu.org/licenses/>.
 
+"""Module for the handler of the logs window"""
+
 import gtk
 
 from logic.logging import MANAGER
@@ -20,6 +22,8 @@ from logic.logging.event import TYPES
 from logic.midput import SETTINGS
 
 class LogHandler(object):
+    
+    """Logs window handler"""
     
     def __init__(self, mainhandler):
         self._mainhandler = mainhandler
@@ -69,9 +73,11 @@ class LogHandler(object):
         self._window.show_all()
 
     def get_mainhandler(self):
+        """Property"""
         return self._mainhandler
     
     def set_mainhandler(self, mainhandler):
+        """Property"""
         self._mainhandler = mainhandler
         
     mainhandler = property(get_mainhandler, set_mainhandler)
@@ -80,24 +86,35 @@ class LogHandler(object):
     #Methods
     #################################
     def _populate_logviewer(self):
+        """Fills log viewer with occurred events"""
         if MANAGER.events is not None:
             for event in MANAGER.events:
                 self.add_event_to_store(event)
         
     def add_event_to_store(self, event):
+        """Adds a single event to the treestore"""
         self._lslogviewer.append([event.msg, event.filename, event.err,
                                      TYPES[event.type], event.location,
                                      event.date])
         
     def hide_or_show(self, active):
+        """Hides or shows the window
+        
+        The log viewer window is always created, it is only shown or hidden.
+        """
         if active is True:
             self._window.show_all()
         else:
             self._mainhandler.chkmnlog.set_active(active)
             self._window.hide()
 
-    def _filter_logs(self, model, iter):
-        if model.get_value(iter, 3) in self._types:
+    def _filter_logs(self, model, _iter):
+        """Visible function for the TreeModelFilter
+        
+        This function manages the hiding or showing of the different event
+        types.
+        """
+        if model.get_value(_iter, 3) in self._types:
             return True
         else:
             return False
@@ -106,6 +123,7 @@ class LogHandler(object):
     #Callbacks
     #################################
     def chklogmissingmime_toggled_cb(self, widget):
+        """Callback for events of type Missing MIME"""
         if widget.get_active() is True:
             self._types.append(TYPES[1])
         else:
@@ -113,6 +131,7 @@ class LogHandler(object):
         self._tmflogviewer.refilter()
 
     def chklogioerror_toggled_cb(self, widget):
+        """Callback for events of type I/O Error"""
         if widget.get_active() is True:
             self._types.append(TYPES[2])
         else:
@@ -120,6 +139,7 @@ class LogHandler(object):
         self._tmflogviewer.refilter()
     
     def chklogmetadataerror_toggled_cb(self, widget):
+        """Callback for events of type Metadata Error"""
         if widget.get_active() is True:
             self._types.append(TYPES[3])
         else:
@@ -127,6 +147,7 @@ class LogHandler(object):
         self._tmflogviewer.refilter()
 
     def chklogmissingicon_toggled_cb(self, widget):
+        """Callback for events of type Missing icon"""
         if widget.get_active() is True:
             self._types.append(TYPES[4])
         else:
@@ -134,6 +155,7 @@ class LogHandler(object):
         self._tmflogviewer.refilter()
 
     def chklogthumberror_toggled_cb(self, widget):
+        """Callback for events of type Thumbnail error"""
         if widget.get_active() is True:
             self._types.append(TYPES[5])
         else:
@@ -141,6 +163,7 @@ class LogHandler(object):
         self._tmflogviewer.refilter()
         
     def btnclose_clicked_cb(self, widget):
+        """Callback for close event"""
         self._mainhandler.chkmnlog.set_active(False)
         self._window.destroy()
     
@@ -164,9 +187,11 @@ class LogHandler(object):
         savedialog.destroy()
         
     def _configure(self, widget, event):
+        """Configure event callback, used to store the window size"""
         SETTINGS.logwindowsize = (event.width, event.height)
         
     def view_state(self, widget, event):
+        """View state callback, to store wether the window is maximized"""
         if event.new_window_state == gtk.gdk.WINDOW_STATE_MAXIMIZED:
             SETTINGS.logwindowmax = True
         else:

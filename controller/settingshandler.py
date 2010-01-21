@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Indexor.  If not, see <http://www.gnu.org/licenses/>.
 
+"""Module for the handler of the settings window"""
 
 import gtk
 import sys
@@ -20,6 +21,8 @@ import sys
 from logic.midput import LOADER, SETTINGS
 
 class SettingsHandler(object):
+    
+    """Settings window handler"""
     
     def __init__(self, mainhandler):
         self._mainhandler = mainhandler
@@ -114,28 +117,43 @@ class SettingsHandler(object):
         self._hidetbls()
         
     def destroy(self, widget):
+        """Destroys the window"""
         if self._window is not None:
             self._window.destroy()
             self._window = None
     
     def _hidetbls(self):
+        """Hides all tables. Used when switching sections inside the window"""
         self._tblinterface.hide()
         self._tbllogs.hide()
         self._tblfilters.hide()
         
     def _hide_combo_or_spin(self):
+        """Method to show either the comboboxes or the spinbuttons
+        
+        This is needed because Windows doesn't handle SVG icons well, so we
+        need to use fixed size icons (in order to be sure that the icon is
+        loaded from the sized png files.
+        """
         if sys.platform == "win32":
+            #This means we are on Win32, so we hide the spinbuttons.
             self._spiniconlistsize.hide()
             self._spiniconpanesize.hide()
             self._spinthumblistsize.hide()
             self._spinthumbpanesize.hide()
         else:
+            #This means we are NOT on Win32, so we hide the comboboxes.
             self._cmbiconlistsize.hide()
             self._cmbiconpanesize.hide()
             self._cmbthumblistsize.hide()
             self._cmbthumbpanesize.hide()
 
     def _set_values_from_settings(self):
+        """Set all values in the settings windows
+        
+        The values are taken from the corresponding value set in the SETTINGS
+        object.
+        """
         if sys.platform == "win32":
             self._set_combos()
         else:
@@ -177,12 +195,14 @@ class SettingsHandler(object):
         self._chkfiltersavebackup.set_active(SETTINGS.savebackup)
 
     def _set_spins(self):
+        """Sets the values for the spinbuttons"""
         self._spiniconlistsize.set_value(SETTINGS.iconlistsize)
         self._spiniconpanesize.set_value(SETTINGS.iconpanesize)
         self._spinthumblistsize.set_value(SETTINGS.thumblistsize)
         self._spinthumbpanesize.set_value(SETTINGS.thumbpanesize)
            
     def _set_combos(self):
+        """Sets the values for the comboboxes"""
         sett = {
                0    :   SETTINGS.iconlistsize,
                1    :   SETTINGS.iconpanesize,
@@ -195,12 +215,14 @@ class SettingsHandler(object):
                2    :   self._cmbthumblistsize,
                3    :   self._cmbthumbpanesize
                }
-        call = {
-                0   :   self.cmbiconsizelist_changed_cb,
-                1   :   self.cmbiconsizepane_changed_cb,
-                2   :   self.cmbthumbsizelist_changed_cb,
-                3   :   self.cmbthumbsizepane_changed_cb,
-                }
+        #======================================================================
+        # call = {
+        #        0   :   self.cmbiconsizelist_changed_cb,
+        #        1   :   self.cmbiconsizepane_changed_cb,
+        #        2   :   self.cmbthumbsizelist_changed_cb,
+        #        3   :   self.cmbthumbsizepane_changed_cb,
+        #        }
+        #======================================================================
         for i in range(4):
             if sett[i] > 128:
                 cmb[i].set_active(3)
@@ -228,54 +250,68 @@ class SettingsHandler(object):
     #Callbacks
     #################################
     def tbinterface_clicked_cb(self, widget):
+        """Callback for the interface section"""
         self._hidetbls()
         self._tblinterface.show()
 
     def tblogs_clicked_cb(self, widget):
+        """Callback for the logs section"""
         self._hidetbls()
         self._tbllogs.show()
 
     def tbfilters_clicked_cb(self, widget):
+        """Callback for the filters section"""
         self._hidetbls()
         self._tblfilters.show()
         self._tblfilters.show()
 
     def btnclose_clicked_cb(self, widget):
+        """Callback called when closing the window"""
         self.destroy(widget)
     
     def btnsave_clicked_cb(self, widget):
+        """Callback called when saving settings"""
         LOADER.save_settings()
     
     #Settings
     #Filters
     def chkfiltersavebackup_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.savebackup = widget.get_active()
 
     def chkfiltergnuhidden_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.gnuhidden = widget.get_active()
 
     #Logging
     def chklogsdebug_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.debug = widget.get_active()
         
     def chklogsthumb_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.thumberror = widget.get_active()
         
     def chklogsicon_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.missingicon = widget.get_active()
 
     def chklogsreadmeta_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.metadataerror = widget.get_active()
 
     def chklogsreadio_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.ioerror = widget.get_active()
 
     def chklogsmime_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.missingmime = widget.get_active()
 
     #Interface
     #Info pane
     def chkinterfacegen_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.geninfo = widget.get_active()
         self._chkinterfaceabs.set_sensitive(widget.get_active())
         self._chkinterfacerel.set_sensitive(widget.get_active())
@@ -286,39 +322,48 @@ class SettingsHandler(object):
         self._mainhandler.set_infopanes_visibility()
         
     def chkinterfacemtime_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.mtime = widget.get_active()
         self._mainhandler.set_infopanes_visibility()
 
     def chkinterfaceatime_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.atime = widget.get_active()
         self._mainhandler.set_infopanes_visibility()
 
     def chkinterfacemime_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.mime = widget.get_active()
         self._mainhandler.set_infopanes_visibility()
 
     def chkinterfacerel_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.relpath = widget.get_active()
         self._mainhandler.set_infopanes_visibility()
 
     def chkinterfacesize_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.size = widget.get_active()
         self._mainhandler.set_infopanes_visibility()
 
     def chkinterfaceabs_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.abspath = widget.get_active()
         self._mainhandler.set_infopanes_visibility()
         
     def chkinterfacemedia_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.mediainfo = widget.get_active()
         self._chkinterfacemedialength.set_sensitive(widget.get_active())
         self._mainhandler.set_infopanes_visibility()
 
     def chkinterfacemedialength_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.medialength = widget.get_active()
         self._mainhandler.set_infopanes_visibility()
 
     def chkinterfacevideo_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.videoinfo = widget.get_active()
         self._chkinterfacevideocodec.set_sensitive(widget.get_active())
         self._chkinterfacevideobitrate.set_sensitive(widget.get_active())
@@ -328,26 +373,32 @@ class SettingsHandler(object):
         self._mainhandler.set_infopanes_visibility()
 
     def chkinterfacevideocodec_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.videocodec = widget.get_active()
         self._mainhandler.set_infopanes_visibility()
 
     def chkinterfacevideobitrate_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.videobitrate = widget.get_active()
         self._mainhandler.set_infopanes_visibility()
 
     def chkinterfacevideores_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.videores = widget.get_active()
         self._mainhandler.set_infopanes_visibility()
 
     def chkinterfacevideofps_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.videofps = widget.get_active()
         self._mainhandler.set_infopanes_visibility()
 
     def chkinterfacevideoar_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.videoar = widget.get_active()
         self._mainhandler.set_infopanes_visibility()
 
     def chkinterfaceaudio_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.audioinfo = widget.get_active()
         self._chkinterfaceaudiobitrate.set_sensitive(widget.get_active())
         self._chkinterfaceaudiosample.set_sensitive(widget.get_active())
@@ -356,31 +407,38 @@ class SettingsHandler(object):
         self._mainhandler.set_infopanes_visibility()
 
     def chkinterfaceaudiobitrate_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.audiobitrate = widget.get_active()
         self._mainhandler.set_infopanes_visibility()
 
     def chkinterfaceaudiosample_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.audiosample = widget.get_active()
         self._mainhandler.set_infopanes_visibility()
 
     def chkinterfaceaudiocodec_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.audiocodec = widget.get_active()
         self._mainhandler.set_infopanes_visibility()
 
     def chkinterfaceaudiochannels_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.audiochan = widget.get_active()
         self._mainhandler.set_infopanes_visibility()
 
     def chkinterfacesub_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.subinfo = widget.get_active()
         self._chkinterfacesublangs.set_sensitive(widget.get_active())
         self._mainhandler.set_infopanes_visibility()
 
     def chkinterfacesublangs_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.sublangs = widget.get_active()
         self._mainhandler.set_infopanes_visibility()
 
     def chkinterfaceimage_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.imginfo = widget.get_active()
         self._chkinterfaceimgres.set_sensitive(widget.get_active())
         self._chkinterfaceimgdate.set_sensitive(widget.get_active())
@@ -389,54 +447,66 @@ class SettingsHandler(object):
         self._mainhandler.set_infopanes_visibility()
 
     def chkinterfaceimageres_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.imgres = widget.get_active()
         self._mainhandler.set_infopanes_visibility()
 
     def chkinterfaceimagedate_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.imgdate = widget.get_active()
         self._mainhandler.set_infopanes_visibility()
 
     def chkinterfaceimageauthor_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.imgauthor = widget.get_active()
         self._mainhandler.set_infopanes_visibility()
 
     def chkinterfaceimagesoft_toggled_cb(self, widget):
+        """Callback"""
         SETTINGS.imgsoft = widget.get_active()
         self._mainhandler.set_infopanes_visibility()
 
     #Icon/thumb sizes
     def cmbthumbsizepane_changed_cb(self, widget):
+        """Callback"""
         model = widget.get_model()
-        iter = widget.get_active_iter()
-        SETTINGS.thumbpanesize = model.get_value(iter,0)
+        _iter = widget.get_active_iter()
+        SETTINGS.thumbpanesize = model.get_value(_iter, 0)
         self._set_values_from_settings()
 
     def cmbiconsizepane_changed_cb(self, widget):
+        """Callback"""
         model = widget.get_model()
-        iter = widget.get_active_iter()
-        SETTINGS.iconpanesize = model.get_value(iter,0)
+        _iter = widget.get_active_iter()
+        SETTINGS.iconpanesize = model.get_value(_iter, 0)
         self._set_values_from_settings()
 
     def cmbthumbsizelist_changed_cb(self, widget):
+        """Callback"""
         model = widget.get_model()
-        iter = widget.get_active_iter()
-        SETTINGS.thumblistsize = model.get_value(iter,0)
+        _iter = widget.get_active_iter()
+        SETTINGS.thumblistsize = model.get_value(_iter, 0)
         self._set_values_from_settings()
 
     def cmbiconsizelist_changed_cb(self, widget):
+        """Callback"""
         model = widget.get_model()
-        iter = widget.get_active_iter()
-        SETTINGS.iconlistsize = model.get_value(iter,0)
+        _iter = widget.get_active_iter()
+        SETTINGS.iconlistsize = model.get_value(_iter, 0)
         self._set_values_from_settings()
 
     def spinthumbsizepane_value_changed_cb(self, widget):
+        """Callback"""
         SETTINGS.thumbpanesize = widget.get_value_as_int()
     
     def spiniconsizepane_value_changed_cb(self, widget):
+        """Callback"""
         SETTINGS.iconpanesize = widget.get_value_as_int()
 
     def spinthumbsizelist_value_changed_cb(self, widget):
+        """Callback"""
         SETTINGS.thumblistsize = widget.get_value_as_int()
 
     def spiniconsizelist_value_changed_cb(self, widget):
+        """Callback"""
         SETTINGS.iconlistsize = widget.get_value_as_int()

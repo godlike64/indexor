@@ -13,6 +13,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Indexor.  If not, see <http://www.gnu.org/licenses/>.
 
+"""Module for the handling of events
+
+This module defines a constant for the different event types, and then two
+classes: one for the events itself, and another one to manage all events
+occurred in a program instance.
+"""
+
 import datetime
 import time
 import inspect
@@ -31,12 +38,14 @@ TYPES = {
 from logic.output.plaintext import EventPlainTextWriter
 
 class Event(object):
+    
+    """Class that represents an event"""
 
-    def __init__(self, msg, filename, err, type, location, date):
+    def __init__(self, msg, filename, err, _type, location, date):
         self._msg = msg
         self._filename = filename
         self._err = err
-        self._type = type
+        self._type = _type
         self._location = location
         self._date = date
 
@@ -44,21 +53,27 @@ class Event(object):
     #Properties
     #################################        
     def get_msg(self):
+        """Property"""
         return self._msg
     
     def get_err(self):
+        """Property"""
         return self._err
     
     def get_location(self):
+        """Property"""
         return self._location
     
     def get_date(self):
+        """Property"""
         return self._date
     
     def get_type(self):
+        """Property"""
         return self._type
     
     def get_filename(self):
+        """Property"""
         return self._filename
     
     msg = property(get_msg)
@@ -70,6 +85,17 @@ class Event(object):
 
 class EventManager(object):
     
+    """Class that manages all events occurred in an instance of the program
+    
+    Every time an event happens (identified in an exception elsewhere), the
+    append_event method is called, with some parameters. As an extra, this
+    class uses the inspect module to track down which function at which file
+    and at which line caused the event (or called the append_event method). If
+    SETTINGS.debug is set, then it will print the stack accessible with
+    inspect to stdout.
+    This class also registers the date in which the event happened.
+    """
+    
     def __init__(self, loghandler=None):
         self._events = []
         self._loghandler = loghandler
@@ -78,12 +104,15 @@ class EventManager(object):
     #Properties
     #################################
     def get_events(self):
+        """Property"""
         return self._events
     
     def get_loghandler(self):
+        """Property"""
         return self._loghandler
     
     def set_loghandler(self, loghandler):
+        """Property"""
         self._loghandler = loghandler
     
     events = property(get_events)
@@ -92,7 +121,8 @@ class EventManager(object):
     #################################
     #Methods
     #################################
-    def append_event(self, msg, filename, err, type):
+    def append_event(self, msg, filename, err, _type):
+        """Add an event to the events' list"""
         #SETTINGS.debug = True
         if SETTINGS.debug is True:
             for i in inspect.stack():
@@ -104,10 +134,11 @@ class EventManager(object):
                             str(inspect.stack()[1][2])
         date = datetime.datetime.fromtimestamp(time.time())\
                         .strftime("%Y/%m/%d %X")
-        event = Event(msg, filename, err, type, location, date)
+        event = Event(msg, filename, err, _type, location, date)
         self._events.append(event)
         if self._loghandler is not None:
             self._loghandler.add_event_to_store(event)
     
     def save_to_disk(self, destination):
+        """Save the event list to a plaintext file"""
         EventPlainTextWriter(self._events, destination)

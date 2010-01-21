@@ -19,14 +19,13 @@ This module is meant to be extendable: the listed classes represent normal
 filesystem types, but of course not all of them are represented. Any changes
 in this module will surely break binary compatibility with older archives, so
 be cautious!
-The two constants defined in this module, along with the misc/mime.types file
-help in the detection of mimetypes, and in the setting of the corresponding
-icon for the entry.
+The two constants defined in this module help in the detection of mimetypes,
+and in the setting of the corresponding icon for the entry.
+All metadata from media files is extracted using the kaa.metadata package.
 """
 
 import gtk
 import sys
-import os
 try:
     import kaa.metadata
     NO_KAA = False
@@ -36,11 +35,6 @@ import datetime
 
 from logic.midput import SETTINGS
 from logic.logging import MANAGER
-#==============================================================================
-# import mutagen.asf, mutagen.flac, mutagen.mp4, mutagen.monkeysaudio, mutagen.mp3, mutagen.musepack, mutagen.oggvorbis
-# import wave
-# import pyexiv2
-#==============================================================================
 
 if sys.platform == "win32":
     SEPARATOR = "\\"
@@ -357,9 +351,11 @@ class File(object):
         self._name = name
 
     def get_relpath(self):
+        """Property"""
         return self._relpath
 
     def set_relpath(self, relpath):
+        """Property"""
         self._relpath = relpath
 
     def get_parent(self):
@@ -506,13 +502,15 @@ class Directory(File):
                       gtk.ICON_LOOKUP_FORCE_SVG)
 
 class Video(File):
+    
+    """Class that represents a Video file"""
 
     def __init__(self, parent, name, relpath, mimetype, atime, mtime, size,
                  strsize):
         super(Video, self).__init__(parent, name, relpath, mimetype, atime,
                                     mtime, size=size, strsize=strsize)
         self._length, self._videocodec, self._videobitrate, \
-        self._videores, self._videofps, self._videoar, self._audiobitrate,\
+        self._videores, self._videofps, self._videoar, self._audiobitrate, \
         self._audiosamplerate, self._audiocodec, \
         self._audiochannels = _return_tuple(NO_INFO, 10)
         if NO_KAA is not True:
@@ -581,8 +579,9 @@ class Video(File):
     #Methods
     #################################
     def _load_metadata(self):
-        length, videocodec, videobitrate, videores,\
-        videofps, videoar, audiobitrate, audiosamplerate,\
+        """Try to load metadata from the actual file"""
+        length, videocodec, videobitrate, videores, \
+        videofps, videoar, audiobitrate, audiosamplerate, \
         audiocodec, audiochannels, sublangs = _return_tuple(0, 11)
         try:
             info = kaa.metadata.parse(self.__str__())
@@ -608,7 +607,7 @@ class Video(File):
                         videobitrate = str(video.bitrate) + " Kbps"
                     if hasattr(video, "aspect")\
                     and video.aspect is not None:
-                        videoar = str(round(video.aspect,2))
+                        videoar = str(round(video.aspect, 2))
                     if hasattr(video, "width") and video.width is not None\
                     and hasattr(video, "height") and video.height is not None:
                         videores = str(video.width) + "x" + str(video.height)
@@ -616,7 +615,7 @@ class Video(File):
                             videoar = str(round(float(video.width)
                                                 /video.height,2))
                     if hasattr(video, "fps") and video.fps is not None:
-                        videofps = str(round(video.fps,3))
+                        videofps = str(round(video.fps, 3))
                 
                 #Loading audio attributes
                 if hasattr(info, "audio") and info.audio[0] is not None:
@@ -712,6 +711,7 @@ class Audio(File):
     #Methods
     #################################
     def _load_metadata(self):
+        """Try to load metadata from the actual file"""
         length, samplerate, bitrate, codec = _return_tuple(0, 4)
         try:
             info = kaa.metadata.parse(self.__str__())
@@ -794,7 +794,7 @@ class Photo(File):
                                      self.__str__(), exc, 5)
             self.parse_icon()
         #Try loading image metadata
-        self._res, self._date_taken, self._author, self._soft,\
+        self._res, self._date_taken, self._author, self._soft, \
             self._date_taken = _return_tuple(NO_INFO, 5)
         if NO_KAA is not True:
             self._load_metadata()
@@ -823,9 +823,11 @@ class Photo(File):
         return self._author
     
     def get_thumb(self):
+        """Property"""
         return self._thumb
     
     def set_thumb(self, thumb):
+        """Property"""
         self._thumb = thumb
 
     hasthumb = property(get_hasthumb)
@@ -855,6 +857,7 @@ class Photo(File):
             self._hasthumb = False
 
     def _load_metadata(self):
+        """Try to load metadata from the actual file"""
         try:
             width, height, author, soft, date_taken = _return_tuple(0, 5)
             info = kaa.metadata.parse(self.__str__())
@@ -890,4 +893,10 @@ class Photo(File):
 
 
 def _return_tuple(arg, count):
+    """Method used to return a tuple of similar values
+    
+    It is used when assigning the same value to multiple variables. This
+    method returns a tuple of \"count\" number of items, all of wich have the
+    \"arg\" as value
+    """
     return tuple([arg] * count)

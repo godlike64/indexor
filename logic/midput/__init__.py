@@ -12,6 +12,9 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with Indexor.  If not, see <http://www.gnu.org/licenses/>.
+
+"""Initializing of the midput module, creates some module globals"""
+
 from settings import SettingsLoader
 
 LOADER = SettingsLoader()

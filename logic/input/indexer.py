@@ -20,7 +20,6 @@ import gobject
 import threading
 import datetime
 import mimetypes
-import inspect
 
 from fs.entries import File, Directory, Audio, Video, Photo, MIMES, \
 NOT_AUDIO, SEPARATOR
@@ -115,9 +114,11 @@ class Indexer(object):
         self._last = last
         
     def get_stop(self):
+        """Property"""
         return self._stop
     
     def set_stop(self, stop):
+        """Property"""
         self._stop = stop
 
     root = property(get_root)

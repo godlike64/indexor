@@ -12,6 +12,9 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with Indexor.  If not, see <http://www.gnu.org/licenses/>.
+
+"""Initalizing of logging module, creates MANAGER module global"""
+
 from event import EventManager
 
 MANAGER = EventManager()

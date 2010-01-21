@@ -136,12 +136,15 @@ class PlainTextWriter(object):
         
 class EventPlainTextWriter(object):
     
+    """Class that writes the log events to a plaintext file"""
+    
     def __init__(self, events, destination):
         outputfile = open(destination, "w")
         self._write_to_disk(events, outputfile)
         outputfile.close()
         
     def _write_to_disk(self, events, outputfile):
+        """Writes the events to disk"""
         for event in events:
             outputfile.write("Message: " + event.msg + "\n")
             outputfile.write("Filename: " + event.filename + "\n")

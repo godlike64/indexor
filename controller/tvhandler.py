@@ -17,8 +17,12 @@
 
 import gtk
 import gobject
+from sqlobject import sqlhub
 
-import fs.entries
+#import fs.entries
+from fs.entities import File, Directory, Video, Audio, Photo
+from logic.input.constants import ICONS, MIMES
+from logic.midput import SETTINGS
 
 class TVHandler(object):
     
@@ -29,7 +33,7 @@ class TVHandler(object):
     """
     
     def __init__(self, mainhandler, wtree):
-        self._indexer = None
+        self._dbmanager = None
         self._root = None
         self._wtree = wtree
         self._mainhandler = mainhandler
@@ -79,13 +83,14 @@ class TVHandler(object):
         
         self._root = root
     
-    def get_indexer(self):
+    def get_dbmanager(self):
         """Property"""
-        return self._indexer
+        return self._dbmanager
     
-    def set_indexer(self, indexer):
+    def set_dbmanager(self, dbmanager):
         """Property"""
-        self._indexer = indexer
+        self._dbmanager = dbmanager
+        sqlhub.processConnection = dbmanager.conn
         
     def get_tmfdirtree(self):
         """Property"""
@@ -108,7 +113,7 @@ class TVHandler(object):
         return self._tmffilelist
         
     root = property(get_root, set_root)
-    indexer = property(get_indexer, set_indexer)
+    dbmanager = property(get_dbmanager, set_dbmanager)
     tmfdirtree = property(get_tmfdirtree)
     lsfilelist = property(get_lsfilelist, set_lsfilelist)
     tvdirtree = property(get_tvdirtree)
@@ -127,7 +132,7 @@ class TVHandler(object):
         
         Called once after indexing.
         """
-        for dirchild in _dir.get_dirs():
+        for dirchild in _dir.dirs:
             _iter = self._tsdirtree.append(piter, ['folder', dirchild.name,
                                        dirchild.__str__()])
             self.append_directories(_iter, dirchild)
@@ -143,7 +148,10 @@ class TVHandler(object):
         #self._tsdirtree.clear()
         self.clear_stores()
         if not self._root:
-            self._root = self._indexer.get_root()
+            #self._root = self._dbmanager.get_root()
+            rootselect = Directory.select(Directory.q.relpath == "/")
+            root = rootselect[0]
+            self._root = root
         if self._root is not None:
             self._mainhandler.root = self._root
             self._rootiter = self._tsdirtree.append(None, 
@@ -167,23 +175,42 @@ class TVHandler(object):
         entry.
         """
         lsfl.clear()
-        if self._entrysearch.get_text() == "":
-            for dirchild in parent.get_dirs():
-                lsfl.append([dirchild.icon, dirchild.name,
-                             dirchild.strsize, dirchild.__str__()])
-            for filechild in parent.get_files():
-                lsfl.append([filechild.icon, filechild.name,
+        for dirchild in parent.dirs:
+            
+            #gtk.icon_theme_get_default().\
+            #load_icon(ICONS[MIMES[self._mimetype]]
+            
+            
+            lsfl.append([gtk.icon_theme_get_default().\
+                         load_icon(ICONS[MIMES[dirchild.mimetype]], 
+                                   SETTINGS.iconlistsize, 
+                                   gtk.ICON_LOOKUP_FORCE_SVG), 
+                                   dirchild.name, dirchild.strsize, 
+                                   dirchild.__str__()])
+        for filechild in parent.files:
+            if isinstance(filechild, Photo) \
+            and filechild.hasthumb is True:
+                lsfl.append([filechild.icon, filechild.name, 
                              filechild.strsize, filechild.__str__()])
-        else:
-            text = self._entrysearch.get_text()
-            for dirchild in parent.get_dirs():
-                if self._mainhandler.find_cased_string(dirchild.name, text):
-                    lsfl.append([dirchild.icon, dirchild.name,
-                                 dirchild.strsize, dirchild.__str__()])
-            for filechild in parent.get_files():
-                if self._mainhandler.find_cased_string(filechild.name, text):
-                    lsfl.append([filechild.icon, filechild.name,
-                              filechild.strsize, filechild.__str__()])
+            else:
+                lsfl.append([gtk.icon_theme_get_default().\
+                             load_icon(ICONS[MIMES[filechild.mimetype]], 
+                                       SETTINGS.iconlistsize, 
+                                       gtk.ICON_LOOKUP_FORCE_SVG), 
+                                       filechild.name, filechild.strsize, 
+                                       filechild.__str__()])
+        #======================================================================
+        # else:
+        #    text = self._entrysearch.get_text()
+        #    for dirchild in parent.dirs:
+        #        if self._mainhandler.find_cased_string(dirchild.name, text):
+        #            lsfl.append([dirchild.icon, dirchild.name,
+        #                         dirchild.strsize, dirchild.__str__()])
+        #    for filechild in parent.files:
+        #        if self._mainhandler.find_cased_string(filechild.name, text):
+        #            lsfl.append([filechild.icon, filechild.name,
+        #                      filechild.strsize, filechild.__str__()])
+        #======================================================================
                     
     def switch_to_node_from_fs_path(self, fs_path, parent):
         """Switch to a node in the structure with a given fs path.
@@ -254,6 +281,12 @@ class TVHandler(object):
         node = self._mainhandler.find_dir_or_file_with_fs_path(path,
                                                                self._root)
         self._mainhandler.set_infopane_content(node)
+
+    def _iterate_inside(self, parentiter, activated):
+        for row in parentiter.iterchildren():
+            if activated == row[2]:
+                self._candidate = row.iter
+            self._iterate_inside(row, activated)
         
     def tvfilelist_row_activated_cb(self, tvfl, path, view_column):
         """Callback that handles row activation in the file list treeview.
@@ -266,17 +299,34 @@ class TVHandler(object):
         #cursor = self._tvfilelist.get_cursor()
         _iter = tvfl.get_model().get_iter(path)
         fs_path = self._tmffilelist.get(_iter, 3)[0]
-        node = self._mainhandler.find_dir_with_fs_path(fs_path, self._root)
-        if isinstance(node, fs.entries.Directory):
+        #node = self._mainhandler.find_dir_with_fs_path(fs_path, self._root)
+        nodelist = Directory.select(Directory.q.strabs == fs_path)
+        if nodelist.count() == 1:
+            node = nodelist[0]
             activated = tvfl.get_model().get_value(_iter, 3)
             dtcursor = self._tvdirtree.get_cursor()
-            path = dtcursor[0]
-            curiter = self._tmfdirtree.get_iter(path)
-            iterdest = self._tmfdirtree.iter_children(curiter)
-            while iterdest is not None:
-                if self._tmfdirtree.get_value(iterdest, 2) == activated:
-                    break
-                iterdest = self._tmfdirtree.iter_next(iterdest)
-            path = self._tmfdirtree.get_path(iterdest)
+            #path = dtcursor[0]
+            #curiter = self._tmfdirtree.get_iter(path)
+            #curiter = self._tmfdirtree.get_iter_first()
+            #iterdest = self._tmfdirtree.iter_children(curiter)
+            parentiter = iter(self._tmfdirtree).next()
+            #itering = itermodel.next()
+            self._candidate = None
+            self._iterate_inside(parentiter, activated)
+            #==================================================================
+            # while iterdest is not None:
+            #    print self._tmfdirtree.get_value(iterdest, 2)
+            #    print activated
+            #    if self._tmfdirtree.get_value(iterdest, 2) == activated:
+            #        break
+            #    iterdestaux = self._tmfdirtree.iter_children(iterdest)
+            #    if iterdestaux is None:
+            #        print iterdest
+            #        iterdest = self._tmfdirtree.iter_next(iterdest)
+            #        print iterdest
+            #    else:
+            #        iterdest = iterdestaux
+            #==================================================================
+            path = self._tmfdirtree.get_path(self._candidate)
             self._tvdirtree.expand_to_path(path)
             self._tvdirtree.set_cursor(path)

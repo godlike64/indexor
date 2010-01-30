@@ -15,8 +15,17 @@
 
 """Module for the handler of the main window"""
 
+
+
+#Regular imports
+import gobject
+import pygtk
+pygtk.require('2.0')
+import gtk
+
 #Local imports
-import fs.entries as entries
+from fs.entities import File, Directory, Video, Audio, Photo
+from logic.input.constants import ICONS, MIMES, SEPARATOR
 from logic.input.indexer import Indexer
 from logic.output.binary import BinaryReader, BinaryWriter
 from logic.output.plaintext import PlainTextWriter
@@ -28,12 +37,7 @@ from logic.midput import LOADER, SETTINGS
 from controller.loghandler import LogHandler
 from controller.abouthandler import AboutHandler
 from logic.logging import MANAGER
-
-#Regular imports
-import gobject
-import pygtk
-pygtk.require('2.0')
-import gtk
+from logic.input.dbmanager import DBManager
 
 
 class MainHandler(object):
@@ -49,7 +53,7 @@ class MainHandler(object):
         # MANAGER.loghandler = LOGHANDLER
         # LOGHANDLER.mainhandler = self
         #======================================================================
-        self._indexer = None
+        self._dbmanager = None
         self._root = None
         self._rootiter = None
         self._path = None
@@ -138,6 +142,9 @@ class MainHandler(object):
     def get_window(self):
         """Property"""
         return self._window
+    
+    def get_pbar(self):
+        return self._pbar
 
     currentpath = property(get_currentpath, set_currentpath)
     currentnode = property(get_currentnode, set_currentnode)
@@ -145,6 +152,7 @@ class MainHandler(object):
     root = property(get_root, set_root)
     chkmnlog = property(get_chkmnlog)
     window = property(get_window)
+    pbar = property(get_pbar)
 
     #################################
     #Methods
@@ -276,7 +284,7 @@ class MainHandler(object):
         self._selected = node
         self._clear_infopane()
         self._lblinfoname.set_text(node.name)
-        self._lblinfoabspath.set_text(node.parent + entries.SEPARATOR)
+        self._lblinfoabspath.set_text(node.parent + SEPARATOR)
         self._lblinforelpath.set_text(node.relpath)
         self._lblinfosize.set_text(node.strsize)
         self._lblinfomime.set_text(node.mimetype)
@@ -285,13 +293,15 @@ class MainHandler(object):
         if hasattr(self, "_infoimg"):
             self._vwpinfoimg.remove(self._infoimg)
 
-        if isinstance(node, entries.Directory):
-            self._infoimg = gtk.image_new_from_pixbuf\
-                                (gtk.icon_theme_get_default().\
-                                 load_icon('folder', SETTINGS.iconpanesize,
-                                           gtk.ICON_LOOKUP_FORCE_SVG))
-            self._lblinfomime.set_text("folder")
-        elif isinstance(node, entries.Photo):
+        #======================================================================
+        # if isinstance(node, Directory):
+        #    self._infoimg = gtk.image_new_from_pixbuf\
+        #                        (gtk.icon_theme_get_default().\
+        #                         load_icon('folder', SETTINGS.iconpanesize,
+        #                                   gtk.ICON_LOOKUP_FORCE_SVG))
+        #    self._lblinfomime.set_text("folder")
+        #======================================================================
+        if isinstance(node, Photo):
             self._infoimg = gtk.image_new_from_pixbuf(node.thumb)
             self._lblimgres.set_text(node.res)
             self._lblimgdate.set_text(node.date_taken)
@@ -299,14 +309,14 @@ class MainHandler(object):
             self._lblimgsoft.set_text(node.soft)
             self._tblimginfo.show()
         else:
-            if isinstance(node, entries.Audio):
+            if isinstance(node, Audio):
                 self._tblmediainfo.show()
                 self._tblaudioinfo.show()
                 self._lblmedialength.set_text(node.length)
                 self._lblaudiobitrate.set_text(node.bitrate)
                 self._lblaudiosample.set_text(node.samplerate)
                 self._lblaudiocodec.set_text(node.codec)
-            if isinstance(node, entries.Video):
+            if isinstance(node, Video):
                 self._tblmediainfo.show()
                 self._tblaudioinfo.show()
                 self._tblaudiochaninfo.show()
@@ -314,6 +324,7 @@ class MainHandler(object):
                 if hasattr(node, "_sublangs"):
                     self._tblsubinfo.show()
                     self._lblsublangs.set_text(node.sublangs)
+                print node.length
                 self._lblmedialength.set_text(node.length)
                 self._lblvideocodec.set_text(node.videocodec)
                 self._lblvideobitrate.set_text(node.videobitrate)
@@ -326,8 +337,8 @@ class MainHandler(object):
                 self._lblaudiochan.set_text(node.audiochannels)
             self._infoimg = gtk.image_new_from_pixbuf\
                                 (gtk.icon_theme_get_default().\
-                                 load_icon(entries.ICONS[entries.MIMES
-                                                        [node.mimetype]], 120,
+                                 load_icon(ICONS[MIMES[node.mimetype]], 
+                                           SETTINGS.iconpanesize,
                                            gtk.ICON_LOOKUP_FORCE_SVG))
         self._infoimg.show()
         self._vwpinfoimg.add(self._infoimg)
@@ -361,14 +372,14 @@ class MainHandler(object):
         self._tblimgdate.set_property("visible", SETTINGS.imgdate)
         self._tblimgauthor.set_property("visible", SETTINGS.imgauthor)
         self._tblimgsoft.set_property("visible", SETTINGS.imgsoft)
-        if isinstance(self._selected, entries.Audio):
+        if isinstance(self._selected, Audio):
             self._tblimginfo.hide()
             self._tblvideoinfo.hide()
             self._tblsubinfo.hide()
             self._tblaudiochaninfo.hide()
-        elif isinstance(self._selected, entries.Video):
+        elif isinstance(self._selected, Video):
             self._tblimginfo.hide()
-        elif isinstance(self._selected, entries.Photo):
+        elif isinstance(self._selected, Photo):
             self._tblmediainfo.hide()
             self._tblvideoinfo.hide()
             self._tblaudioinfo.hide()
@@ -405,14 +416,16 @@ class MainHandler(object):
         """
         if (self._path is not None):
             self.set_buttons_sensitivity(False)
-            self._indexer = Indexer(self._path, 
-                                    self._pbar, self)
-            fscountthread = self._indexer.start_counting()
-            self._tvhandler.indexer = self._indexer
+            self._dbmanager = DBManager()
+            self._dbmanager.index_new_dir(self._path, self)
+            fscountthread = self._dbmanager.start_counting()
+            self._tvhandler.dbmanager = self._dbmanager
             gobject.timeout_add(500, self.check_if_counting_finished,
                                 fscountthread)
-        if (hasattr(self, "_root")):
-            self._root = None
+        #======================================================================
+        # if (hasattr(self, "_root")):
+        #    self._root = None
+        #======================================================================
             self._tvhandler.root = None
             self._tvhandler.clear_stores()
             self._pbar.set_text("")
@@ -423,7 +436,7 @@ class MainHandler(object):
         if root.__str__() == path:
             return root
         else:
-            for _dir in root.get_dirs():
+            for _dir in root.dirs:
                 if (self.find_dir_with_fs_path(path, _dir) is not None):
                     return self.find_dir_with_fs_path(path, _dir)
 
@@ -451,10 +464,10 @@ class MainHandler(object):
         if root.name.lower().find(text.lower()) != -1:
             return True
         else:
-            for _dir in root.get_dirs():
+            for _dir in root.dirs:
                 if self.find_cased_dir_or_file(text, _dir):
                     return True
-            for _file in root.get_files():
+            for _file in root.files:
                 if self.find_cased_file(text, _file):
                     return True
 
@@ -481,7 +494,7 @@ class MainHandler(object):
         Called from gobject.timeout_add.
         """
         if not fscountthread.is_alive():
-            fsindexthread = self._indexer.start_indexing()
+            fsindexthread = self._dbmanager.start_indexing()
             gobject.timeout_add(500, self.check_if_indexing_finished, 
                                 fsindexthread)
             return False
@@ -654,7 +667,7 @@ class MainHandler(object):
 
     def btncancel_clicked_cb(self, widget):
         """Callback used when cancelling the indexing process"""
-        self._indexer.stop = True
+        self._dbmanager.stop = True
         self._pbar.set_text("Indexing process of " + self._path +
                             " cancelled.")
         gobject.timeout_add(2000, self.hide_progressbar)
@@ -674,7 +687,7 @@ class MainHandler(object):
         
     def imgmnquit_activate_cb(self, widget):
         """Quits the program"""
-        if self._indexer is not None:
+        if self._dbmanager is not None:
             self.btncancel_clicked_cb(widget)
         self._destroy(widget)
         

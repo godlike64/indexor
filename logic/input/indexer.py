@@ -21,8 +21,12 @@ import threading
 import datetime
 import mimetypes
 
-from fs.entries import File, Directory, Audio, Video, Photo, MIMES, \
-NOT_AUDIO, SEPARATOR
+
+#from fs.entries import File, Directory, Audio, Video, Photo, MIMES, \
+#NOT_AUDIO, SEPARATOR
+from logic.input.constants import SEPARATOR, MIMES, NOT_AUDIO
+#from logic.input.factory import Factory
+#from logic.input.factory import NOT_AUDIO
 from logic.midput import SETTINGS
 from logic.logging import MANAGER
 
@@ -39,7 +43,7 @@ class Indexer(object):
     added easily as long as the structure is honored.
     """
 
-    def __init__(self, path, progress, mainhandler):
+    def __init__(self, path, progress, mainhandler, factory):
         #mimetypes.init(['misc/mime.types'])
         mimetypes.add_type("audio/x-musepack", ".mpc", True)
         mimetypes.add_type("audio/x-spc", ".spc", True)
@@ -58,6 +62,7 @@ class Indexer(object):
         self._lastfile = ""
         self._stop = False
         self._mainhandler = mainhandler
+        self._factory = factory
         if path[-1] == SEPARATOR:
             self._path = path[:-1]
         else:
@@ -158,7 +163,7 @@ class Indexer(object):
         is called from the main handler class.
         """
         fsindexthread = threading.Thread(target=self.do_index_process,
-                                         args=(self._path, ""))
+                                         args=(self._path, "", None))
         fsindexthread.start()
         gobject.timeout_add(500, self.update_progressbar_indexing,
                             fsindexthread)
@@ -226,14 +231,16 @@ class Indexer(object):
         """Calculates total directory size."""
         contentsize = 0
         if self._stop is False:
-            for _file in _dir.files:
-                contentsize += _file.size
-            for childdir in _dir.dirs:
-                self.calculate_dir_size(childdir)
-                contentsize += childdir.size
+            if hasattr(_dir, "files"):
+                for _file in _dir.files:
+                    contentsize += _file.size
+            if hasattr(_dir, "dirs"):
+                for childdir in _dir.dirs:
+                    self.calculate_dir_size(childdir)
+                    contentsize += childdir.size
             _dir.size = contentsize
 
-    def do_index_process(self, path, relpath):
+    def do_index_process(self, path, relpath, hroot=None):
         """The bulk of the indexing process.
         
         It is called recursively for every file and directory found, and
@@ -253,8 +260,9 @@ class Indexer(object):
                     strftime("%Y/%m/%d %H:%M:%S")
             mtime = datetime.datetime.fromtimestamp(stat.st_mtime).\
                     strftime("%Y/%m/%d %H:%M:%S")
-            root = Directory(dirname, basename, relpath, atime, mtime, size,
-                             self.parse_size(size))
+            root = self._factory.new_dir(dirname, basename, relpath, atime, 
+                                         mtime, hroot, size, 
+                                         self.parse_size(size), absname)
             ldir = os.listdir(path)
             ldir.sort(cmp=lambda x, y: cmp(x.lower(), y.lower()))
             if SETTINGS.gnuhidden is True:
@@ -282,32 +290,43 @@ class Indexer(object):
                         size = round(size, 2)
                         if (mimetype[0] is not None and MIMES[mimetype[0]] 
                             == "image"):
-                            _file = Photo(root.parent + SEPARATOR +root.name,
-                                          entry, rpath, mimetype, atime,
-                                          mtime, size, self.parse_size(size))
+                            _file = self._factory.\
+                                    new_photo(root.parent + SEPARATOR + 
+                                              root.name, entry, rpath, 
+                                              mimetype, atime, mtime, root, 
+                                              size, self.parse_size(size), 
+                                              self.last)
                         elif (mimetype[0] is not None and MIMES[mimetype[0]] 
                               == "audio" and not mimetype[0] in NOT_AUDIO):
-                            _file = Audio(root.parent + SEPARATOR +root.name,
-                                          entry, rpath, mimetype, atime,
-                                          mtime, size, self.parse_size(size))
+                            _file = self._factory.\
+                                    new_audio(root.parent + SEPARATOR + 
+                                              root.name, entry, rpath, 
+                                              mimetype, atime, mtime, root, 
+                                              size, self.parse_size(size), 
+                                              self.last)
                         elif (mimetype[0] is not None and MIMES[mimetype[0]]
                               == "video"):
-                            _file = Video(root.parent + SEPARATOR + root.name,
-                                          entry, rpath, mimetype, atime,
-                                          mtime, size, self.parse_size(size))
+                            _file = self._factory.\
+                                    new_video(root.parent + SEPARATOR + 
+                                              root.name, entry, rpath, 
+                                              mimetype, atime, mtime, root, 
+                                              size, self.parse_size(size), 
+                                              self.last)
                         else:
-                            _file = File(root.parent + SEPARATOR +
-                                         root.name, entry, rpath, mimetype,
-                                         atime, mtime, size,
-                                         self.parse_size(size))
-                        if root is not None:
-                            root.append_file(_file)
+                            _file = self._factory.\
+                                    new_file(root.parent + SEPARATOR + 
+                                             root.name, entry, rpath, 
+                                             mimetype, atime, mtime, root, 
+                                             self.last, size, 
+                                             self.parse_size(size),)
+                        #if root is not None:
+                            #root.append_file(_file)
                         self._position += 1
                     else:
                         if self._stop is False:
                             _dir = self.do_index_process(path + SEPARATOR +
-                                                         entry, relpath)
-                            root.append_dir(_dir)
+                                                         entry, relpath, root)
+                            #root.append_dir(_dir)
                             self._position += 1
                         else:
                             return None
@@ -322,18 +341,18 @@ class Indexer(object):
                                 "found in the MIME list."
                         print error
                 except Exception as exc:
-                    if SETTINGS.ioerror:
-                        MANAGER.\
-                        append_event("Error indexing file. I/O error.",
-                                     absname + SEPARATOR + entry, exc, 2)
-                        print "Error indexing file: " + absname + SEPARATOR +\
-                                entry + ". I/O error."
-                        print exc
+                   if SETTINGS.ioerror:
+                       MANAGER.\
+                       append_event("Error indexing file. I/O error.",
+                                    absname + SEPARATOR + entry, exc, 2)
+                       print "Error indexing file: " + absname + SEPARATOR +\
+                               entry + ". I/O error."
+                       print exc
             if root is not None:
-                self.calculate_dir_size(root)
-                root.strsize = self.parse_size(root.size)
                 if (root.__str__() == self._path):
-                    self._root = root
+                    self.calculate_dir_size(root)
+                    root.strsize = self.parse_size(root.size)
+                    self._root = None
                 return root
         except Exception as exc:
             if SETTINGS.ioerror:

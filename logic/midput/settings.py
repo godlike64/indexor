@@ -31,6 +31,7 @@ import cPickle as pickle
 
 HOMEDIR = os.path.expanduser("~") + "/.indexor"
 SETTSFILE = HOMEDIR + "/settings"
+CATALOGDIR = HOMEDIR + "/catalogs"
 
 class SettingsLoader(object):
     
@@ -48,6 +49,11 @@ class SettingsLoader(object):
             except Exception as exc:
                 print exc
             self._load_default_settings()
+        if not os.path.exists(CATALOGDIR):
+            try:
+                os.mkdir(CATALOGDIR, 0700)
+            except Exception as exc:
+                print exc
 
 
     #################################

@@ -17,10 +17,9 @@
 
 import gtk
 import gobject
-from sqlobject import sqlhub
 
 #import fs.entries
-from fs.entities import File, Directory, Video, Audio, Photo
+from fs.entities import MetaDir, File, Directory, Video, Audio, Photo
 from logic.input.constants import ICONS, MIMES
 from logic.midput import SETTINGS
 
@@ -90,7 +89,7 @@ class TVHandler(object):
     def set_dbmanager(self, dbmanager):
         """Property"""
         self._dbmanager = dbmanager
-        sqlhub.processConnection = dbmanager.conn
+        self._conn = dbmanager.conn
         
     def get_tmfdirtree(self):
         """Property"""
@@ -146,10 +145,12 @@ class TVHandler(object):
         keep it consistent.
         """
         #self._tsdirtree.clear()
+        self._dbmanager.create_metadir()
         self.clear_stores()
         if not self._root:
             #self._root = self._dbmanager.get_root()
-            rootselect = Directory.select(Directory.q.relpath == "/")
+            rootselect = Directory.select(Directory.q.relpath == "/", 
+                                          connection = self._conn)
             root = rootselect[0]
             self._root = root
         if self._root is not None:
@@ -248,6 +249,12 @@ class TVHandler(object):
                 break
             self.iterate_over_children(parent, child)
 
+    def _iterate_inside(self, parentiter, activated):
+        for row in parentiter.iterchildren():
+            if activated == row[2]:
+                self._candidate = row.iter
+            self._iterate_inside(row, activated)
+
     #################################        
     #Callbacks
     #################################
@@ -264,8 +271,10 @@ class TVHandler(object):
         self._current = _iter
         self._mainhandler.currentpath = self._currentpath
         self._mainhandler.current = self._current
-        self._currentnode = self._mainhandler.\
-                                find_dir_with_fs_path(parent, self._root)
+        #self._currentnode = self._mainhandler.\
+        #                        find_dir_with_fs_path(parent, self._root)
+        self._currentnode = Directory.select(Directory.q.strabs == parent, 
+                                             connection = self._conn)[0]
         self._mainhandler.currentnode = self._currentnode
         self._tvfilelist.columns_autosize()
         self.generate_file_list(self._currentnode, self._lsfilelist)
@@ -282,12 +291,6 @@ class TVHandler(object):
                                                                self._root)
         self._mainhandler.set_infopane_content(node)
 
-    def _iterate_inside(self, parentiter, activated):
-        for row in parentiter.iterchildren():
-            if activated == row[2]:
-                self._candidate = row.iter
-            self._iterate_inside(row, activated)
-        
     def tvfilelist_row_activated_cb(self, tvfl, path, view_column):
         """Callback that handles row activation in the file list treeview.
         
@@ -296,37 +299,16 @@ class TVHandler(object):
         treeview, causing it to load the directory contents in the right
         treeview.
         """
-        #cursor = self._tvfilelist.get_cursor()
         _iter = tvfl.get_model().get_iter(path)
         fs_path = self._tmffilelist.get(_iter, 3)[0]
-        #node = self._mainhandler.find_dir_with_fs_path(fs_path, self._root)
         nodelist = Directory.select(Directory.q.strabs == fs_path)
         if nodelist.count() == 1:
             node = nodelist[0]
             activated = tvfl.get_model().get_value(_iter, 3)
             dtcursor = self._tvdirtree.get_cursor()
-            #path = dtcursor[0]
-            #curiter = self._tmfdirtree.get_iter(path)
-            #curiter = self._tmfdirtree.get_iter_first()
-            #iterdest = self._tmfdirtree.iter_children(curiter)
             parentiter = iter(self._tmfdirtree).next()
-            #itering = itermodel.next()
             self._candidate = None
             self._iterate_inside(parentiter, activated)
-            #==================================================================
-            # while iterdest is not None:
-            #    print self._tmfdirtree.get_value(iterdest, 2)
-            #    print activated
-            #    if self._tmfdirtree.get_value(iterdest, 2) == activated:
-            #        break
-            #    iterdestaux = self._tmfdirtree.iter_children(iterdest)
-            #    if iterdestaux is None:
-            #        print iterdest
-            #        iterdest = self._tmfdirtree.iter_next(iterdest)
-            #        print iterdest
-            #    else:
-            #        iterdest = iterdestaux
-            #==================================================================
             path = self._tmfdirtree.get_path(self._candidate)
             self._tvdirtree.expand_to_path(path)
             self._tvdirtree.set_cursor(path)

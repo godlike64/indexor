@@ -416,20 +416,18 @@ class MainHandler(object):
         """
         if (self._path is not None):
             self.set_buttons_sensitivity(False)
-            self._dbmanager = DBManager()
-            self._dbmanager.index_new_dir(self._path, self)
-            fscountthread = self._dbmanager.start_counting()
-            self._tvhandler.dbmanager = self._dbmanager
-            gobject.timeout_add(500, self.check_if_counting_finished,
-                                fscountthread)
-        #======================================================================
-        # if (hasattr(self, "_root")):
-        #    self._root = None
-        #======================================================================
-            self._tvhandler.root = None
-            self._tvhandler.clear_stores()
-            self._pbar.set_text("")
-            self._hbpbar.show()
+            self._dbmanager = DBManager(self)
+            if self._dbmanager.index_new_dir(self._path, self) is True:
+                fscountthread = self._dbmanager.start_counting()
+                self._tvhandler.dbmanager = self._dbmanager
+                gobject.timeout_add(500, self.check_if_counting_finished,
+                                    fscountthread)
+                self._tvhandler.root = None
+                self._tvhandler.clear_stores()
+                self._pbar.set_text("")
+                self._hbpbar.show()
+            else:
+                self.set_buttons_sensitivity(True)
         
     def find_dir_with_fs_path(self, path, root):
         """Finds a directory with a given path"""

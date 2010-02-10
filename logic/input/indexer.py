@@ -57,6 +57,8 @@ class Indexer(object):
         mimetypes.add_type("text/plain", ".dat", True)
         mimetypes.add_type("video/x-matroska", ".mkv", True)
         self._count = 0
+        self._countfiles = 0
+        self._countdirs = 0
         self._root = None
         self._position = 0
         self._lastfile = ""
@@ -125,6 +127,15 @@ class Indexer(object):
     def set_stop(self, stop):
         """Property"""
         self._stop = stop
+        
+    def get_countdirs(self):
+        return self._countdirs
+    
+    def get_countfiles(self):
+        return self._countfiles
+    
+    def get_path(self):
+        return self._path
 
     root = property(get_root)
     list = property(get_list)
@@ -134,6 +145,9 @@ class Indexer(object):
     position = property(get_position, set_position)
     last = property(get_last, set_last)
     stop = property(get_stop, set_stop)
+    countdirs = property(get_countdirs)
+    countfiles = property(get_countfiles)
+    path = property(get_path)
 
     #################################
     #Methods
@@ -378,7 +392,9 @@ class Indexer(object):
                 self.save_backup_linux_filter(files)
                 self.save_backup_linux_filter(dirs)
             self._count += len(files)
+            self._countfiles += len(files)
             self._count += len(dirs)
+            self._countdirs += len(dirs)
 
     def update_progressbar_pulse(self, fscountthread):
         """Pulses the progress bar."""

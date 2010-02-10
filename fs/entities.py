@@ -15,11 +15,20 @@
 
 
 import gtk
-from sqlobject import SQLObject, StringCol, FloatCol, BoolCol, ForeignKey, \
-                        DateTimeCol, PickleCol, MultipleJoin, RelatedJoin
+from sqlobject import SQLObject, StringCol, FloatCol, BoolCol, IntCol, \
+                        ForeignKey, DateTimeCol, PickleCol, MultipleJoin, \
+                        RelatedJoin
 from sqlobject.inheritance import InheritableSQLObject
 
 from logic.input.constants import SEPARATOR
+
+class MetaDir(SQLObject):
+    target = StringCol()
+    files = IntCol()
+    dirs = IntCol()
+    size = FloatCol()
+    strsize = StringCol()
+    category = StringCol(default = "None")
 
 class File(InheritableSQLObject):
     

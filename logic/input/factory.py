@@ -18,16 +18,13 @@ import datetime
 import time
 import gtk
 
-from sqlobject import sqlhub, MultipleJoin
-
-
 try:
    import kaa.metadata
    NO_KAA = False
 except ImportError:
    NO_KAA = True
     
-from fs.entities import File, Directory, Video, Audio, Photo
+from fs.entities import MetaDir, File, Directory, Video, Audio, Photo
 from logic.midput import SETTINGS
 from logic.logging import MANAGER
 
@@ -37,14 +34,20 @@ from logic.input.constants import ICONS, MIMES, NO_INFO, NOT_AUDIO, SEPARATOR
 class Factory(object):
     
     def __init__(self, conn):
-        sqlhub.processConnection = conn
-        File.createTable()
-        Directory.createTable()
-        Video.createTable()
-        Audio.createTable()
-        Photo.createTable()
+        self._conn = conn
+        MetaDir.createTable(connection = self._conn)
+        File.createTable(connection = self._conn)
+        Directory.createTable(connection = self._conn)
+        Video.createTable(connection = self._conn)
+        Audio.createTable(connection = self._conn)
+        Photo.createTable(connection = self._conn)
         #File._connection.debug = True
         #Directory._connection.debug = True
+        
+    def new_metadir(self, target, files, dirs, size, strsize):
+        return MetaDir(target = target, files = files, dirs = dirs, 
+                       size = size, strsize = strsize, 
+                       connection = self._conn)
         
     def new_file(self, parent, name, relpath, mimetype, atime, mtime, 
                  root, strabs, size = None, strsize = None, isdir = False):
@@ -57,7 +60,7 @@ class Factory(object):
         return File(parent = parent, name = name, relpath = relpath,
                     mimetype = mimetype, atime = atime, mtime = mtime, 
                     size = size, strsize = strsize, isdir = isdir, 
-                    strabs = strabs, root = root)
+                    strabs = strabs, root = root, connection = self._conn)
 
     
     def new_dir(self, parent, name, relpath, atime, mtime, root, size, 
@@ -67,7 +70,8 @@ class Factory(object):
         return Directory(parent = parent, name = name, relpath = relpath, 
                          mimetype = mimetype, atime = atime, mtime = mtime, 
                          size = size, strsize = strsize, isdir = isdir, 
-                         strabs = strabs, root = root)
+                         strabs = strabs, root = root, 
+                         connection = self._conn)
     
     def new_video(self, parent, name, relpath, mimetype, atime, mtime, 
                   root, size, strsize, strabs):
@@ -76,7 +80,8 @@ class Factory(object):
         video = Video(parent = parent, name = name, relpath = relpath, 
                       mimetype = mimetype, atime = atime, mtime = mtime, 
                       size = size, strsize = strsize, root = root, 
-                      isdir = False, strabs = strabs)
+                      isdir = False, strabs = strabs, 
+                      connection = self._conn)
         self._get_video_metadata(video)
         return video
     
@@ -87,7 +92,8 @@ class Factory(object):
         audio = Audio(parent = parent, name = name,  relpath = relpath, 
                       mimetype = mimetype, atime = atime, mtime = mtime, 
                       size = size, strsize = strsize, root = root, 
-                      isdir = False, strabs = strabs)
+                      isdir = False, strabs = strabs, 
+                      connection = self._conn)
         self._get_audio_metadata(audio)
         return audio
     
@@ -98,7 +104,8 @@ class Factory(object):
         photo = Photo(parent = parent, name = name, relpath = relpath, 
                       mimetype = mimetype, atime = atime, mtime = mtime, 
                       size = size, strsize = strsize, root = root, 
-                      isdir = False, strabs = strabs)
+                      isdir = False, strabs = strabs, 
+                      connection = self._conn)
         self._get_photo_metadata(photo)
         return photo
     

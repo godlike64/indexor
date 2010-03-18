@@ -15,88 +15,79 @@
 
 
 import gtk
-from sqlobject import SQLObject, StringCol, FloatCol, BoolCol, IntCol, \
-                        ForeignKey, DateTimeCol, PickleCol, MultipleJoin, \
-                        RelatedJoin
-from sqlobject.inheritance import InheritableSQLObject
+from elixir import Entity, Field, Text, Integer, Float, OneToOne, OneToMany, \
+                    ManyToOne, PickleType, Boolean, using_options
 
 from logic.input.constants import SEPARATOR
 
-class MetaDir(SQLObject):
-    target = StringCol()
-    files = IntCol()
-    dirs = IntCol()
-    size = FloatCol()
-    strsize = StringCol()
-    category = StringCol(default = "None")
+class MetaDir(Entity):
+    target = Field(Text)
+    files = Field(Integer)
+    dirs = Field(Integer)
+    size = Field(Float)
+    strsize = Field(Text)
+    category = Field(Text)
 
-class File(InheritableSQLObject):
+class File(Entity):
     
-    parent = StringCol()
-    name = StringCol()
-    relpath = StringCol()
-    mimetype = StringCol()
-    atime = StringCol()
-    mtime = StringCol()
-    size = FloatCol()
-    strsize = StringCol()
-    isdir = BoolCol()
-    strabs = StringCol()
-    root = ForeignKey("Directory")
+    parent = Field(Text)
+    name = Field(Text)
+    relpath = Field(Text)
+    mimetype = Field(Text)
+    atime = Field(Text)
+    mtime = Field(Text)
+    size = Field(Float)
+    strsize = Field(Text)
+    isdir = Field(Boolean)
+    strabs = Field(Text)
+    root = ManyToOne("Directory")
     
     def __str__(self):
         return self.strabs
     
 
-class Directory(SQLObject):
+class Directory(File):
     
-    parent = StringCol()
-    name = StringCol()
-    relpath = StringCol()
-    mimetype = StringCol()
-    atime = StringCol()
-    mtime = StringCol()
-    size = FloatCol()
-    strsize = StringCol()
-    isdir = BoolCol()
-    strabs = StringCol()
-    root = ForeignKey("Directory")
-    dirs = MultipleJoin("Directory", joinColumn="root_id")
-    files = MultipleJoin("File", joinColumn="root_id")
+    using_options(inheritance='multi')
+    dirs = ManyToOne("Directory")
+    files = ManyToOne("File")
     
     def __str__(self):
         return self.strabs
     
 class Video(File):
     
-    length = StringCol(default = None)
-    videocodec = StringCol(default = None)
-    videobitrate = StringCol(default = None)
-    videores = StringCol(default = None)
-    videofps = StringCol(default = None)
-    videoar = StringCol(default = None)
-    audiobitrate = StringCol(default = None)
-    audiosamplerate = StringCol(default = None)
-    audiocodec = StringCol(default = None)
-    audiochannels = StringCol(default = None)
-    sublangs = StringCol(default = None)
+    using_options(inheritance='multi')
+    length = Field(Text, default = None)
+    videocodec = Field(Text, default = None)
+    videobitrate = Field(Text, default = None)
+    videores = Field(Text, default = None)
+    videofps = Field(Text, default = None)
+    videoar = Field(Text, default = None)
+    audiobitrate = Field(Text, default = None)
+    audiosamplerate = Field(Text, default = None)
+    audiocodec = Field(Text, default = None)
+    audiochannels = Field(Text, default = None)
+    sublangs = Field(Text, default = None)
 
 class Audio(File):
     
-    length = StringCol(default = None)
-    bitrate = StringCol(default = None)
-    samplerate = StringCol(default = None)
-    codec = StringCol(default = None)
+    using_options(inheritance='multi')
+    length = Field(Text, default = None)
+    bitrate = Field(Text, default = None)
+    samplerate = Field(Text, default = None)
+    codec = Field(Text, default = None)
 
 class Photo(File):
     
-    hasthumb = BoolCol(default = None)
-    author = StringCol(default = None)
-    res = StringCol(default = None)
-    date_taken = StringCol(default = None)
-    soft = StringCol(default = None)
-    _thumb = PickleCol(default = None)
-    _icon = PickleCol(default = None)
+    using_options(inheritance='multi')
+    hasthumb = Field(Boolean, default = None)
+    author = Field(Text, default = None)
+    res = Field(Text, default = None)
+    date_taken = Field(Text, default = None)
+    soft = Field(Text, default = None)
+    _thumb = Field(PickleType, default = None)
+    _icon = Field(PickleType, default = None)
     
     def _get_thumb(self):
         return gtk.gdk.pixbuf_new_from_array(self._thumb, 

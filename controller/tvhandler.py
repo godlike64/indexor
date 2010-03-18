@@ -149,8 +149,10 @@ class TVHandler(object):
         self.clear_stores()
         if not self._root:
             #self._root = self._dbmanager.get_root()
-            rootselect = Directory.select(Directory.q.relpath == "/", 
-                                          connection = self._conn)
+            #rootselect = Directory.select(Directory.q.relpath == "/", 
+            #                              connection = self._conn)
+            rootselect = self._dbmanager.session.\
+                            query(Directory).filter_by(relpath = "/")
             root = rootselect[0]
             self._root = root
         if self._root is not None:
@@ -273,8 +275,10 @@ class TVHandler(object):
         self._mainhandler.current = self._current
         #self._currentnode = self._mainhandler.\
         #                        find_dir_with_fs_path(parent, self._root)
-        self._currentnode = Directory.select(Directory.q.strabs == parent, 
-                                             connection = self._conn)[0]
+        #self._currentnode = Directory.select(Directory.q.strabs == parent, 
+        #                                     connection = self._conn)[0]
+        self._currentnode = self._dbmanager.session.\
+                            query(Directory).filter_by(strabs = parent)[0]
         self._mainhandler.currentnode = self._currentnode
         self._tvfilelist.columns_autosize()
         self.generate_file_list(self._currentnode, self._lsfilelist)
@@ -301,7 +305,9 @@ class TVHandler(object):
         """
         _iter = tvfl.get_model().get_iter(path)
         fs_path = self._tmffilelist.get(_iter, 3)[0]
-        nodelist = Directory.select(Directory.q.strabs == fs_path)
+        #nodelist = Directory.select(Directory.q.strabs == fs_path)
+        nodelist = self._dbmanager.session.query(Directory).\
+                    filter_by(strabs = fs_path)
         if nodelist.count() == 1:
             node = nodelist[0]
             activated = tvfl.get_model().get_value(_iter, 3)

@@ -28,26 +28,30 @@ from fs.entities import MetaDir, File, Directory, Video, Audio, Photo
 from logic.midput import SETTINGS
 from logic.logging import MANAGER
 
+import elixir
+from sqlalchemy.schema import MetaData
 
 from logic.input.constants import ICONS, MIMES, NO_INFO, NOT_AUDIO, SEPARATOR
 
 class Factory(object):
     
-    def __init__(self, conn):
-        self._conn = conn
-        MetaDir.createTable(connection = self._conn)
-        File.createTable(connection = self._conn)
-        Directory.createTable(connection = self._conn)
-        Video.createTable(connection = self._conn)
-        Audio.createTable(connection = self._conn)
-        Photo.createTable(connection = self._conn)
+    def __init__(self, engine, session):
+        self._engine = engine
+        self._session = session
+        a_metadata = MetaData
+        a_metadata.bind = engine
+        elixir.setup_all()
+        elixir.create_all(self._engine)
         #File._connection.debug = True
         #Directory._connection.debug = True
         
     def new_metadir(self, target, files, dirs, size, strsize):
-        return MetaDir(target = target, files = files, dirs = dirs, 
+        metadir = MetaDir(target = target, files = files, dirs = dirs, 
                        size = size, strsize = strsize, 
                        connection = self._conn)
+        self._session.save(metadir)
+        self._session.commit()
+        return metadir
         
     def new_file(self, parent, name, relpath, mimetype, atime, mtime, 
                  root, strabs, size = None, strsize = None, isdir = False):
@@ -57,21 +61,27 @@ class Factory(object):
             mimetype = mimetype[0]
         else:
             mimetype = "text/plain"
-        return File(parent = parent, name = name, relpath = relpath,
+        _file = File(parent = parent, name = name, relpath = relpath,
                     mimetype = mimetype, atime = atime, mtime = mtime, 
                     size = size, strsize = strsize, isdir = isdir, 
                     strabs = strabs, root = root, connection = self._conn)
+        self._session.save(_file)
+        self._session.commit()
+        return _file
 
     
     def new_dir(self, parent, name, relpath, atime, mtime, root, size, 
                 strsize, strabs, isdir = True):
         atime, mtime = self._check_stat(atime, mtime)
         mimetype = "inode/folder"
-        return Directory(parent = parent, name = name, relpath = relpath, 
+        _dir = Directory(parent = parent, name = name, relpath = relpath, 
                          mimetype = mimetype, atime = atime, mtime = mtime, 
                          size = size, strsize = strsize, isdir = isdir, 
                          strabs = strabs, root = root, 
                          connection = self._conn)
+        self._session.save(_dir)
+        self._session.commit()
+        return _dir
     
     def new_video(self, parent, name, relpath, mimetype, atime, mtime, 
                   root, size, strsize, strabs):
@@ -83,6 +93,8 @@ class Factory(object):
                       isdir = False, strabs = strabs, 
                       connection = self._conn)
         self._get_video_metadata(video)
+        self._session.save(video)
+        self._session.commit()
         return video
     
     def new_audio(self, parent, name, relpath, mimetype, atime, mtime, 
@@ -95,6 +107,8 @@ class Factory(object):
                       isdir = False, strabs = strabs, 
                       connection = self._conn)
         self._get_audio_metadata(audio)
+        self._session.save(audio)
+        self._session.commit()
         return audio
     
     def new_photo(self, parent, name, relpath, mimetype, atime, mtime, 
@@ -107,6 +121,8 @@ class Factory(object):
                       isdir = False, strabs = strabs, 
                       connection = self._conn)
         self._get_photo_metadata(photo)
+        self._session.save(photo)
+        self._session.commit()
         return photo
     
     def _get_video_metadata(self, video):

@@ -13,12 +13,15 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Indexor.  If not, see <http://www.gnu.org/licenses/>.
 
-from sqlobject import connectionForURI
+#from sqlobject import connectionForURI
 import os
 import datetime
 import time
 import gc
 import gtk
+
+from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy import create_engine
 
 from logic.input.indexer import Indexer
 from logic.input.factory import Factory
@@ -55,9 +58,13 @@ class DBManager(object):
     def get_conn(self):
         return self._conn
     
+    def get_session(self):
+        return self._session
+    
     stop = property(get_stop, set_stop)
     indexer = property(get_indexer, set_indexer)
     conn = property(get_conn)
+    session = property(get_session)
     
     #################################
     #Methods
@@ -70,8 +77,12 @@ class DBManager(object):
                         + ".db"
             con_str = "sqlite://" + file_str
             self._scanningcatalog = file_str  
-            self._conn = connectionForURI(con_str)
-            self._factory = Factory(self._conn)
+            #self._conn = connectionForURI(con_str)
+            self._engine = create_engine(con_str, echo=True)
+            self._session = scoped_session(sessionmaker(autoflush = True, 
+                                                  transactional = True, 
+                                                  bind = self._engine))
+            self._factory = Factory(self._engine, self._session)
             self._indexer = Indexer(path, mainhandler.pbar, mainhandler, 
                                     self._factory)
             return True
@@ -114,12 +125,17 @@ class DBManager(object):
     
     def _check_if_is_same_dir(self, entry, path):
         con_str = "sqlite://" + CATALOGDIR + entry
-        conn = connectionForURI(con_str)
-        metadircount = MetaDir.select(MetaDir.q.target == path, 
-                                 connection = conn).count()
+        engine = create_engine(con_str, echo=True)
+        session = scoped_session(sessionmaker(autoflush = True, 
+                                          transactional = True, 
+                                          bind = engine))
+        metadircount = session.query(MetaDir).filter_by(target = path).count()
+        #metadircount = MetaDir.select(MetaDir.q.target == path, 
+        #                         connection = conn).count()
         if metadircount > 0:
-            return MetaDir.select(MetaDir.q.target == path, 
-                                 connection = conn)[0].target == path
+            return session.query(MetaDir).filter_by(target = path).one().target == path
+            #return MetaDir.select(MetaDir.q.target == path, 
+            #                     connection = conn)[0].target == path
         #return metadir.target == path
     
     def start_counting(self):
@@ -129,9 +145,10 @@ class DBManager(object):
         return self._indexer.start_indexing()
     
     def create_metadir(self):
-        rootselect = Directory.select(Directory.q.relpath == "/", 
-                                      connection = self._conn)
-        root = rootselect[0]
+        rootselect = self._session.query(Directory).filter_by(relpath = "/")
+        #rootselect = Directory.select(Directory.q.relpath == "/", 
+        #                              connection = self._conn)
+        root = rootselect.one()
         self._factory.new_metadir(self._indexer.path, 
                                   self._indexer.countfiles, 
                                   self._indexer.countdirs, root.size, 

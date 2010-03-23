@@ -35,9 +35,10 @@ from logic.input.constants import ICONS, MIMES, NO_INFO, NOT_AUDIO, SEPARATOR
 
 class Factory(object):
     
-    def __init__(self, engine, session):
+    def __init__(self, engine, session, dbmanager):
         self._engine = engine
         self._session = session
+        self._dbmanager = dbmanager
         a_metadata = MetaData
         a_metadata.bind = engine
         elixir.setup_all()
@@ -47,15 +48,13 @@ class Factory(object):
         
     def new_metadir(self, target, files, dirs, size, strsize):
         metadir = MetaDir(target = target, files = files, dirs = dirs, 
-                       size = size, strsize = strsize, 
-                       connection = self._conn)
-        self._session.save(metadir)
+                       size = size, strsize = strsize)
+        self._session.add(metadir)
         self._session.commit()
         return metadir
         
     def new_file(self, parent, name, relpath, mimetype, atime, mtime, 
                  root, strabs, size = None, strsize = None, isdir = False):
-
         atime, mtime = self._check_stat(atime, mtime)
         if mimetype is not None and mimetype[0] is not None:
             mimetype = mimetype[0]
@@ -64,8 +63,8 @@ class Factory(object):
         _file = File(parent = parent, name = name, relpath = relpath,
                     mimetype = mimetype, atime = atime, mtime = mtime, 
                     size = size, strsize = strsize, isdir = isdir, 
-                    strabs = strabs, root = root, connection = self._conn)
-        self._session.save(_file)
+                    strabs = strabs, root = root)
+        self._session.add(_file)
         self._session.commit()
         return _file
 
@@ -77,10 +76,11 @@ class Factory(object):
         _dir = Directory(parent = parent, name = name, relpath = relpath, 
                          mimetype = mimetype, atime = atime, mtime = mtime, 
                          size = size, strsize = strsize, isdir = isdir, 
-                         strabs = strabs, root = root, 
-                         connection = self._conn)
-        self._session.save(_dir)
+                         strabs = strabs, root = root)
+        self._session.add(_dir)
         self._session.commit()
+        if relpath == "/":
+            self._dbmanager.create_metadir()
         return _dir
     
     def new_video(self, parent, name, relpath, mimetype, atime, mtime, 
@@ -90,10 +90,9 @@ class Factory(object):
         video = Video(parent = parent, name = name, relpath = relpath, 
                       mimetype = mimetype, atime = atime, mtime = mtime, 
                       size = size, strsize = strsize, root = root, 
-                      isdir = False, strabs = strabs, 
-                      connection = self._conn)
+                      isdir = False, strabs = strabs)
         self._get_video_metadata(video)
-        self._session.save(video)
+        self._session.add(video)
         self._session.commit()
         return video
     
@@ -104,10 +103,9 @@ class Factory(object):
         audio = Audio(parent = parent, name = name,  relpath = relpath, 
                       mimetype = mimetype, atime = atime, mtime = mtime, 
                       size = size, strsize = strsize, root = root, 
-                      isdir = False, strabs = strabs, 
-                      connection = self._conn)
+                      isdir = False, strabs = strabs)
         self._get_audio_metadata(audio)
-        self._session.save(audio)
+        self._session.add(audio)
         self._session.commit()
         return audio
     
@@ -118,10 +116,9 @@ class Factory(object):
         photo = Photo(parent = parent, name = name, relpath = relpath, 
                       mimetype = mimetype, atime = atime, mtime = mtime, 
                       size = size, strsize = strsize, root = root, 
-                      isdir = False, strabs = strabs, 
-                      connection = self._conn)
+                      isdir = False, strabs = strabs)
         self._get_photo_metadata(photo)
-        self._session.save(photo)
+        self._session.add(photo)
         self._session.commit()
         return photo
     

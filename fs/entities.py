@@ -20,6 +20,8 @@ from elixir import Entity, Field, Text, Integer, Float, OneToOne, OneToMany, \
 
 from logic.input.constants import SEPARATOR
 
+__session__ = None
+
 class MetaDir(Entity):
     target = Field(Text)
     files = Field(Integer)
@@ -30,6 +32,7 @@ class MetaDir(Entity):
 
 class File(Entity):
     
+    using_options(inheritance='multi')
     parent = Field(Text)
     name = Field(Text)
     relpath = Field(Text)
@@ -40,17 +43,28 @@ class File(Entity):
     strsize = Field(Text)
     isdir = Field(Boolean)
     strabs = Field(Text)
-    root = ManyToOne("Directory")
+    root = ManyToOne("Directory", inverse = "files", use_alter = True)
     
     def __str__(self):
         return self.strabs
     
 
-class Directory(File):
+class Directory(Entity):
     
     using_options(inheritance='multi')
-    dirs = ManyToOne("Directory")
-    files = ManyToOne("File")
+    parent = Field(Text)
+    name = Field(Text)
+    relpath = Field(Text)
+    mimetype = Field(Text)
+    atime = Field(Text)
+    mtime = Field(Text)
+    size = Field(Float)
+    strsize = Field(Text)
+    isdir = Field(Boolean)
+    strabs = Field(Text)
+    root = ManyToOne("Directory", inverse = "dirs", use_alter = True)
+    dirs = OneToMany("Directory", inverse = "root", post_update = True)
+    files = OneToMany("File", inverse = "root", post_update = True)
     
     def __str__(self):
         return self.strabs

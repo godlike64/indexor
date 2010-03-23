@@ -89,7 +89,7 @@ class TVHandler(object):
     def set_dbmanager(self, dbmanager):
         """Property"""
         self._dbmanager = dbmanager
-        self._conn = dbmanager.conn
+        self._session = dbmanager.session
         
     def get_tmfdirtree(self):
         """Property"""
@@ -145,12 +145,12 @@ class TVHandler(object):
         keep it consistent.
         """
         #self._tsdirtree.clear()
-        self._dbmanager.create_metadir()
+        #self._dbmanager.create_metadir()
         self.clear_stores()
         if not self._root:
             #self._root = self._dbmanager.get_root()
             #rootselect = Directory.select(Directory.q.relpath == "/", 
-            #                              connection = self._conn)
+            #                              connection = self._session)
             rootselect = self._dbmanager.session.\
                             query(Directory).filter_by(relpath = "/")
             root = rootselect[0]
@@ -276,7 +276,7 @@ class TVHandler(object):
         #self._currentnode = self._mainhandler.\
         #                        find_dir_with_fs_path(parent, self._root)
         #self._currentnode = Directory.select(Directory.q.strabs == parent, 
-        #                                     connection = self._conn)[0]
+        #                                     connection = self._session)[0]
         self._currentnode = self._dbmanager.session.\
                             query(Directory).filter_by(strabs = parent)[0]
         self._mainhandler.currentnode = self._currentnode

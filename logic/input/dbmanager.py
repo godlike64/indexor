@@ -19,9 +19,11 @@ import datetime
 import time
 import gc
 import gtk
+import threading
 
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy import create_engine
+import elixir
 
 from logic.input.indexer import Indexer
 from logic.input.factory import Factory
@@ -56,7 +58,7 @@ class DBManager(object):
             gc.collect()
     
     def get_conn(self):
-        return self._conn
+        return self._session
     
     def get_session(self):
         return self._session
@@ -75,14 +77,15 @@ class DBManager(object):
                     strftime("%Y.%m.%d-%H.%M.%S")
             file_str = CATALOGDIR + os.path.basename(path) + ".-." + date \
                         + ".db"
-            con_str = "sqlite://" + file_str
+            con_str = "sqlite:///" + file_str
             self._scanningcatalog = file_str  
-            #self._conn = connectionForURI(con_str)
-            self._engine = create_engine(con_str, echo=True)
+            #self._session = connectionForURI(con_str)
+            elixir.setup_all()
+            self._engine = create_engine(con_str)
+            elixir.create_all(self._engine)
             self._session = scoped_session(sessionmaker(autoflush = True, 
-                                                  transactional = True, 
                                                   bind = self._engine))
-            self._factory = Factory(self._engine, self._session)
+            self._factory = Factory(self._engine, self._session, self)
             self._indexer = Indexer(path, mainhandler.pbar, mainhandler, 
                                     self._factory)
             return True
@@ -91,6 +94,8 @@ class DBManager(object):
         
     def _check_if_was_scanned(self, path):
         for entry in os.listdir(CATALOGDIR):
+            if entry.endswith("-journal"):
+                os.remove(CATALOGDIR + entry)
             if entry.startswith(os.path.basename(path)):
                 if self._check_if_is_same_dir(entry, path) is True:
                     label = gtk.Label()
@@ -124,10 +129,11 @@ class DBManager(object):
         return True
     
     def _check_if_is_same_dir(self, entry, path):
-        con_str = "sqlite://" + CATALOGDIR + entry
-        engine = create_engine(con_str, echo=True)
+        con_str = "sqlite:///" + CATALOGDIR + entry
+        elixir.setup_all()
+        engine = create_engine(con_str)
+        elixir.create_all(engine)
         session = scoped_session(sessionmaker(autoflush = True, 
-                                          transactional = True, 
                                           bind = engine))
         metadircount = session.query(MetaDir).filter_by(target = path).count()
         #metadircount = MetaDir.select(MetaDir.q.target == path, 
@@ -147,7 +153,7 @@ class DBManager(object):
     def create_metadir(self):
         rootselect = self._session.query(Directory).filter_by(relpath = "/")
         #rootselect = Directory.select(Directory.q.relpath == "/", 
-        #                              connection = self._conn)
+        #                              connection = self._session)
         root = rootselect.one()
         self._factory.new_metadir(self._indexer.path, 
                                   self._indexer.countfiles, 

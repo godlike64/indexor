@@ -1,4 +1,4 @@
-#   This file is part of Indexor.
+#    This file is part of Indexor.
 #
 #    Indexor is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -118,3 +118,6 @@ class Photo(File):
     def _set_icon(self, value):
         if isinstance(value, gtk.gdk.Pixbuf):
             self._icon = value.get_pixels_array()
+            
+    thumb = property(_get_thumb, _set_thumb)
+    icon = property(_get_icon, _set_icon)

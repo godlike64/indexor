@@ -28,37 +28,37 @@ from fs.entities import MetaDir, Directory
 CATALOGDIR = HOMEDIR + "/catalogs/"
 
 class DBManager(object):
-    
+
     def __init__(self, mainhandler):
         self._mainhandler = mainhandler
-    
+
     #################################
     #Propeties
     #################################
     def get_stop(self):
         if hasattr(self, "indexer") and self._indexer is not None:
             return self._indexer.stop
-    
+
     def set_stop(self, stop):
         if hasattr(self, "indexer") and self._indexer is not None:
             self._indexer.stop = stop
             os.remove(self._scanningcatalog)
-    
+
     def get_indexer(self):
         return self._indexer
-    
+
     def set_indexer(self, indexer):
         if indexer is None:
             self._indexer = None
             gc.collect()
-    
+
     def get_conn(self):
         return self._conn
-    
+
     stop = property(get_stop, set_stop)
     indexer = property(get_indexer, set_indexer)
     conn = property(get_conn)
-    
+
     #################################
     #Methods
     #################################
@@ -69,15 +69,16 @@ class DBManager(object):
             file_str = CATALOGDIR + os.path.basename(path) + ".-." + date \
                         + ".db"
             con_str = "sqlite://" + file_str
-            self._scanningcatalog = file_str  
+            self._scanningcatalog = file_str
             self._conn = connectionForURI(con_str)
+            self._conn.debug = True
             self._factory = Factory(self._conn)
-            self._indexer = Indexer(path, mainhandler.pbar, mainhandler, 
+            self._indexer = Indexer(path, mainhandler.pbar, mainhandler,
                                     self._factory)
             return True
         else:
             return False
-        
+
     def _check_if_was_scanned(self, path):
         for entry in os.listdir(CATALOGDIR):
             if entry.startswith(os.path.basename(path)):
@@ -88,13 +89,13 @@ class DBManager(object):
                                       "to overwrite the catalog with the" + \
                                       "updated one?")
                     hbox = gtk.HBox(spacing = 8)
-                    dialog = gtk.Dialog("Overwrite previous catalog?", 
-                                        self._mainhandler.window, 
-                                        gtk.DIALOG_MODAL, 
+                    dialog = gtk.Dialog("Overwrite previous catalog?",
+                                        self._mainhandler.window,
+                                        gtk.DIALOG_MODAL,
                                         (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT,
                                          gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
                     icon = gtk.icon_theme_get_default().\
-                            load_icon("emblem-important", 64, 
+                            load_icon("emblem-important", 64,
                                       gtk.ICON_LOOKUP_NO_SVG)
                     img = gtk.image_new_from_pixbuf(icon)
                     img.show()
@@ -111,30 +112,29 @@ class DBManager(object):
                     else:
                         return False
         return True
-    
+
     def _check_if_is_same_dir(self, entry, path):
         con_str = "sqlite://" + CATALOGDIR + entry
         conn = connectionForURI(con_str)
-        metadircount = MetaDir.select(MetaDir.q.target == path, 
+        metadircount = MetaDir.select(MetaDir.q.target == path,
                                  connection = conn).count()
         if metadircount > 0:
-            return MetaDir.select(MetaDir.q.target == path, 
+            return MetaDir.select(MetaDir.q.target == path,
                                  connection = conn)[0].target == path
         #return metadir.target == path
-    
+
     def start_counting(self):
         return self._indexer.start_counting()
-    
+
     def start_indexing(self):
         return self._indexer.start_indexing()
-    
+
     def create_metadir(self):
-        rootselect = Directory.select(Directory.q.relpath == "/", 
+        rootselect = Directory.select(Directory.q.relpath == "/",
                                       connection = self._conn)
         root = rootselect[0]
-        self._factory.new_metadir(self._indexer.path, 
-                                  self._indexer.countfiles, 
-                                  self._indexer.countdirs, root.size, 
+        self._factory.new_metadir(self._indexer.path,
+                                  self._indexer.countfiles,
+                                  self._indexer.countdirs, root.size,
                                   root.strsize)
-        
-        
+

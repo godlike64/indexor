@@ -47,7 +47,7 @@ class MainHandler(object):
     Grabs all events from the main window, and passes those relevant to the
     treeviews to the TVHandler. And the rest, is magic ;-).
     """
-    
+
     def __init__(self, gladefile):
         #======================================================================
         # MANAGER.loghandler = LOGHANDLER
@@ -88,9 +88,9 @@ class MainHandler(object):
         self._currentnode = None
         self._currentpath = None
         self._entrysearch = self._wtree.get_object("entrysearch")
-        
+
         self._chkmnlog = self._wtree.get_object("chkmnlog")
-        
+
         self._load_infopane_variables()
         self._wtree.connect_signals(self)
         self._window.set_default_size(*SETTINGS.windowsize)
@@ -134,15 +134,15 @@ class MainHandler(object):
     def set_root(self, root):
         """Property"""
         self._root = root
-        
+
     def get_chkmnlog(self):
         """Property"""
         return self._chkmnlog
-    
+
     def get_window(self):
         """Property"""
         return self._window
-    
+
     def get_pbar(self):
         return self._pbar
 
@@ -162,7 +162,7 @@ class MainHandler(object):
         SETTINGS.infopanesize = self._hplistpane.get_position()
         LOADER.save_settings()
         gtk.main_quit()
-        
+
     def _hide_after_shown(self):
         """Hide things that should not be shown immediately."""
         self._hbpbar.hide()
@@ -173,7 +173,7 @@ class MainHandler(object):
         self._tblaudioinfo.hide()
         self._tblsubinfo.hide()
         self._tblvideoinfo.hide()
-        
+
     def _load_infopane_variables(self):
         """Create the objects needed for info pane handling."""
         #Pane and tables
@@ -337,7 +337,7 @@ class MainHandler(object):
                 self._lblaudiochan.set_text(node.audiochannels)
             self._infoimg = gtk.image_new_from_pixbuf\
                                 (gtk.icon_theme_get_default().\
-                                 load_icon(ICONS[MIMES[node.mimetype]], 
+                                 load_icon(ICONS[MIMES[node.mimetype]],
                                            SETTINGS.iconpanesize,
                                            gtk.ICON_LOOKUP_FORCE_SVG))
         self._infoimg.show()
@@ -399,7 +399,7 @@ class MainHandler(object):
         total = self._window.get_allocation().width
         result = total - idle - firststep - secondstep
         return result
-    
+
     def set_pane_width(self, width):
         """Sets the pane's width. Used when restoring settings"""
         firststep = self._hptreelist.get_position()
@@ -428,7 +428,7 @@ class MainHandler(object):
                 self._hbpbar.show()
             else:
                 self.set_buttons_sensitivity(True)
-        
+
     def find_dir_with_fs_path(self, path, root):
         """Finds a directory with a given path"""
         if root.__str__() == path:
@@ -493,7 +493,7 @@ class MainHandler(object):
         """
         if not fscountthread.is_alive():
             fsindexthread = self._dbmanager.start_indexing()
-            gobject.timeout_add(500, self.check_if_indexing_finished, 
+            gobject.timeout_add(500, self.check_if_indexing_finished,
                                 fsindexthread)
             return False
         else:
@@ -508,6 +508,8 @@ class MainHandler(object):
         if not fsindexthread.is_alive():
             self._root = None
             self._tvhandler.print_output()
+            print "Total time consumed: " + self._dbmanager.\
+                                                get_time_consumed()
             return False
         else:
             return True
@@ -535,11 +537,11 @@ class MainHandler(object):
             return True
         else:
             return False
-    
+
     def hide_progressbar(self):
         """This is refactored into a method because other classes use it"""
         self._hbpbar.hide()
-        
+
     def set_buttons_sensitivity(self, sensitive):
         """Sets buttons (and menus) sensitivity according to value given
         
@@ -578,10 +580,10 @@ class MainHandler(object):
     def tbnewpath_clicked_cb(self, widget):
         """Shows the "New Path" dialog."""
         opendialog = \
-        gtk.FileChooserDialog(title="Point me a path...",
+        gtk.FileChooserDialog(title = "Point me a path...",
                               parent = self._window,
-                              action = gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER, 
-                              buttons = (gtk.STOCK_CANCEL, 
+                              action = gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
+                              buttons = (gtk.STOCK_CANCEL,
                                          gtk.RESPONSE_CANCEL,
                                          gtk.STOCK_OK, gtk.RESPONSE_OK))
         response = opendialog.run()
@@ -602,7 +604,7 @@ class MainHandler(object):
     def tbsave_clicked_cb(self, widget):
         """Shows the "Save" dialog."""
         savedialog = \
-        gtk.FileChooserDialog(title="Point me a destination...",
+        gtk.FileChooserDialog(title = "Point me a destination...",
                               parent = self._window,
                               action = gtk.FILE_CHOOSER_ACTION_SAVE,
                               buttons = (gtk.STOCK_CANCEL,
@@ -674,21 +676,21 @@ class MainHandler(object):
     def imgmnscan_activate_cb(self, widget):
         """Redirects to "tbnew" method"""
         self.tbnewpath_clicked_cb(widget)
-        
+
     def imgmnload_activate_cb(self, widget):
         """Redirects to "tbload" method"""
         self.tbloadfile_clicked_cb(widget)
-        
+
     def imgmnsaveas_activate_cb(self, widget):
         """Redirects to "tbsave" method"""
         self.tbsave_clicked_cb(widget)
-        
+
     def imgmnquit_activate_cb(self, widget):
         """Quits the program"""
         if self._dbmanager is not None:
             self.btncancel_clicked_cb(widget)
         self._destroy(widget)
-        
+
     def chkmnlog_toggled_cb(self, widget):
         """Shows/hides the log viewer window"""
         if widget.get_active() is True:
@@ -698,14 +700,14 @@ class MainHandler(object):
             MANAGER.loghandler = None
             self._loghandler.btnclose_clicked_cb(self)
             self._loghandler = None
-            
+
     def chkmninfopane_toggled_cb(self, widget):
         """Shows/hides the info pane."""
         if widget.get_active():
             self._infopane.show()
         else:
             self._infopane.hide()
-            
+
     def imgmnsettings_activate_cb(self, widget):
         """Shows the options window"""
         self._settings = SettingsHandler(self)
@@ -738,14 +740,14 @@ class MainHandler(object):
         datamod.encode("utf-8")
         self._path = datamod
         self.init_index_process()
-        
+
     def view_state(self, widget, event):
         """view state callback, to store wether the window is maximized"""
         if event.new_window_state == gtk.gdk.WINDOW_STATE_MAXIMIZED:
             SETTINGS.windowmax = True
         else:
             SETTINGS.windowmax = False
-            
+
     def _configure(self, widget, event):
         """Configure event callback, used to store the window size"""
         SETTINGS.windowsize = (event.width, event.height)

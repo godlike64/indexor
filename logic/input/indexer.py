@@ -186,7 +186,7 @@ class Indexer(object):
         fsindexthread.start()
         gobject.timeout_add(500, self.update_progressbar_indexing,
                             fsindexthread)
-        gobject.timeout_add(100, self.count_time, fsindexthread)
+        gobject.timeout_add(10, self.count_time, fsindexthread)
         return fsindexthread
 
     def print_dirs(self, _dir):
@@ -402,8 +402,8 @@ class Indexer(object):
             self._count += len(dirs)
             self._countdirs += len(dirs)
 
-    def count_time(self):
-        self._timer = self._timer + 100
+    def count_time(self, fsindexthread):
+        self._timer = self._timer + 10
         if fsindexthread.is_alive():
             return True
         else:

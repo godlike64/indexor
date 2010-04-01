@@ -71,7 +71,7 @@ class DBManager(object):
             con_str = "sqlite://" + file_str
             self._scanningcatalog = file_str
             self._conn = connectionForURI(con_str)
-            self._conn.debug = True
+            #self._conn.debug = True
             self._factory = Factory(self._conn)
             self._indexer = Indexer(path, mainhandler.pbar, mainhandler,
                                     self._factory)

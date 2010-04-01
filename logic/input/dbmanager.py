@@ -138,3 +138,6 @@ class DBManager(object):
                                   self._indexer.countdirs, root.size,
                                   root.strsize)
 
+    def get_time_consumed(self):
+        return self._indexer.timer
+

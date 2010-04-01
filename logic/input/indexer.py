@@ -119,27 +119,30 @@ class Indexer(object):
     def set_last(self, last):
         """Property"""
         self._last = last
-        
+
     def get_stop(self):
         """Property"""
         return self._stop
-    
+
     def set_stop(self, stop):
         """Property"""
         self._stop = stop
-        
+
     def get_countdirs(self):
         return self._countdirs
-    
+
     def get_countfiles(self):
         return self._countfiles
-    
+
     def get_path(self):
         return self._path
 
+    def get_timer(self):
+        return self._timer
+
     root = property(get_root)
     list = property(get_list)
-    count = property(get_count, set_count) 
+    count = property(get_count, set_count)
     progress = property(get_progress)
     lastfile = property(get_lastfile, set_lastfile)
     position = property(get_position, set_position)
@@ -148,6 +151,7 @@ class Indexer(object):
     countdirs = property(get_countdirs)
     countfiles = property(get_countfiles)
     path = property(get_path)
+    timer = property(get_timer)
 
     #################################
     #Methods
@@ -159,8 +163,8 @@ class Indexer(object):
         bar update method using gobject.timeout_add. Returns the thread. It
         is called from the main handler class.
         """
-        fscountthread = threading.Thread(target=self.count_files,
-                                         args=(self._path,))
+        fscountthread = threading.Thread(target = self.count_files,
+                                         args = (self._path,))
         fscountthread.start()
         self.progress.pulse()
         gobject.timeout_add(80, self.update_progressbar_pulse,
@@ -176,11 +180,13 @@ class Indexer(object):
         bar update method using gobject.timeout_add. Returns the thread. It
         is called from the main handler class.
         """
-        fsindexthread = threading.Thread(target=self.do_index_process,
-                                         args=(self._path, "", None))
+        fsindexthread = threading.Thread(target = self.do_index_process,
+                                         args = (self._path, "", None))
+        self._timer = 0
         fsindexthread.start()
         gobject.timeout_add(500, self.update_progressbar_indexing,
                             fsindexthread)
+        gobject.timeout_add(100, self.count_time, fsindexthread)
         return fsindexthread
 
     def print_dirs(self, _dir):
@@ -254,7 +260,7 @@ class Indexer(object):
                     contentsize += childdir.size
             _dir.size = contentsize
 
-    def do_index_process(self, path, relpath, hroot=None):
+    def do_index_process(self, path, relpath, hroot = None):
         """The bulk of the indexing process.
         
         It is called recursively for every file and directory found, and
@@ -274,11 +280,11 @@ class Indexer(object):
                     strftime("%Y/%m/%d %H:%M:%S")
             mtime = datetime.datetime.fromtimestamp(stat.st_mtime).\
                     strftime("%Y/%m/%d %H:%M:%S")
-            root = self._factory.new_dir(dirname, basename, relpath, atime, 
-                                         mtime, hroot, size, 
+            root = self._factory.new_dir(dirname, basename, relpath, atime,
+                                         mtime, hroot, size,
                                          self.parse_size(size), absname)
             ldir = os.listdir(path)
-            ldir.sort(cmp=lambda x, y: cmp(x.lower(), y.lower()))
+            ldir.sort(cmp = lambda x, y: cmp(x.lower(), y.lower()))
             if SETTINGS.gnuhidden is True:
                 self.hidden_linux_filter(ldir)
             if SETTINGS.savebackup is True:
@@ -297,41 +303,41 @@ class Indexer(object):
                         mtime = datetime.datetime.fromtimestamp\
                         (os.path.getmtime(path + SEPARATOR + entry)
                          ).strftime("%Y/%m/%d %H:%M:%S")
-                        mimetype = mimetypes.guess_type(path + SEPARATOR 
+                        mimetype = mimetypes.guess_type(path + SEPARATOR
                                                         + entry, False)
                         size = os.path.getsize(root.__str__() + SEPARATOR
                                                + entry)
                         size = round(size, 2)
-                        if (mimetype[0] is not None and MIMES[mimetype[0]] 
+                        if (mimetype[0] is not None and MIMES[mimetype[0]]
                             == "image"):
                             _file = self._factory.\
-                                    new_photo(root.parent + SEPARATOR + 
-                                              root.name, entry, rpath, 
-                                              mimetype, atime, mtime, root, 
-                                              size, self.parse_size(size), 
+                                    new_photo(root.parent + SEPARATOR +
+                                              root.name, entry, rpath,
+                                              mimetype, atime, mtime, root,
+                                              size, self.parse_size(size),
                                               self.last)
-                        elif (mimetype[0] is not None and MIMES[mimetype[0]] 
+                        elif (mimetype[0] is not None and MIMES[mimetype[0]]
                               == "audio" and not mimetype[0] in NOT_AUDIO):
                             _file = self._factory.\
-                                    new_audio(root.parent + SEPARATOR + 
-                                              root.name, entry, rpath, 
-                                              mimetype, atime, mtime, root, 
-                                              size, self.parse_size(size), 
+                                    new_audio(root.parent + SEPARATOR +
+                                              root.name, entry, rpath,
+                                              mimetype, atime, mtime, root,
+                                              size, self.parse_size(size),
                                               self.last)
                         elif (mimetype[0] is not None and MIMES[mimetype[0]]
                               == "video"):
                             _file = self._factory.\
-                                    new_video(root.parent + SEPARATOR + 
-                                              root.name, entry, rpath, 
-                                              mimetype, atime, mtime, root, 
-                                              size, self.parse_size(size), 
+                                    new_video(root.parent + SEPARATOR +
+                                              root.name, entry, rpath,
+                                              mimetype, atime, mtime, root,
+                                              size, self.parse_size(size),
                                               self.last)
                         else:
                             _file = self._factory.\
-                                    new_file(root.parent + SEPARATOR + 
-                                             root.name, entry, rpath, 
-                                             mimetype, atime, mtime, root, 
-                                             self.last, size, 
+                                    new_file(root.parent + SEPARATOR +
+                                             root.name, entry, rpath,
+                                             mimetype, atime, mtime, root,
+                                             self.last, size,
                                              self.parse_size(size),)
                         #if root is not None:
                             #root.append_file(_file)
@@ -348,10 +354,10 @@ class Indexer(object):
                     if SETTINGS.missingmime:
                         MANAGER.\
                         append_event("Error indexing file. Probably the " +
-                                     "MIME is not found in the MIME list.", 
+                                     "MIME is not found in the MIME list.",
                                      absname + SEPARATOR + entry, error, 1)
-                        print "Error indexing file: " + absname + SEPARATOR +\
-                                entry + ". Probably the MIME is not" +\
+                        print "Error indexing file: " + absname + SEPARATOR + \
+                                entry + ". Probably the MIME is not" + \
                                 "found in the MIME list."
                         print error
                 except Exception as exc:
@@ -359,7 +365,7 @@ class Indexer(object):
                        MANAGER.\
                        append_event("Error indexing file. I/O error.",
                                     absname + SEPARATOR + entry, exc, 2)
-                       print "Error indexing file: " + absname + SEPARATOR +\
+                       print "Error indexing file: " + absname + SEPARATOR + \
                                entry + ". I/O error."
                        print exc
             if root is not None:
@@ -372,7 +378,7 @@ class Indexer(object):
             if SETTINGS.ioerror:
                 MANAGER.append_event("Error indexing directory. I/O error",
                                      absname, exc, 2)
-            print "Error indexing directory: " + absname 
+            print "Error indexing directory: " + absname
             print exc
             return root
 
@@ -395,6 +401,13 @@ class Indexer(object):
             self._countfiles += len(files)
             self._count += len(dirs)
             self._countdirs += len(dirs)
+
+    def count_time(self):
+        self._timer = self._timer + 100
+        if fsindexthread.is_alive():
+            return True
+        else:
+            return False
 
     def update_progressbar_pulse(self, fscountthread):
         """Pulses the progress bar."""

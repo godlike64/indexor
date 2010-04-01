@@ -31,7 +31,7 @@ class MetaDir(SQLObject):
     category = StringCol(default = "None")
 
 class File(InheritableSQLObject):
-    
+
     parent = StringCol()
     name = StringCol()
     relpath = StringCol()
@@ -43,13 +43,13 @@ class File(InheritableSQLObject):
     isdir = BoolCol()
     strabs = StringCol()
     root = ForeignKey("Directory")
-    
+
     def __str__(self):
         return self.strabs
-    
+
 
 class Directory(SQLObject):
-    
+
     parent = StringCol()
     name = StringCol()
     relpath = StringCol()
@@ -61,14 +61,14 @@ class Directory(SQLObject):
     isdir = BoolCol()
     strabs = StringCol()
     root = ForeignKey("Directory")
-    dirs = MultipleJoin("Directory", joinColumn="root_id")
-    files = MultipleJoin("File", joinColumn="root_id")
-    
+    dirs = MultipleJoin("Directory", joinColumn = "root_id")
+    files = MultipleJoin("File", joinColumn = "root_id")
+
     def __str__(self):
         return self.strabs
-    
+
 class Video(File):
-    
+
     length = StringCol(default = None)
     videocodec = StringCol(default = None)
     videobitrate = StringCol(default = None)
@@ -82,14 +82,14 @@ class Video(File):
     sublangs = StringCol(default = None)
 
 class Audio(File):
-    
+
     length = StringCol(default = None)
     bitrate = StringCol(default = None)
     samplerate = StringCol(default = None)
     codec = StringCol(default = None)
 
 class Photo(File):
-    
+
     hasthumb = BoolCol(default = None)
     author = StringCol(default = None)
     res = StringCol(default = None)
@@ -97,19 +97,22 @@ class Photo(File):
     soft = StringCol(default = None)
     _thumb = PickleCol(default = None)
     _icon = PickleCol(default = None)
-    
-    def _get_thumb(self):
-        return gtk.gdk.pixbuf_new_from_array(self._thumb, 
+
+    def get_thumb(self):
+        return gtk.gdk.pixbuf_new_from_array(self._thumb,
                                                    gtk.gdk.COLORSPACE_RGB, 8)
-    
-    def _set_thumb(self, value):
+
+    def set_thumb(self, value):
         if isinstance(value, gtk.gdk.Pixbuf):
             self._thumb = value.get_pixels_array()
-    
-    def _get_icon(self):
-        return gtk.gdk.pixbuf_new_from_array(self._icon, 
+
+    def get_icon(self):
+        return gtk.gdk.pixbuf_new_from_array(self._icon,
                                                   gtk.gdk.COLORSPACE_RGB, 8)
-    
-    def _set_icon(self, value):
+
+    def set_icon(self, value):
         if isinstance(value, gtk.gdk.Pixbuf):
             self._icon = value.get_pixels_array()
+
+    thumb = property(get_thumb, set_thumb)
+    icon = property(get_icon, set_icon)

@@ -71,7 +71,6 @@ class DBManager(object):
             con_str = "sqlite://" + file_str
             self._scanningcatalog = file_str
             self._conn = connectionForURI(con_str)
-            #self._conn.debug = True
             self._factory = Factory(self._conn)
             self._indexer = Indexer(path, mainhandler.pbar, mainhandler,
                                     self._factory)
@@ -86,7 +85,7 @@ class DBManager(object):
                     label = gtk.Label()
                     label.set_markup("Indexor has already registered " + \
                                       "this directory. Do you wish\n" +
-                                      "to overwrite the catalog with the" + \
+                                      "to overwrite the catalog with the " + \
                                       "updated one?")
                     hbox = gtk.HBox(spacing = 8)
                     dialog = gtk.Dialog("Overwrite previous catalog?",
@@ -140,4 +139,8 @@ class DBManager(object):
 
     def get_time_consumed(self):
         return self._indexer.timer
+
+    def reload_connection(self):
+        self._conn.close()
+        self._conn = connectionForURI("sqlite://" + self._scanningcatalog)
 

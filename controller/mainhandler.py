@@ -507,6 +507,10 @@ class MainHandler(object):
         """
         if not fsindexthread.is_alive():
             self._root = None
+            #self._dbmanager.close_transaction()
+            #self._dbmanager.reload_connection()
+            #self._tvhandler.dbmanager = self._dbmanager
+            self._dbmanager.create_metadir()
             self._tvhandler.print_output()
             print "Total time consumed: " + str(self._dbmanager.\
                                                 get_time_consumed()) + " ms."

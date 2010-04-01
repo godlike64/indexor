@@ -23,7 +23,7 @@ try:
    NO_KAA = False
 except ImportError:
    NO_KAA = True
-    
+
 from fs.entities import MetaDir, File, Directory, Video, Audio, Photo
 from logic.midput import SETTINGS
 from logic.logging import MANAGER
@@ -32,7 +32,7 @@ from logic.logging import MANAGER
 from logic.input.constants import ICONS, MIMES, NO_INFO, NOT_AUDIO, SEPARATOR
 
 class Factory(object):
-    
+
     def __init__(self, conn):
         self._conn = conn
         MetaDir.createTable(connection = self._conn)
@@ -43,13 +43,13 @@ class Factory(object):
         Photo.createTable(connection = self._conn)
         #File._connection.debug = True
         #Directory._connection.debug = True
-        
+
     def new_metadir(self, target, files, dirs, size, strsize):
-        return MetaDir(target = target, files = files, dirs = dirs, 
-                       size = size, strsize = strsize, 
+        return MetaDir(target = target, files = files, dirs = dirs,
+                       size = size, strsize = strsize,
                        connection = self._conn)
-        
-    def new_file(self, parent, name, relpath, mimetype, atime, mtime, 
+
+    def new_file(self, parent, name, relpath, mimetype, atime, mtime,
                  root, strabs, size = None, strsize = None, isdir = False):
 
         atime, mtime = self._check_stat(atime, mtime)
@@ -58,57 +58,63 @@ class Factory(object):
         else:
             mimetype = "text/plain"
         return File(parent = parent, name = name, relpath = relpath,
-                    mimetype = mimetype, atime = atime, mtime = mtime, 
-                    size = size, strsize = strsize, isdir = isdir, 
+                    mimetype = mimetype, atime = atime, mtime = mtime,
+                    size = size, strsize = strsize, isdir = isdir,
                     strabs = strabs, root = root, connection = self._conn)
 
-    
-    def new_dir(self, parent, name, relpath, atime, mtime, root, size, 
+
+    def new_dir(self, parent, name, relpath, atime, mtime, root, size,
                 strsize, strabs, isdir = True):
         atime, mtime = self._check_stat(atime, mtime)
         mimetype = "inode/folder"
-        return Directory(parent = parent, name = name, relpath = relpath, 
-                         mimetype = mimetype, atime = atime, mtime = mtime, 
-                         size = size, strsize = strsize, isdir = isdir, 
-                         strabs = strabs, root = root, 
+        return Directory(parent = parent, name = name, relpath = relpath,
+                         mimetype = mimetype, atime = atime, mtime = mtime,
+                         size = size, strsize = strsize, isdir = isdir,
+                         strabs = strabs, root = root,
                          connection = self._conn)
-    
-    def new_video(self, parent, name, relpath, mimetype, atime, mtime, 
+
+    def new_video(self, parent, name, relpath, mimetype, atime, mtime,
                   root, size, strsize, strabs):
+        trans = self._conn.transaction()
         atime, mtime = self._check_stat(atime, mtime)
         mimetype = mimetype[0]
-        video = Video(parent = parent, name = name, relpath = relpath, 
-                      mimetype = mimetype, atime = atime, mtime = mtime, 
-                      size = size, strsize = strsize, root = root, 
-                      isdir = False, strabs = strabs, 
-                      connection = self._conn)
+        video = Video(parent = parent, name = name, relpath = relpath,
+                      mimetype = mimetype, atime = atime, mtime = mtime,
+                      size = size, strsize = strsize, root = root,
+                      isdir = False, strabs = strabs,
+                      connection = trans)
         self._get_video_metadata(video)
+        trans.commit(close = True)
         return video
-    
-    def new_audio(self, parent, name, relpath, mimetype, atime, mtime, 
+
+    def new_audio(self, parent, name, relpath, mimetype, atime, mtime,
                   root, size, strsize, strabs):
+        trans = self._conn.transaction()
         atime, mtime = self._check_stat(atime, mtime)
         mimetype = mimetype[0]
-        audio = Audio(parent = parent, name = name,  relpath = relpath, 
-                      mimetype = mimetype, atime = atime, mtime = mtime, 
-                      size = size, strsize = strsize, root = root, 
-                      isdir = False, strabs = strabs, 
-                      connection = self._conn)
+        audio = Audio(parent = parent, name = name, relpath = relpath,
+                      mimetype = mimetype, atime = atime, mtime = mtime,
+                      size = size, strsize = strsize, root = root,
+                      isdir = False, strabs = strabs,
+                      connection = trans)
         self._get_audio_metadata(audio)
+        trans.commit(close = True)
         return audio
-    
-    def new_photo(self, parent, name, relpath, mimetype, atime, mtime, 
+
+    def new_photo(self, parent, name, relpath, mimetype, atime, mtime,
                   root, size, strsize, strabs):
+        trans = self._conn.transaction()
         atime, mtime = self._check_stat(atime, mtime)
         mimetype = mimetype[0]
-        photo = Photo(parent = parent, name = name, relpath = relpath, 
-                      mimetype = mimetype, atime = atime, mtime = mtime, 
-                      size = size, strsize = strsize, root = root, 
-                      isdir = False, strabs = strabs, 
-                      connection = self._conn)
+        photo = Photo(parent = parent, name = name, relpath = relpath,
+                      mimetype = mimetype, atime = atime, mtime = mtime,
+                      size = size, strsize = strsize, root = root,
+                      isdir = False, strabs = strabs,
+                      connection = trans)
         self._get_photo_metadata(photo)
+        trans.commit(close = True)
         return photo
-    
+
     def _get_video_metadata(self, video):
         """Try to load metadata from the actual file"""
         video.length, video.videocodec, video.videobitrate, \
@@ -131,7 +137,7 @@ class Factory(object):
                             minlength = int(minlength % 60)
                     length = str(hourlength) + ":" + str(minlength).zfill(2)\
                                 + ":" + str(seclength).zfill(2)
-                
+
                 #Loading video attributes
                 if hasattr(info, "video") and info.video[0] is not None:
                     vinfo = info.video[0]
@@ -148,10 +154,10 @@ class Factory(object):
                         videores = str(vinfo.width) + "x" + str(vinfo.height)
                         if videoar == 0:
                             videoar = str(round(float(vinfo.width)
-                                                /vinfo.height,2))
+                                                / vinfo.height, 2))
                     if hasattr(vinfo, "fps") and vinfo.fps is not None:
                         videofps = str(round(vinfo.fps, 3))
-                
+
                 #Loading audio attributes
                 if hasattr(info, "audio") and info.audio[0] is not None:
                     ainfo = info.audio[0]
@@ -167,7 +173,7 @@ class Factory(object):
                     if hasattr(ainfo, "channels")\
                     and ainfo.channels is not None:
                         audiochannels = str(ainfo.channels)
-                
+
                 #Loading subtitle attributes
                 if hasattr(info, "subtitles") and len(info.subtitles) > 0:
                     sublangs = ""
@@ -177,9 +183,9 @@ class Factory(object):
                             sublangs += ", " + sub.language
         except Exception as exc:
             if SETTINGS.metadataerror is True:
-                MANAGER.append_event("Error loading video metadata", 
+                MANAGER.append_event("Error loading video metadata",
                                      self.__str__(), exc, 3)
-            print "Error loading video metadata: " + self.__str__()
+            print "Error loading video metadata: " + video.__str__()
             print exc
         #Assigning to class variables
         if length != 0:
@@ -204,7 +210,7 @@ class Factory(object):
             video.audiochannels = audiochannels
         if sublangs != 0:
             video.sublangs = sublangs
-    
+
     def _get_audio_metadata(self, audio):
         """Try to load metadata from the actual file"""
         audio.bitrate, audio.codec, audio.length, \
@@ -250,7 +256,7 @@ class Factory(object):
             if SETTINGS.metadataerror is True:
                 MANAGER.append_event("Error loading audio metadata",
                                      self.__str__(), exc, 3)
-            print "Error loading audio metadata: " + self.__str__()
+            print "Error loading audio metadata: " + audio.__str__()
             print exc
         if length != 0:
             audio.length = length
@@ -260,7 +266,7 @@ class Factory(object):
             audio.bitrate = bitrate
         if codec != 0:
             audio.codec = codec
-    
+
     def _get_photo_metadata(self, photo):
         """Try to load metadata from the actual file"""
         photo.author, photo.date_taken, photo.res, \
@@ -287,17 +293,17 @@ class Factory(object):
             if SETTINGS.metadataerror is True:
                 MANAGER.append_event("Error loading image metadata",
                                      self.__str__(), exc, 3)
-            print "Error occurred loading image metadata: " + self.__str__()
+            print "Error occurred loading image metadata: " + photo.__str__()
             print exc
         if width != 0 and height != 0:
             photo.res = str(width) + "x" + str(height)
         if author != 0:
-            photo.author = author
+            photo.author = author.encode('utf-8')
         if soft != 0:
             photo.soft = soft
         if date_taken != 0:
             photo.date_taken = date_taken
-        
+
         try:
             photo.icon = \
             gtk.gdk.pixbuf_new_from_file_at_size(photo.strabs,
@@ -312,17 +318,17 @@ class Factory(object):
             if SETTINGS.thumberror is True:
                 MANAGER.append_event("Error loading thumbnail",
                                      photo.__str__(), exc, 5)
-            print "Error occurred loading image metadata: " + self.__str__()
+            print "Error occurred loading image metadata: " + photo.__str__()
             print exc
             photo.hasthumb = False
-            
+
     def _check_stat(self, atime, mtime):
         if atime is None:
             atime = NO_INFO
         if mtime is None:
             mtime = NO_INFO
         return atime, mtime
-    
+
 def _return_tuple(arg, count):
     """Method used to return a tuple of similar values
     

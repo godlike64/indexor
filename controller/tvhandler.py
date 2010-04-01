@@ -24,13 +24,13 @@ from logic.input.constants import ICONS, MIMES
 from logic.midput import SETTINGS
 
 class TVHandler(object):
-    
+
     """Treeviews' handler.
     
     All the treeview-related thingies got separated in this class in order
     to keep things tidy.
     """
-    
+
     def __init__(self, mainhandler, wtree):
         self._dbmanager = None
         self._root = None
@@ -69,55 +69,55 @@ class TVHandler(object):
         self._tvcolnamefl.add_attribute(self._crnamefilelist, 'text', 1)
         self._tvcolsizefl.add_attribute(self._crsizefilelist, 'text', 2)
         self._tvfilelist.columns_autosize()
-        
+
     #################################
     #Properties
     #################################    
     def get_root(self):
         """Property"""
         return self._root
-    
+
     def set_root(self, root):
         """Property"""
-        
+
         self._root = root
-    
+
     def get_dbmanager(self):
         """Property"""
         return self._dbmanager
-    
+
     def set_dbmanager(self, dbmanager):
         """Property"""
         self._dbmanager = dbmanager
         self._conn = dbmanager.conn
-        
+
     def get_tmfdirtree(self):
         """Property"""
         return self._tmfdirtree
-    
+
     def get_lsfilelist(self):
         """Property"""
         return self._lsfilelist
-    
+
     def set_lsfilelist(self, lsfilelist):
         """Property"""
         self._lsfilelist = lsfilelist
-        
+
     def get_tvdirtree(self):
         """Property"""
         return self._tvdirtree
-    
+
     def get_tmffilelist(self):
         """Property"""
         return self._tmffilelist
-        
+
     root = property(get_root, set_root)
     dbmanager = property(get_dbmanager, set_dbmanager)
     tmfdirtree = property(get_tmfdirtree)
     lsfilelist = property(get_lsfilelist, set_lsfilelist)
     tvdirtree = property(get_tvdirtree)
     tmffilelist = property(get_tmffilelist)
-    
+
     #################################
     #Methods  
     #################################
@@ -125,7 +125,7 @@ class TVHandler(object):
         """Empties the stores."""
         self._tsdirtree.clear()
         self._lsfilelist.clear()
-        
+
     def append_directories(self, piter, _dir):
         """Adds directories to the left treeview.
         
@@ -135,7 +135,7 @@ class TVHandler(object):
             _iter = self._tsdirtree.append(piter, ['folder', dirchild.name,
                                        dirchild.__str__()])
             self.append_directories(_iter, dirchild)
-            
+
     def print_output(self):
         """Populates the directory tree treestore.
         
@@ -145,17 +145,16 @@ class TVHandler(object):
         keep it consistent.
         """
         #self._tsdirtree.clear()
-        self._dbmanager.create_metadir()
         self.clear_stores()
         if not self._root:
             #self._root = self._dbmanager.get_root()
-            rootselect = Directory.select(Directory.q.relpath == "/", 
+            rootselect = Directory.select(Directory.q.relpath == "/",
                                           connection = self._conn)
             root = rootselect[0]
             self._root = root
         if self._root is not None:
             self._mainhandler.root = self._root
-            self._rootiter = self._tsdirtree.append(None, 
+            self._rootiter = self._tsdirtree.append(None,
                                                     ['drive-harddisk',
                                                      self._root.name +
                                                      " (" +
@@ -165,8 +164,8 @@ class TVHandler(object):
             self.append_directories(self._rootiter, self._root)
             gobject.timeout_add(2000, self._mainhandler.hide_progressbar)
         self._mainhandler.set_buttons_sensitivity(True)
-        
-        
+
+
     def generate_file_list(self, parent, lsfl):
         """Populate the file list treestore.
         
@@ -177,28 +176,28 @@ class TVHandler(object):
         """
         lsfl.clear()
         for dirchild in parent.dirs:
-            
+
             #gtk.icon_theme_get_default().\
             #load_icon(ICONS[MIMES[self._mimetype]]
-            
-            
+
+
             lsfl.append([gtk.icon_theme_get_default().\
-                         load_icon(ICONS[MIMES[dirchild.mimetype]], 
-                                   SETTINGS.iconlistsize, 
-                                   gtk.ICON_LOOKUP_FORCE_SVG), 
-                                   dirchild.name, dirchild.strsize, 
+                         load_icon(ICONS[MIMES[dirchild.mimetype]],
+                                   SETTINGS.iconlistsize,
+                                   gtk.ICON_LOOKUP_FORCE_SVG),
+                                   dirchild.name, dirchild.strsize,
                                    dirchild.__str__()])
         for filechild in parent.files:
             if isinstance(filechild, Photo) \
             and filechild.hasthumb is True:
-                lsfl.append([filechild.icon, filechild.name, 
+                lsfl.append([filechild.icon, filechild.name,
                              filechild.strsize, filechild.__str__()])
             else:
                 lsfl.append([gtk.icon_theme_get_default().\
-                             load_icon(ICONS[MIMES[filechild.mimetype]], 
-                                       SETTINGS.iconlistsize, 
-                                       gtk.ICON_LOOKUP_FORCE_SVG), 
-                                       filechild.name, filechild.strsize, 
+                             load_icon(ICONS[MIMES[filechild.mimetype]],
+                                       SETTINGS.iconlistsize,
+                                       gtk.ICON_LOOKUP_FORCE_SVG),
+                                       filechild.name, filechild.strsize,
                                        filechild.__str__()])
         #======================================================================
         # else:
@@ -212,7 +211,7 @@ class TVHandler(object):
         #            lsfl.append([filechild.icon, filechild.name,
         #                      filechild.strsize, filechild.__str__()])
         #======================================================================
-                    
+
     def switch_to_node_from_fs_path(self, fs_path, parent):
         """Switch to a node in the structure with a given fs path.
         
@@ -237,7 +236,7 @@ class TVHandler(object):
         self._currentpath = self._switching.path
         self._tvdirtree.expand_to_path(self._currentpath)
         self._tvdirtree.set_cursor(self._currentpath)
-                
+
     def iterate_over_children(self, parent, row):
         """Iterates over the children of a treeview row.
         
@@ -273,12 +272,12 @@ class TVHandler(object):
         self._mainhandler.current = self._current
         #self._currentnode = self._mainhandler.\
         #                        find_dir_with_fs_path(parent, self._root)
-        self._currentnode = Directory.select(Directory.q.strabs == parent, 
+        self._currentnode = Directory.select(Directory.q.strabs == parent,
                                              connection = self._conn)[0]
         self._mainhandler.currentnode = self._currentnode
         self._tvfilelist.columns_autosize()
         self.generate_file_list(self._currentnode, self._lsfilelist)
-        
+
     def tvfilelist_cursor_changed_cb(self, tvfl):
         """Callback that handles the selection in the file list treeview.
         
@@ -301,7 +300,7 @@ class TVHandler(object):
         """
         _iter = tvfl.get_model().get_iter(path)
         fs_path = self._tmffilelist.get(_iter, 3)[0]
-        nodelist = Directory.select(Directory.q.strabs == fs_path)
+        nodelist = Directory.select(Directory.q.strabs == fs_path, connection = self._conn)
         if nodelist.count() == 1:
             node = nodelist[0]
             activated = tvfl.get_model().get_value(_iter, 3)

@@ -360,7 +360,7 @@ class Indexer(object):
                                 entry + ". Probably the MIME is not" + \
                                 "found in the MIME list."
                         print error
-                except Exception as exc:
+                except TypeError as exc:
                    if SETTINGS.ioerror:
                        MANAGER.\
                        append_event("Error indexing file. I/O error.",
@@ -374,7 +374,7 @@ class Indexer(object):
                     root.strsize = self.parse_size(root.size)
                     self._root = None
                 return root
-        except Exception as exc:
+        except TypeError as exc:
             if SETTINGS.ioerror:
                 MANAGER.append_event("Error indexing directory. I/O error",
                                      absname, exc, 2)

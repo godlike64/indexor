@@ -38,8 +38,8 @@ class DBManager(object):
 
     def __init__(self, mainhandler):
         self._mainhandler = mainhandler
-        logging.basicConfig(stream = sys.stdout)
-        logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+        #logging.basicConfig(stream = sys.stdout)
+        #logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
     #################################
     #Propeties
@@ -85,7 +85,7 @@ class DBManager(object):
             self._scanningcatalog = file_str
             #self._session = connectionForURI(con_str)
             elixir.setup_all()
-            self._engine = create_engine(con_str, echo = True)
+            self._engine = create_engine(con_str)
             elixir.create_all(self._engine)
             self._session = scoped_session(sessionmaker(autoflush = True,
                                                   bind = self._engine))

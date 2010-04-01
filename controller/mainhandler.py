@@ -508,8 +508,8 @@ class MainHandler(object):
         if not fsindexthread.is_alive():
             self._root = None
             self._tvhandler.print_output()
-            print "Total time consumed: " + self._dbmanager.\
-                                                get_time_consumed()
+            print "Total time consumed: " + str(self._dbmanager.\
+                                                get_time_consumed()) + " ms."
             return False
         else:
             return True

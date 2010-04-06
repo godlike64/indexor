@@ -20,7 +20,7 @@ from sqlobject import SQLObject, StringCol, FloatCol, BoolCol, IntCol, \
                         RelatedJoin
 from sqlobject.inheritance import InheritableSQLObject
 
-from logic.input.constants import SEPARATOR
+from constants import SEPARATOR
 
 class MetaDir(SQLObject):
     target = StringCol()
@@ -47,22 +47,37 @@ class File(InheritableSQLObject):
     def __str__(self):
         return self.strabs
 
+class FileEntry(File):
+    pass
 
-class Directory(SQLObject):
 
-    parent = StringCol()
-    name = StringCol()
-    relpath = StringCol()
-    mimetype = StringCol()
-    atime = StringCol()
-    mtime = StringCol()
-    size = FloatCol()
-    strsize = StringCol()
-    isdir = BoolCol()
-    strabs = StringCol()
-    root = ForeignKey("Directory")
-    dirs = MultipleJoin("Directory", joinColumn = "root_id")
-    files = MultipleJoin("File", joinColumn = "root_id")
+class Directory(File):
+
+    #==========================================================================
+    # parent = StringCol()
+    # name = StringCol()
+    # relpath = StringCol()
+    # mimetype = StringCol()
+    # atime = StringCol()
+    # mtime = StringCol()
+    # size = FloatCol()
+    # strsize = StringCol()
+    # isdir = BoolCol()
+    # strabs = StringCol()
+    # root = ForeignKey("Directory")
+    #==========================================================================
+    entries = MultipleJoin("File", joinColumn = "root_id")
+    #dirs = MultipleJoin("Directory", joinColumn = "root_id")
+    #files = MultipleJoin("File", joinColumn = "root_id")
+
+    def _filter_entries(self, klass):
+        return [entry for entry in self.entries if isinstance(entry, klass)]
+
+    def _get_files(self):
+        return self._filter_entries(File)
+
+    def _get_dirs(self):
+        return self._filter_entries(Directory)
 
     def __str__(self):
         return self.strabs

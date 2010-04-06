@@ -29,7 +29,7 @@ from logic.midput import SETTINGS
 from logic.logging import MANAGER
 
 
-from logic.input.constants import ICONS, MIMES, NO_INFO, NOT_AUDIO, SEPARATOR
+from constants import ICONS, MIMES, NO_INFO, NOT_AUDIO, SEPARATOR
 
 class Factory(object):
 
@@ -41,8 +41,6 @@ class Factory(object):
         Video.createTable(connection = self._conn)
         Audio.createTable(connection = self._conn)
         Photo.createTable(connection = self._conn)
-        #File._connection.debug = True
-        #Directory._connection.debug = True
 
     def new_metadir(self, target, files, dirs, size, strsize):
         return MetaDir(target = target, files = files, dirs = dirs,
@@ -282,7 +280,7 @@ class Factory(object):
                 if info.author is not None:
                     author = info.author
                 elif info.artist is not None:
-                    author = info.author
+                    author = info.artist
                 if info.software is not None:
                     soft = info.software
                 if info.timestamp is not None:

@@ -20,6 +20,13 @@ if sys.platform == "win32":
 else:
     SEPARATOR = "/"
 
+
+VERSION = "v0.1-alpha2"
+SITE = "http://www.vicarious.com.ar/blogs/indexor.php"
+AUTHOR = "Juan Manuel Santos"
+EMAIL = "godlike64 at gm4il d0t c0m"
+DESC = "A file and directory indexing tool."
+
 NO_INFO = "No information available"
 
 MIMES = {
@@ -53,6 +60,7 @@ MIMES = {
         "application/relax-ng-compact-syntax"           :   "html",
         "application/rdf+xml"                           :   "html",
         "application/rtf"                               :   "document",
+        "application/sparql-results+xml"                :   "html",
         "application/vnd.lotus-organizer"               :   "html",
         "application/vnd.mozilla.xul+xml"               :   "html",
         "application/vnd.ms-cab-compressed"             :   "archive",
@@ -106,6 +114,7 @@ MIMES = {
         "application/x-javascript"                      :   "html",
         "application/x-maker"                           :   "script",
         "application/x-mif"                             :   "mail",
+        "application/x-msaccess"                        :   "document",
         "application/x-msdos-program"                   :   "script",
         "application/x-msdownload"                      :   "executable",
         "application/x-msi"                             :   "executable",
@@ -143,6 +152,7 @@ MIMES = {
         "chemical/x-crossfire"                          :   "file",
         "chemical/x-gamess-input"                       :   "file",
         "chemical/x-gaussian-log"                       :   "file",
+        "chemical/x-mdl-sdfile"                         :   "file",
         "chemical/x-pdb"                                :   "file",
         "chemical/x-xyz"                                :   "file",
         "image/x-corelphotopaint"                       :   "image",
@@ -174,6 +184,7 @@ MIMES = {
         "text/sgml"                                     :   "html",
         "text/texmacs"                                  :   "document",
         "text/troff"                                    :   "document",
+        "text/vnd.fmi.flexstor"                         :   "text",
         "text/x-asm"                                    :   "source",
         "text/x-bibtex"                                 :   "text",
         "text/x-c++hdr"                                 :   "source",
@@ -198,6 +209,7 @@ MIMES = {
         "text/vnd.sun.j2me.app-descriptor"              :   "archive",
         "text/xml"                                      :   "html",
         "text/xul"                                      :   "html",
+        "video/3gpp"                                    :   "video",
         "video/mp4"                                     :   "video",
         "video/mpeg"                                    :   "video",
         "video/quicktime"                               :   "video",

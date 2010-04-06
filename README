@@ -1,0 +1,75 @@
+Indexor
+A file and directory indexing tool. 
+
+Welcome to Indexor, a program designed to keep track of where you left which
+things stored. Indexor can currently scan a directory of your choosing,
+indexing all files and directories under it, and extracting metadata from
+media files (audio, video and image). Filters can be applied to the scanning
+process, and error messages are logged in a separate window, giving the
+possibility to save the error list to a plain text file. The resulting catalog
+can be saved into a plain text file or into a binary file. If saved to binary,
+such file can later be loaded into an Indexor instance (in less time than it
+took to scan the directory), and all data will be there.
+
+Indexor also features an info pane, inspired by the one present in the Dolphin
+file manager. When visible, displays all metadata it was able to extract from
+the currently selected file, plus a thumbnail for image files (the thumbnail
+is also displayed in the file list but at a smaller default size).
+
+While it theoretically CAN run under Windows, as long as you have all the
+dependencies (I personally ran it some time ago), as of now a Windows
+installer doesn't exist. I have plans to develop one, but I never did put much
+effort in them (e.g. develop the py2exe setup.py and InnoSetup script, testing
+it, etc). Nevertheless, I intend to officially support Windows when most of
+the things I have planned for the app are finished :)
+
+Indexor is currently under development, so there are no guarantees: things may
+break or become incompatible, kitties may die and houses may be repossessed.
+Other than that, it's safe to use ;). I developed it with the purpose of
+learning Python, and because the similar tools available did not satisfy me in
+some aspects, portability being one of them. Indexor's generated catalog
+binary files can be loaded on any Indexor instance, and I intend to keep it
+that way, despite format changes. Since I do this in my free time (whenever I
+have some), I could really use a hand developing Indexor. If you are
+interested, please contact me.
+
+
+Dependencies
+
+Python-2.6 or newer GTK+-2.16 or newer PyGTK-2.14.1 or newer (and its suite of
+libraries: gobject, pango, etc.) kaa-metadata (used for extracting metadata
+from media files)
+
+
+Install
+
+Currently there aren't any as I don't have a setup script or anything like
+that :P. Just make sure you have all the deps installed, and then run
+runner.py from the directory where it is located. This last step is CRITICAL,
+as Indexor will not work if you don't follow it.
+
+
+License
+
+All code (including glade files) is licensed under the GPLv3. Icons are
+licensed under a CreativeCommons BY-NC-SA license.
+
+
+Authors
+
+GODLiKE (godlike64 4t gm4il d0t c0m) 
+
+
+Contact
+
+(godlike64 at gm4il d0t c0m) 
+
+
+Download
+
+You can download this project in either zip 
+[http://github.com/godlike64/indexor/zipball/master] or tar 
+[http://github.com/godlike64/indexor/tarball/master] formats. 
+
+You can also clone the project with Git by running: 
+$ git clone git://github.com/godlike64/indexor

@@ -25,7 +25,7 @@ import gtk
 
 #Local imports
 from fs.entities import File, Directory, Video, Audio, Photo
-from logic.input.constants import ICONS, MIMES, SEPARATOR
+from constants import ICONS, MIMES, SEPARATOR
 from logic.input.indexer import Indexer
 from logic.output.binary import BinaryReader, BinaryWriter
 from logic.output.plaintext import PlainTextWriter

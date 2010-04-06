@@ -24,7 +24,7 @@ import mimetypes
 
 #from fs.entries import File, Directory, Audio, Video, Photo, MIMES, \
 #NOT_AUDIO, SEPARATOR
-from logic.input.constants import SEPARATOR, MIMES, NOT_AUDIO
+from constants import SEPARATOR, MIMES, NOT_AUDIO
 #from logic.input.factory import Factory
 #from logic.input.factory import NOT_AUDIO
 from logic.midput import SETTINGS
@@ -360,7 +360,7 @@ class Indexer(object):
                                 entry + ". Probably the MIME is not" + \
                                 "found in the MIME list."
                         print error
-                except TypeError as exc:
+                except Exception as exc:
                    if SETTINGS.ioerror:
                        MANAGER.\
                        append_event("Error indexing file. I/O error.",
@@ -374,7 +374,7 @@ class Indexer(object):
                     root.strsize = self.parse_size(root.size)
                     self._root = None
                 return root
-        except TypeError as exc:
+        except Exception as exc:
             if SETTINGS.ioerror:
                 MANAGER.append_event("Error indexing directory. I/O error",
                                      absname, exc, 2)
@@ -443,6 +443,6 @@ class Indexer(object):
             return False
         else:
             self.progress.set_text(self.last)
-            self.progress.set_fraction(round(float(self.position), 2)
+            self.progress.set_fraction(round(float(self.position), 8)
                                        / self.count)
             return True

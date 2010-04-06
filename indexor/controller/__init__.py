@@ -12,8 +12,3 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with Indexor.  If not, see <http://www.gnu.org/licenses/>.
-
-"""Initializing of controller module, sets some module globals"""
-
-VERSION = "v0.1-alpha2"
-SITE = "http://github.com/godlike64/indexor"

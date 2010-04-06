@@ -17,12 +17,12 @@
 
 import gtk
 
-from controller import VERSION
+from constants import VERSION
 
 class AboutHandler(object):
-    
+
     """About window handler"""
-    
+
     def __init__(self, mainhandler):
         self._mainhandler = mainhandler
         self._wtree = gtk.Builder()
@@ -34,12 +34,12 @@ class AboutHandler(object):
         self._vwpicon = self._wtree.get_object("vwpicon")
         self._icon = gtk.gdk.pixbuf_new_from_file("icons/indexorapp.png")
         self._iconimg = gtk.image_new_from_pixbuf(self._icon)
-        
+
         self._vwpicon.add(self._iconimg)
         self._lblversion.set_text("Indexor " + VERSION)
-        
+
         self._window.show_all()
-        
+
     def destroy(self, widget):
         """Destroys the window."""
         if widget is not None:

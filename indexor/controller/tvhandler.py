@@ -20,7 +20,7 @@ import gobject
 
 #import fs.entries
 from fs.entities import MetaDir, File, Directory, Video, Audio, Photo
-from logic.input.constants import ICONS, MIMES
+from constants import ICONS, MIMES
 from logic.midput import SETTINGS
 
 class TVHandler(object):
@@ -286,8 +286,10 @@ class TVHandler(object):
         """
         (_model, _iter) = tvfl.get_selection().get_selected()
         path = tvfl.get_model().get_value(_iter, 3)
-        node = self._mainhandler.find_dir_or_file_with_fs_path(path,
-                                                               self._root)
+        #node = self._mainhandler.find_dir_or_file_with_fs_path(path,
+        #                                                       self._root)
+        node = File.select(File.q.strabs == path, connection = self._conn)
+        node = node[0]
         self._mainhandler.set_infopane_content(node)
 
     def tvfilelist_row_activated_cb(self, tvfl, path, view_column):
@@ -300,7 +302,8 @@ class TVHandler(object):
         """
         _iter = tvfl.get_model().get_iter(path)
         fs_path = self._tmffilelist.get(_iter, 3)[0]
-        nodelist = Directory.select(Directory.q.strabs == fs_path, connection = self._conn)
+        nodelist = Directory.select(Directory.q.strabs == fs_path,
+                                    connection = self._conn)
         if nodelist.count() == 1:
             node = nodelist[0]
             activated = tvfl.get_model().get_value(_iter, 3)

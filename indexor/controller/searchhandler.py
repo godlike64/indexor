@@ -18,14 +18,14 @@
 import gtk
 
 class SearchHandler(object):
-    
+
     """Search window handler.
     
     Handles all events from the search window, and also performs the searches.
     I know that last bit of code should not be in here, but it is really small
     and to me it doesn't justify creating another module/class for it.
     """
-    
+
     def __init__(self, gladefile, mainhandler, tvhandler):
         self._gladefile = gladefile
         self._mainhandler = mainhandler
@@ -52,9 +52,9 @@ class SearchHandler(object):
         self._tvsearchcolname.pack_start(self._cellpb, False)
         self._tvsearchcolname.pack_start(self._cellname, False)
         self._tvsearchcolsize.pack_start(self._cellsize, False)
-        self._tvsearchcolname.set_attributes(self._cellpb, pixbuf=0)
-        self._tvsearchcolname.set_attributes(self._cellname, markup=1)
-        self._tvsearchcolsize.set_attributes(self._cellsize, text=2)
+        self._tvsearchcolname.set_attributes(self._cellpb, pixbuf = 0)
+        self._tvsearchcolname.set_attributes(self._cellname, markup = 1)
+        self._tvsearchcolsize.set_attributes(self._cellsize, text = 2)
         self._tvsearchcolname.set_sort_column_id(1)
         self._tvsearchcolsize.set_sort_column_id(5)
         self._tvsearch = self._wtree.get_object("tvsearch")
@@ -67,11 +67,11 @@ class SearchHandler(object):
         if self._window is not None:
             self._window.destroy()
             self._window = None
-        
+
     def find_text(self, name, text):
         """Returns the result of the search with lowercase values."""
         return name.lower().find(text.lower())
-    
+
     def search_and_append(self, node, text):
         """Searches in the entire directory structure.
         
@@ -91,7 +91,7 @@ class SearchHandler(object):
             namemarkup += "</b>"
             namemarkup += name2[index + len(text2):len(name2)]
             namemarkup += "\n" + str2
-            self._lssearch.append([node.icon, namemarkup.replace("&","&amp;"),
+            self._lssearch.append([node.icon, namemarkup.replace("&", "&amp;"),
                                    node.strsize, node.__str__(), node.parent,
                                    node.size])
         if hasattr(node, "dirs"):
@@ -100,15 +100,15 @@ class SearchHandler(object):
         if hasattr(node, "files"):
             for _file in node.files:
                 self.search_and_append(_file, text)
-        
+
     #################################
     #Callbacks
     #################################
-    
+
     def btncancel_clicked_cb(self, widget):
         """Destroys the window."""
         self.destroy()
-        
+
     def btnjumpto_clicked_cb(self, widget):
         """Binds the "Jump To" button to the row_activated callback.
         
@@ -119,30 +119,30 @@ class SearchHandler(object):
         _path = _model.get_path(_iter)
         _column = self._tvsearch.get_column(0)
         self.tvsearch_row_activated_cb(self._tvsearch, _path, _column)
-    
+
     def btnsearch_clicked_cb(self, widget):
         """Starts the search."""
         self._lssearch.clear()
         self._tvsearch.columns_autosize()
         self.search_and_append(self._root, self._entrysearch.get_text())
-    
+
     def txtsearch_activate_cb(self, widget):
         """Starts the search."""
         self.btnsearch_clicked_cb(widget)
-    
+
     def txtsearch_changed_cb(self, widget):
         """Starts the search."""
         self.btnsearch_clicked_cb(widget)
-        
+
     def btnclear_clicked_cb(self, widget):
         """Clears the search store."""
         self._lssearch.clear()
         self._btnjumpto.set_sensitive(True)
-        
+
     def tvsearch_cursor_changed_cb(self, widget):
         """Sets the "Jump To" button sensitive."""
         self._btnjumpto.set_sensitive(True)
-        
+
     def tvsearch_row_activated_cb(self, tvdt, path, view_column):
         """Jumps to the selected node in the main window.
         

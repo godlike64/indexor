@@ -23,6 +23,7 @@ from sqlobject.inheritance import InheritableSQLObject
 from constants import SEPARATOR
 
 class MetaDir(SQLObject):
+    name = StringCol()
     target = StringCol()
     files = IntCol()
     dirs = IntCol()

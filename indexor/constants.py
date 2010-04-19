@@ -250,7 +250,7 @@ ICONS = {
             "presentation"      :   "x-office-presentation",
             "security"          :   "system-lock-screen",
             "script"            :   "text-x-script",
-            "source"            :   "text-x-generic-template",
+            "source"            :   "text-x-generic",
             "spreadsheet"       :   "x-office-spreadsheet",
             "trash"             :   "user-trash",
             "video"             :   "video-x-generic",

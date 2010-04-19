@@ -43,7 +43,7 @@ class Indexer(object):
     added easily as long as the structure is honored.
     """
 
-    def __init__(self, path, progress, mainhandler, factory):
+    def __init__(self, path, progress, tvhandler, factory):
         #mimetypes.init(['misc/mime.types'])
         mimetypes.add_type("audio/x-musepack", ".mpc", True)
         mimetypes.add_type("audio/x-spc", ".spc", True)
@@ -63,7 +63,7 @@ class Indexer(object):
         self._position = 0
         self._lastfile = ""
         self._stop = False
-        self._mainhandler = mainhandler
+        self._tvhandler = tvhandler
         self._factory = factory
         if path[-1] == SEPARATOR:
             self._path = path[:-1]
@@ -259,6 +259,7 @@ class Indexer(object):
                     self.calculate_dir_size(childdir)
                     contentsize += childdir.size
             _dir.size = contentsize
+            _dir.strsize = self.parse_size(contentsize)
 
     def do_index_process(self, path, relpath, hroot = None):
         """The bulk of the indexing process.
@@ -439,7 +440,7 @@ class Indexer(object):
             self.progress.set_text("Completed indexing "
                                    + str(self.count) + " files.")
             self.progress.set_fraction(1.0)
-            gobject.timeout_add(2000, self._mainhandler.hide_progressbar)
+            gobject.timeout_add(2000, self._tvhandler.hide_progressbar)
             return False
         else:
             self.progress.set_text(self.last)

@@ -38,6 +38,7 @@ from controller.loghandler import LogHandler
 from controller.abouthandler import AboutHandler
 from logic.logging import MANAGER
 from logic.input.dbmanager import DBManager
+from logic.input.mdmanager import MDManager
 
 
 class MainHandler(object):
@@ -68,7 +69,7 @@ class MainHandler(object):
         self._hbpbar = self._wtree.get_object("hbpbar")
         self._pbar = self._wtree.get_object("pbar")
         self._btncancel = self._wtree.get_object("btncancel")
-        self._tvhandler = TVHandler(self, self._wtree)
+        self._tvhandler = TVHandler(self)
         self._window.drag_dest_set(gtk.DEST_DEFAULT_DROP,
                                    [('text/plain', 0, 0)], 0)
         self._window.connect("configure-event", self._configure)
@@ -84,21 +85,37 @@ class MainHandler(object):
         self._tbnewpath = self._wtree.get_object("tbnewpath")
         self._tbsave = self._wtree.get_object("tbsave")
         self._tbloadfile = self._wtree.get_object("tbloadfile")
+        self._vwpscan = self._wtree.get_object("vwpscan")
+
+        self._hpscanlist = self._wtree.get_object("hpscanlist")
+        self._tvscanlist = self._wtree.get_object("tvscanlist")
+        self._lsscanlist = gtk.ListStore(gtk.gdk.Pixbuf, str, str)
+        self._tvscanlist.set_model(self._lsscanlist)
+
+        self._tvcolsl_data = self._wtree.get_object("tvcolsl_data")
+        self._cellsl_icon = gtk.CellRendererPixbuf()
+        self._cellsl_data = gtk.CellRendererText()
+        self._tvcolsl_data.pack_start(self._cellsl_icon, False)
+        self._tvcolsl_data.pack_start(self._cellsl_data, False)
+        self._tvcolsl_data.add_attribute(self._cellsl_icon, "pixbuf", 0)
+        self._tvcolsl_data.add_attribute(self._cellsl_data, "markup", 1)
+        #self._lsscanlist.append(["folder", "holaaa\n<b>despiertense todos</b>"])
+
+        self._mdmanager = MDManager(self, self._lsscanlist)
+        self._mdmanager.populate_catalog_list()
+
         self._current = None
         self._currentnode = None
         self._currentpath = None
-        self._entrysearch = self._wtree.get_object("entrysearch")
 
         self._chkmnlog = self._wtree.get_object("chkmnlog")
 
-        self._load_infopane_variables()
         self._wtree.connect_signals(self)
         self._window.set_default_size(*SETTINGS.windowsize)
-        self._hplistpane.set_position(SETTINGS.infopanesize)
+        #self._hplistpane.set_position(SETTINGS.infopanesize)
         if SETTINGS.windowmax is True:
             self._window.maximize()
         self._window.show_all()
-        self._hide_after_shown()
 
     #################################
     #Properties
@@ -146,6 +163,9 @@ class MainHandler(object):
     def get_pbar(self):
         return self._pbar
 
+    def get_vwpscan(self):
+        return self._vwpscan
+
     currentpath = property(get_currentpath, set_currentpath)
     currentnode = property(get_currentnode, set_currentnode)
     current = property(get_current, set_current)
@@ -153,26 +173,19 @@ class MainHandler(object):
     chkmnlog = property(get_chkmnlog)
     window = property(get_window)
     pbar = property(get_pbar)
+    vwpscan = property(get_vwpscan)
 
     #################################
     #Methods
     #################################
+    def populate_catalog_list(self):
+        self._mdmanager.populate_catalog_list(
+                                              )
     def _destroy(self, widget):
         """Destroys the window."""
-        SETTINGS.infopanesize = self._hplistpane.get_position()
+        #SETTINGS.infopanesize = self._hplistpane.get_position()
         LOADER.save_settings()
         gtk.main_quit()
-
-    def _hide_after_shown(self):
-        """Hide things that should not be shown immediately."""
-        self._hbpbar.hide()
-        self._infopane.hide()
-        self._entrysearch.hide()
-        self._tblmediainfo.hide()
-        self._tblimginfo.hide()
-        self._tblaudioinfo.hide()
-        self._tblsubinfo.hide()
-        self._tblvideoinfo.hide()
 
     def _load_infopane_variables(self):
         """Create the objects needed for info pane handling."""
@@ -266,130 +279,90 @@ class MainHandler(object):
             self._lblsublangs.set_size_request(width - 80, -1)
 
 
-    def _clear_infopane(self):
-        """Hides all non-common attributes from the info pane."""
-        self._tblmediainfo.hide()
-        self._tblaudioinfo.hide()
-        self._tblaudiochaninfo.hide()
-        self._tblsubinfo.hide()
-        self._tblvideoinfo.hide()
-        self._tblimginfo.hide()
+    #==========================================================================
+    # def _clear_infopane(self):
+    #    """Hides all non-common attributes from the info pane."""
+    #    self._tblmediainfo.hide()
+    #    self._tblaudioinfo.hide()
+    #    self._tblaudiochaninfo.hide()
+    #    self._tblsubinfo.hide()
+    #    self._tblvideoinfo.hide()
+    #    self._tblimginfo.hide()
+    #==========================================================================
 
-    def set_infopane_content(self, node):
-        """Sets the labels of the info pane.
-        
-        This method is called each time an entry is selected in the file
-        list. Then sets the info pane labels to the correct values.
-        """
-        self._selected = node
-        self._clear_infopane()
-        self._lblinfoname.set_text(node.name)
-        self._lblinfoabspath.set_text(node.parent + SEPARATOR)
-        self._lblinforelpath.set_text(node.relpath)
-        self._lblinfosize.set_text(node.strsize)
-        self._lblinfomime.set_text(node.mimetype)
-        self._lblinfoatime.set_text(node.atime)
-        self._lblinfomtime.set_text(node.mtime)
-        if hasattr(self, "_infoimg"):
-            self._vwpinfoimg.remove(self._infoimg)
-
-        #======================================================================
-        # if isinstance(node, Directory):
-        #    self._infoimg = gtk.image_new_from_pixbuf\
-        #                        (gtk.icon_theme_get_default().\
-        #                         load_icon('folder', SETTINGS.iconpanesize,
-        #                                   gtk.ICON_LOOKUP_FORCE_SVG))
-        #    self._lblinfomime.set_text("folder")
-        #======================================================================
-        if isinstance(node, Photo):
-            self._infoimg = gtk.image_new_from_pixbuf(node.thumb)
-            self._lblimgres.set_text(node.res)
-            self._lblimgdate.set_text(node.date_taken)
-            self._lblimgauthor.set_text(node.author)
-            self._lblimgsoft.set_text(node.soft)
-            self._tblimginfo.show()
-        else:
-            if isinstance(node, Audio):
-                self._tblmediainfo.show()
-                self._tblaudioinfo.show()
-                self._lblmedialength.set_text(node.length)
-                self._lblaudiobitrate.set_text(node.bitrate)
-                self._lblaudiosample.set_text(node.samplerate)
-                self._lblaudiocodec.set_text(node.codec)
-            if isinstance(node, Video):
-                self._tblmediainfo.show()
-                self._tblaudioinfo.show()
-                self._tblaudiochaninfo.show()
-                self._tblvideoinfo.show()
-                if hasattr(node, "_sublangs"):
-                    self._tblsubinfo.show()
-                    self._lblsublangs.set_text(node.sublangs)
-                print node.length
-                self._lblmedialength.set_text(node.length)
-                self._lblvideocodec.set_text(node.videocodec)
-                self._lblvideobitrate.set_text(node.videobitrate)
-                self._lblvideores.set_text(node.videores)
-                self._lblvideofps.set_text(node.videofps)
-                self._lblvideoar.set_text(node.videoar)
-                self._lblaudiobitrate.set_text(node.audiobitrate)
-                self._lblaudiosample.set_text(node.audiosamplerate)
-                self._lblaudiocodec.set_text(node.audiocodec)
-                self._lblaudiochan.set_text(node.audiochannels)
-            self._infoimg = gtk.image_new_from_pixbuf\
-                                (gtk.icon_theme_get_default().\
-                                 load_icon(ICONS[MIMES[node.mimetype]],
-                                           SETTINGS.iconpanesize,
-                                           gtk.ICON_LOOKUP_FORCE_SVG))
-        self._infoimg.show()
-        self._vwpinfoimg.add(self._infoimg)
-        self.set_infopanes_visibility()
+#==============================================================================
+#    def set_infopane_content(self, node):
+#        """Sets the labels of the info pane.
+#        
+#        This method is called each time an entry is selected in the file
+#        list. Then sets the info pane labels to the correct values.
+#        """
+#        self._selected = node
+#        self._clear_infopane()
+#        self._lblinfoname.set_text(node.name)
+#        self._lblinfoabspath.set_text(node.parent + SEPARATOR)
+#        self._lblinforelpath.set_text(node.relpath)
+#        self._lblinfosize.set_text(node.strsize)
+#        self._lblinfomime.set_text(node.mimetype)
+#        self._lblinfoatime.set_text(node.atime)
+#        self._lblinfomtime.set_text(node.mtime)
+#        if hasattr(self, "_infoimg"):
+#            self._vwpinfoimg.remove(self._infoimg)
+# 
+#        #======================================================================
+#        # if isinstance(node, Directory):
+#        #    self._infoimg = gtk.image_new_from_pixbuf\
+#        #                        (gtk.icon_theme_get_default().\
+#        #                         load_icon('folder', SETTINGS.iconpanesize,
+#        #                                   gtk.ICON_LOOKUP_FORCE_SVG))
+#        #    self._lblinfomime.set_text("folder")
+#        #======================================================================
+#        if isinstance(node, Photo):
+#            self._infoimg = gtk.image_new_from_pixbuf(node.thumb)
+#            self._lblimgres.set_text(node.res)
+#            self._lblimgdate.set_text(node.date_taken)
+#            self._lblimgauthor.set_text(node.author)
+#            self._lblimgsoft.set_text(node.soft)
+#            self._tblimginfo.show()
+#        else:
+#            if isinstance(node, Audio):
+#                self._tblmediainfo.show()
+#                self._tblaudioinfo.show()
+#                self._lblmedialength.set_text(node.length)
+#                self._lblaudiobitrate.set_text(node.bitrate)
+#                self._lblaudiosample.set_text(node.samplerate)
+#                self._lblaudiocodec.set_text(node.codec)
+#            if isinstance(node, Video):
+#                self._tblmediainfo.show()
+#                self._tblaudioinfo.show()
+#                self._tblaudiochaninfo.show()
+#                self._tblvideoinfo.show()
+#                if hasattr(node, "_sublangs"):
+#                    self._tblsubinfo.show()
+#                    self._lblsublangs.set_text(node.sublangs)
+#                print node.length
+#                self._lblmedialength.set_text(node.length)
+#                self._lblvideocodec.set_text(node.videocodec)
+#                self._lblvideobitrate.set_text(node.videobitrate)
+#                self._lblvideores.set_text(node.videores)
+#                self._lblvideofps.set_text(node.videofps)
+#                self._lblvideoar.set_text(node.videoar)
+#                self._lblaudiobitrate.set_text(node.audiobitrate)
+#                self._lblaudiosample.set_text(node.audiosamplerate)
+#                self._lblaudiocodec.set_text(node.audiocodec)
+#                self._lblaudiochan.set_text(node.audiochannels)
+#            self._infoimg = gtk.image_new_from_pixbuf\
+#                                (gtk.icon_theme_get_default().\
+#                                 load_icon(ICONS[MIMES[node.mimetype]],
+#                                           SETTINGS.iconpanesize,
+#                                           gtk.ICON_LOOKUP_FORCE_SVG))
+#        self._infoimg.show()
+#        self._vwpinfoimg.add(self._infoimg)
+#        self.set_infopanes_visibility()
+#==============================================================================
 
     def set_infopanes_visibility(self):
-        """Sets the visibility of each label, according to stored settings"""
-        self._geninfo.set_property("visible", SETTINGS.geninfo)
-        self._tblinfoabspath.set_property("visible", SETTINGS.abspath)
-        self._tblinforelpath.set_property("visible", SETTINGS.relpath)
-        self._tblinfosize.set_property("visible", SETTINGS.size)
-        self._tblinfomime.set_property("visible", SETTINGS.mime)
-        self._tblinfoatime.set_property("visible", SETTINGS.atime)
-        self._tblinfomtime.set_property("visible", SETTINGS.mtime)
-        self._tblmediainfo.set_property("visible", SETTINGS.mediainfo)
-        self._tblmedialength.set_property("visible", SETTINGS.medialength)
-        self._tblvideoinfo.set_property("visible", SETTINGS.videoinfo)
-        self._tblvideocodec.set_property("visible", SETTINGS.videocodec)
-        self._tblvideobitrate.set_property("visible", SETTINGS.videobitrate)
-        self._tblvideores.set_property("visible", SETTINGS.videores)
-        self._tblvideofps.set_property("visible", SETTINGS.videofps)
-        self._tblvideoar.set_property("visible", SETTINGS.videoar)
-        self._tblaudioinfo.set_property("visible", SETTINGS.audioinfo)
-        self._tblaudiosample.set_property("visible", SETTINGS.audiosample)
-        self._tblaudiocodec.set_property("visible", SETTINGS.audiocodec)
-        self._tblaudiochan.set_property("visible", SETTINGS.audiochan)
-        self._tblsubinfo.set_property("visible", SETTINGS.subinfo)
-        self._tblsublangs.set_property("visible", SETTINGS.sublangs)
-        self._tblimginfo.set_property("visible", SETTINGS.imginfo)
-        self._tblimgres.set_property("visible", SETTINGS.imgres)
-        self._tblimgdate.set_property("visible", SETTINGS.imgdate)
-        self._tblimgauthor.set_property("visible", SETTINGS.imgauthor)
-        self._tblimgsoft.set_property("visible", SETTINGS.imgsoft)
-        if isinstance(self._selected, Audio):
-            self._tblimginfo.hide()
-            self._tblvideoinfo.hide()
-            self._tblsubinfo.hide()
-            self._tblaudiochaninfo.hide()
-        elif isinstance(self._selected, Video):
-            self._tblimginfo.hide()
-        elif isinstance(self._selected, Photo):
-            self._tblmediainfo.hide()
-            self._tblvideoinfo.hide()
-            self._tblaudioinfo.hide()
-            self._tblsubinfo.hide()
-        else:
-            self._tblimginfo.hide()
-            self._tblmediainfo.hide()
-            self._tblvideoinfo.hide()
-            self._tblaudioinfo.hide()
-            self._tblsubinfo.hide()
+        self._tvhandler.set_infopanes_visibility()
 
     def get_pane_width(self):
         """Calculates and returns the info pane's width."""
@@ -416,16 +389,17 @@ class MainHandler(object):
         """
         if (self._path is not None):
             self.set_buttons_sensitivity(False)
-            self._dbmanager = DBManager(self)
-            if self._dbmanager.index_new_dir(self._path, self) is True:
+            self._tvhandler.add_to_viewport()
+            self._dbmanager = DBManager(self, self._tvhandler)
+            if self._dbmanager.index_new_dir(self._path) is True:
                 fscountthread = self._dbmanager.start_counting()
                 self._tvhandler.dbmanager = self._dbmanager
                 gobject.timeout_add(500, self.check_if_counting_finished,
                                     fscountthread)
                 self._tvhandler.root = None
                 self._tvhandler.clear_stores()
-                self._pbar.set_text("")
-                self._hbpbar.show()
+                #self._pbar.set_text("")
+                #self._hbpbar.show()
             else:
                 self.set_buttons_sensitivity(True)
 
@@ -510,7 +484,7 @@ class MainHandler(object):
             #self._dbmanager.close_transaction()
             #self._dbmanager.reload_connection()
             #self._tvhandler.dbmanager = self._dbmanager
-            self._dbmanager.create_metadir()
+            #self._dbmanager.create_metadir()
             self._tvhandler.print_output()
             print "Total time consumed: " + str(self._dbmanager.\
                                                 get_time_consumed()) + " ms."
@@ -518,43 +492,44 @@ class MainHandler(object):
         else:
             return True
 
-    def search_in_dirtree(self, model, _iter):
+    #def search_in_dirtree(self, model, _iter):
         """Filtering function for directory tree treeview filter."""
-        text = self._entrysearch.get_text()
-        if text == "" or model.get_value(_iter, 1) is None:
-            return True
-        node = self.find_dir_with_fs_path(model.get_value(_iter, 2),
-                                           self._root)
-        if self.find_cased_dir_or_file(text, node) is True:
-            return True
-        else:
-            return False
+        #text = self._entrysearch.get_text()
+        #if text == "" or model.get_value(_iter, 1) is None:
+        #    return True
+        #node = self.find_dir_with_fs_path(model.get_value(_iter, 2),
+        #                                   self._root)
+        #if self.find_cased_dir_or_file(text, node) is True:
+        #    return True
+        #else:
+        #    return False
 
-    def search_in_filelist(self, model, _iter):
+    #def search_in_filelist(self, model, _iter):
         """Filtering function for file list treeview filter."""
-        text = self._entrysearch.get_text()
-        if text == "" or model.get_value(_iter, 1) is None:
-            return True
-        node = self.find_dir_or_file_with_fs_path\
-                (model.get_value(_iter, 2), self._root)
-        if self.find_cased_file(text, node) is True:
-            return True
-        else:
-            return False
+        #text = self._entrysearch.get_text()
+        #if text == "" or model.get_value(_iter, 1) is None:
+        #    return True
+        #node = self.find_dir_or_file_with_fs_path\
+        #        (model.get_value(_iter, 2), self._root)
+        #if self.find_cased_file(text, node) is True:
+        #    return True
+        #else:
+        #    return False
 
     def hide_progressbar(self):
         """This is refactored into a method because other classes use it"""
-        self._hbpbar.hide()
+        #self._hbpbar.hide()
+        print "This method should not be used anymore, please review"
 
     def set_buttons_sensitivity(self, sensitive):
         """Sets buttons (and menus) sensitivity according to value given
         
         This method is used when the indexing process begins or ends.
         """
-        if sensitive is True:
-            self._btncancel.hide()
-        else:
-            self._btncancel.show()
+        #if sensitive is True:
+        #    self._btncancel.hide()
+        #else:
+        #    self._btncancel.show()
         self._tbnewpath.set_sensitive(sensitive)
         self._tbloadfile.set_sensitive(sensitive)
         self._imgmnscan.set_sensitive(sensitive)
@@ -566,6 +541,14 @@ class MainHandler(object):
             self._tbsave.set_sensitive(False)
             self._imgmnsaveas.set_sensitive(False)
 
+    def load_catalog_from_filename(self, filename):
+        self._tvhandler.clear_stores()
+        self.set_buttons_sensitivity(False)
+        self._tvhandler.add_to_viewport()
+        self._dbmanager = DBManager(self, self._tvhandler)
+        self._dbmanager.create_connection(filename)
+        self._tvhandler.dbmanager = self._dbmanager
+        self._tvhandler.print_output()
     #################################
     #Callbacks
     #################################
@@ -593,7 +576,7 @@ class MainHandler(object):
         response = opendialog.run()
         if response == gtk.RESPONSE_OK:
             self._tvhandler.clear_stores()
-            self._infopane.hide()
+            #self._infopane.hide()
             #if self._entrysearch.get_text() != "":
                 #self._entrysearch.set_text("")
                 #self.entrysearch_changed_cb(self._entrysearch)
@@ -631,6 +614,7 @@ class MainHandler(object):
                 PlainTextWriter(savedialog.get_filename(), self._root)
         savedialog.destroy()
 
+
     def tbloadfile_clicked_cb(self, widget):
         """Shows the "Load" dialog."""
         opendialog = \
@@ -642,17 +626,17 @@ class MainHandler(object):
                                          gtk.STOCK_OK, gtk.RESPONSE_OK))
         response = opendialog.run()
         if response == gtk.RESPONSE_OK:
-            self._infopane.hide()
-            self._tvhandler.clear_stores()
-            binreader = BinaryReader(opendialog.get_filename())
-            opendialog.destroy()
+            filename = opendialog.get_filename()
+            self.load_catalog_from_filename(filename)
             if hasattr(self, "_searchhandler"):
                 self._searchhandler.destroy(self._window)
-            self._root = binreader.get_root()
-            self._tvhandler.root = self._root
-            self._tvhandler.print_output()
+            opendialog.destroy()
 
-    def entrysearch_changed_cb(self, widget):
+            #self._root = binreader.get_root()
+            #self._tvhandler.root = self._root
+
+
+    #def entrysearch_changed_cb(self, widget):
         """Callback used for the filtering text entry."""
         #self._tmfdirtree.refilter()
         #self.generate_file_list(self._currentnode,
@@ -674,8 +658,7 @@ class MainHandler(object):
         self._dbmanager.stop = True
         self._pbar.set_text("Indexing process of " + self._path +
                             " cancelled.")
-        gobject.timeout_add(2000, self.hide_progressbar)
-
+        gobject.timeout_add(2000, self._tvhandler.hide_progressbar)
     #Menu
     def imgmnscan_activate_cb(self, widget):
         """Redirects to "tbnew" method"""
@@ -708,9 +691,9 @@ class MainHandler(object):
     def chkmninfopane_toggled_cb(self, widget):
         """Shows/hides the info pane."""
         if widget.get_active():
-            self._infopane.show()
+            self._tvhandler.infopane.show()
         else:
-            self._infopane.hide()
+            self._tvhandler.infopane.hide()
 
     def imgmnsettings_activate_cb(self, widget):
         """Shows the options window"""
@@ -755,3 +738,7 @@ class MainHandler(object):
     def _configure(self, widget, event):
         """Configure event callback, used to store the window size"""
         SETTINGS.windowsize = (event.width, event.height)
+
+    def tvscanlist_row_activated_cb(self, tvsl, path, view_column):
+        _iter = tvsl.get_model().get_iter(path)
+        self.load_catalog_from_filename(self._lsscanlist.get(_iter, 2)[0])

@@ -29,8 +29,9 @@ CATALOGDIR = HOMEDIR + "/catalogs/"
 
 class DBManager(object):
 
-    def __init__(self, mainhandler):
+    def __init__(self, mainhandler, tvhandler):
         self._mainhandler = mainhandler
+        self._tvhandler = tvhandler
 
     #################################
     #Propeties
@@ -62,17 +63,21 @@ class DBManager(object):
     #################################
     #Methods
     #################################
-    def index_new_dir(self, path, mainhandler):
+
+    def create_connection(self, file_str):
+        con_str = "sqlite://" + file_str
+        self._scanningcatalog = file_str
+        self._conn = connectionForURI(con_str)
+
+    def index_new_dir(self, path):
         if self._check_if_was_scanned(path) is True:
             date = datetime.datetime.fromtimestamp(time.time()).\
                     strftime("%Y.%m.%d-%H.%M.%S")
             file_str = CATALOGDIR + os.path.basename(path) + ".-." + date \
                         + ".db"
-            con_str = "sqlite://" + file_str
-            self._scanningcatalog = file_str
-            self._conn = connectionForURI(con_str)
-            self._factory = Factory(self._conn)
-            self._indexer = Indexer(path, mainhandler.pbar, mainhandler,
+            self.create_connection(file_str)
+            self._factory = Factory(self)
+            self._indexer = Indexer(path, self._tvhandler.pbar, self._tvhandler,
                                     self._factory)
             return True
         else:
@@ -129,13 +134,13 @@ class DBManager(object):
         return self._indexer.start_indexing()
 
     def create_metadir(self):
-        rootselect = Directory.select(Directory.q.relpath == "/",
-                                      connection = self._conn)
-        root = rootselect[0]
-        self._factory.new_metadir(self._indexer.path,
-                                  self._indexer.countfiles,
-                                  self._indexer.countdirs, root.size,
-                                  root.strsize)
+        metadircount = MetaDir.select(connection = self._conn).count()
+        if not metadircount == 1:
+            root = Directory.select(Directory.q.strabs == self._indexer.path, connection = self._conn).getOne()
+            self._factory.new_metadir(self._indexer.path,
+                                      self._indexer.countfiles,
+                                      self._indexer.countdirs, root.size,
+                                      root.strsize, root.name)
 
     def get_time_consumed(self):
         return self._indexer.timer

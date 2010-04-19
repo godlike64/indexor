@@ -20,7 +20,7 @@ import gobject
 
 #import fs.entries
 from fs.entities import MetaDir, File, Directory, Video, Audio, Photo
-from constants import ICONS, MIMES
+from constants import ICONS, MIMES, SEPARATOR
 from logic.midput import SETTINGS
 
 class TVHandler(object):
@@ -31,11 +31,14 @@ class TVHandler(object):
     to keep things tidy.
     """
 
-    def __init__(self, mainhandler, wtree):
+    def __init__(self, mainhandler):
         self._dbmanager = None
         self._root = None
-        self._wtree = wtree
+        self._wtree = gtk.Builder()
+        self._wtree.add_from_file("view/scan.glade")
+        self._wtree.connect_signals(self)
         self._mainhandler = mainhandler
+        self._scanframe = self._wtree.get_object("scanframe")
         self._pbar = self._wtree.get_object("pbar")
         self._btncancel = self._wtree.get_object("btncancel")
         self._tbsavetree = self._wtree.get_object("tbsave")
@@ -43,7 +46,7 @@ class TVHandler(object):
         self._entrysearch = self._wtree.get_object("entrysearch")
         self._tsdirtree = gtk.TreeStore(str, str, str)
         self._tmfdirtree = self._tsdirtree.filter_new()
-        self._tmfdirtree.set_visible_func(self._mainhandler.search_in_dirtree)
+        #self._tmfdirtree.set_visible_func(self._mainhandler.search_in_dirtree)
         self._tvdirtree.set_model(self._tmfdirtree)
         self._crpdirtree = gtk.CellRendererPixbuf()
         self._crnamefilelist = gtk.CellRendererText()
@@ -55,7 +58,7 @@ class TVHandler(object):
         self._tvfilelist = self._wtree.get_object("tvfilelist")
         self._lsfilelist = gtk.ListStore(gtk.gdk.Pixbuf, str, str, str)
         self._tmffilelist = self._lsfilelist.filter_new()
-        self._tmffilelist.set_visible_func(self._mainhandler.search_in_filelist)
+        #self._tmffilelist.set_visible_func(self._mainhandler.search_in_filelist)
         self._tvfilelist.set_model(self._tmffilelist)
         self._crpfilelist = gtk.CellRendererPixbuf()
         self._crnamefilelist = gtk.CellRendererText()
@@ -69,6 +72,10 @@ class TVHandler(object):
         self._tvcolnamefl.add_attribute(self._crnamefilelist, 'text', 1)
         self._tvcolsizefl.add_attribute(self._crsizefilelist, 'text', 2)
         self._tvfilelist.columns_autosize()
+        self._hbpbar = self._wtree.get_object("hbpbar")
+        self._load_infopane_variables()
+        self._hplistpane.set_position(SETTINGS.infopanesize)
+        self._hide_after_shown()
 
     #################################
     #Properties
@@ -111,16 +118,98 @@ class TVHandler(object):
         """Property"""
         return self._tmffilelist
 
+    def get_pbar(self):
+        return self._pbar
+
+    def get_infopane(self):
+        return self._infopane
+
     root = property(get_root, set_root)
     dbmanager = property(get_dbmanager, set_dbmanager)
     tmfdirtree = property(get_tmfdirtree)
     lsfilelist = property(get_lsfilelist, set_lsfilelist)
     tvdirtree = property(get_tvdirtree)
     tmffilelist = property(get_tmffilelist)
+    pbar = property(get_pbar)
+    infopane = property(get_infopane)
 
     #################################
     #Methods  
     #################################
+    def add_to_viewport(self):
+        if len(self._mainhandler.vwpscan.get_children()) == 0:
+            self._mainhandler.vwpscan.add(self._scanframe)
+        self.clear_stores()
+
+    def _load_infopane_variables(self):
+        """Create the objects needed for info pane handling."""
+        #Pane and tables
+        self._vwpinfoimg = self._wtree.get_object("vwpinfoimg")
+        self._infopane = self._wtree.get_object("swinfopane")
+        self._geninfo = self._wtree.get_object("tblgeninfo")
+        self._tblinfoabspath = self._wtree.get_object("tblinfoabspath")
+        self._tblinforelpath = self._wtree.get_object("tblinforelpath")
+        self._tblinfosize = self._wtree.get_object("tblinfosize")
+        self._tblinfomime = self._wtree.get_object("tblinfomime")
+        self._tblinfoatime = self._wtree.get_object("tblinfoatime")
+        self._tblinfomtime = self._wtree.get_object("tblinfomtime")
+        self._tblmediainfo = self._wtree.get_object("tblmediainfo")
+        self._tblvideoinfo = self._wtree.get_object("tblvideoinfo")
+        self._tblvideocodec = self._wtree.get_object("tblvideocodec")
+        self._tblvideobitrate = self._wtree.get_object("tblvideobitrate")
+        self._tblvideores = self._wtree.get_object("tblvideores")
+        self._tblvideofps = self._wtree.get_object("tblvideofps")
+        self._tblvideoar = self._wtree.get_object("tblvideoar")
+        self._tblaudioinfo = self._wtree.get_object("tblaudioinfo")
+        self._tblaudiobitrate = self._wtree.get_object("tblaudiobitrate")
+        self._tblaudiosample = self._wtree.get_object("tblaudiosample")
+        self._tblaudiocodec = self._wtree.get_object("tblaudiocodec")
+        self._tblaudiochan = self._wtree.get_object("tblaudiochan")
+        self._tblaudiochaninfo = self._wtree.get_object("tblaudiochan")
+        self._tblsubinfo = self._wtree.get_object("tblsubinfo")
+        self._tblsublangs = self._wtree.get_object("tblsublangs")
+        self._tblimginfo = self._wtree.get_object("tblimginfo")
+        self._tblimgres = self._wtree.get_object("tblimgres")
+        self._tblimgdate = self._wtree.get_object("tblimgdate")
+        self._tblimgauthor = self._wtree.get_object("tblimgauthor")
+        self._tblimgsoft = self._wtree.get_object("tblimgsoft")
+        self._tblmedialength = self._wtree.get_object("tblmedialength")
+        #Labels
+        self._lblinfoname = self._wtree.get_object("lblinfoname")
+        self._lblinfoabspath = self._wtree.get_object("lblinfoabspath")
+        self._lblinforelpath = self._wtree.get_object("lblinforelpath")
+        self._lblinfosize = self._wtree.get_object("lblinfosize")
+        self._lblinfomime = self._wtree.get_object("lblinfomime")
+        self._lblinfoatime = self._wtree.get_object("lblinfoatime")
+        self._lblinfomtime = self._wtree.get_object("lblinfomtime")
+        self._lblmedialength = self._wtree.get_object("lblmedialength")
+        self._lblvideocodec = self._wtree.get_object("lblvideocodec")
+        self._lblvideobitrate = self._wtree.get_object("lblvideobitrate")
+        self._lblvideores = self._wtree.get_object("lblvideores")
+        self._lblvideofps = self._wtree.get_object("lblvideofps")
+        self._lblvideoar = self._wtree.get_object("lblvideoar")
+        self._lblaudiobitrate = self._wtree.get_object("lblaudiobitrate")
+        self._lblaudiosample = self._wtree.get_object("lblaudiosample")
+        self._lblaudiocodec = self._wtree.get_object("lblaudiocodec")
+        self._lblaudiochan = self._wtree.get_object("lblaudiochan")
+        self._lblsublangs = self._wtree.get_object("lblsublangs")
+        self._lblimgres = self._wtree.get_object("lblimgres")
+        self._lblimgdate = self._wtree.get_object("lblimgdate")
+        self._lblimgauthor = self._wtree.get_object("lblimgauthor")
+        self._lblimgsoft = self._wtree.get_object("lblimgsoft")
+        self._hptreelist = self._wtree.get_object("hptreelist")
+        self._hplistpane = self._wtree.get_object("hplistpane")
+
+    def _hide_after_shown(self):
+        """Hide things that should not be shown immediately."""
+        #self._hbpbar.hide()
+        self._infopane.hide()
+        self._tblmediainfo.hide()
+        self._tblimginfo.hide()
+        self._tblaudioinfo.hide()
+        self._tblsubinfo.hide()
+        self._tblvideoinfo.hide()
+
     def clear_stores(self):
         """Empties the stores."""
         self._tsdirtree.clear()
@@ -145,13 +234,12 @@ class TVHandler(object):
         keep it consistent.
         """
         #self._tsdirtree.clear()
-        self.clear_stores()
-        if not self._root:
-            #self._root = self._dbmanager.get_root()
-            rootselect = Directory.select(Directory.q.relpath == "/",
-                                          connection = self._conn)
-            root = rootselect[0]
-            self._root = root
+        self._dbmanager.create_metadir()
+        rootselect = Directory.select(Directory.q.relpath == "/",
+                                      connection = self._conn)
+        root = rootselect[0]
+        self._root = root
+        self._mainhandler.populate_catalog_list()
         if self._root is not None:
             self._mainhandler.root = self._root
             self._rootiter = self._tsdirtree.append(None,
@@ -162,7 +250,7 @@ class TVHandler(object):
                                                      ")",
                                                      self._root.__str__()])
             self.append_directories(self._rootiter, self._root)
-            gobject.timeout_add(2000, self._mainhandler.hide_progressbar)
+            gobject.timeout_add(2000, self.hide_progressbar)
         self._mainhandler.set_buttons_sensitivity(True)
 
 
@@ -220,7 +308,6 @@ class TVHandler(object):
         until it finds the selected node and parent. Then selects the parent
         so the node's directory is loaded in the right treeview.
         """
-        #TODO: select the node in the filelist treeview
         self._switching = None
         if self._root.parent == parent:
             for row in self._tsdirtree:
@@ -254,9 +341,145 @@ class TVHandler(object):
                 self._candidate = row.iter
             self._iterate_inside(row, activated)
 
+    def _clear_infopane(self):
+        """Hides all non-common attributes from the info pane."""
+        self._tblmediainfo.hide()
+        self._tblaudioinfo.hide()
+        self._tblaudiochaninfo.hide()
+        self._tblsubinfo.hide()
+        self._tblvideoinfo.hide()
+        self._tblimginfo.hide()
+
+    def set_infopane_content(self, node):
+        """Sets the labels of the info pane.
+        
+        This method is called each time an entry is selected in the file
+        list. Then sets the info pane labels to the correct values.
+        """
+        self._selected = node
+        self._clear_infopane()
+        self._lblinfoname.set_text(node.name)
+        self._lblinfoabspath.set_text(node.parent + SEPARATOR)
+        self._lblinforelpath.set_text(node.relpath)
+        self._lblinfosize.set_text(node.strsize)
+        self._lblinfomime.set_text(node.mimetype)
+        self._lblinfoatime.set_text(node.atime)
+        self._lblinfomtime.set_text(node.mtime)
+        if hasattr(self, "_infoimg"):
+            self._vwpinfoimg.remove(self._infoimg)
+
+        #======================================================================
+        # if isinstance(node, Directory):
+        #    self._infoimg = gtk.image_new_from_pixbuf\
+        #                        (gtk.icon_theme_get_default().\
+        #                         load_icon('folder', SETTINGS.iconpanesize,
+        #                                   gtk.ICON_LOOKUP_FORCE_SVG))
+        #    self._lblinfomime.set_text("folder")
+        #======================================================================
+        if isinstance(node, Photo):
+            self._infoimg = gtk.image_new_from_pixbuf(node.thumb)
+            self._lblimgres.set_text(node.res)
+            self._lblimgdate.set_text(node.date_taken)
+            self._lblimgauthor.set_text(node.author)
+            self._lblimgsoft.set_text(node.soft)
+            self._tblimginfo.show()
+        else:
+            if isinstance(node, Audio):
+                self._tblmediainfo.show()
+                self._tblaudioinfo.show()
+                self._lblmedialength.set_text(node.length)
+                self._lblaudiobitrate.set_text(node.bitrate)
+                self._lblaudiosample.set_text(node.samplerate)
+                self._lblaudiocodec.set_text(node.codec)
+            if isinstance(node, Video):
+                self._tblmediainfo.show()
+                self._tblaudioinfo.show()
+                self._tblaudiochaninfo.show()
+                self._tblvideoinfo.show()
+                if hasattr(node, "_sublangs"):
+                    self._tblsubinfo.show()
+                    self._lblsublangs.set_text(node.sublangs)
+                print node.length
+                self._lblmedialength.set_text(node.length)
+                self._lblvideocodec.set_text(node.videocodec)
+                self._lblvideobitrate.set_text(node.videobitrate)
+                self._lblvideores.set_text(node.videores)
+                self._lblvideofps.set_text(node.videofps)
+                self._lblvideoar.set_text(node.videoar)
+                self._lblaudiobitrate.set_text(node.audiobitrate)
+                self._lblaudiosample.set_text(node.audiosamplerate)
+                self._lblaudiocodec.set_text(node.audiocodec)
+                self._lblaudiochan.set_text(node.audiochannels)
+            self._infoimg = gtk.image_new_from_pixbuf\
+                                (gtk.icon_theme_get_default().\
+                                 load_icon(ICONS[MIMES[node.mimetype]],
+                                           SETTINGS.iconpanesize,
+                                           gtk.ICON_LOOKUP_FORCE_SVG))
+        self._infoimg.show()
+        self._vwpinfoimg.add(self._infoimg)
+        self.set_infopanes_visibility()
+
+    def set_infopanes_visibility(self):
+        """Sets the visibility of each label, according to stored settings"""
+        self._geninfo.set_property("visible", SETTINGS.geninfo)
+        self._tblinfoabspath.set_property("visible", SETTINGS.abspath)
+        self._tblinforelpath.set_property("visible", SETTINGS.relpath)
+        self._tblinfosize.set_property("visible", SETTINGS.size)
+        self._tblinfomime.set_property("visible", SETTINGS.mime)
+        self._tblinfoatime.set_property("visible", SETTINGS.atime)
+        self._tblinfomtime.set_property("visible", SETTINGS.mtime)
+        self._tblmediainfo.set_property("visible", SETTINGS.mediainfo)
+        self._tblmedialength.set_property("visible", SETTINGS.medialength)
+        self._tblvideoinfo.set_property("visible", SETTINGS.videoinfo)
+        self._tblvideocodec.set_property("visible", SETTINGS.videocodec)
+        self._tblvideobitrate.set_property("visible", SETTINGS.videobitrate)
+        self._tblvideores.set_property("visible", SETTINGS.videores)
+        self._tblvideofps.set_property("visible", SETTINGS.videofps)
+        self._tblvideoar.set_property("visible", SETTINGS.videoar)
+        self._tblaudioinfo.set_property("visible", SETTINGS.audioinfo)
+        self._tblaudiosample.set_property("visible", SETTINGS.audiosample)
+        self._tblaudiocodec.set_property("visible", SETTINGS.audiocodec)
+        self._tblaudiochan.set_property("visible", SETTINGS.audiochan)
+        self._tblsubinfo.set_property("visible", SETTINGS.subinfo)
+        self._tblsublangs.set_property("visible", SETTINGS.sublangs)
+        self._tblimginfo.set_property("visible", SETTINGS.imginfo)
+        self._tblimgres.set_property("visible", SETTINGS.imgres)
+        self._tblimgdate.set_property("visible", SETTINGS.imgdate)
+        self._tblimgauthor.set_property("visible", SETTINGS.imgauthor)
+        self._tblimgsoft.set_property("visible", SETTINGS.imgsoft)
+        if isinstance(self._selected, Audio):
+            self._tblimginfo.hide()
+            self._tblvideoinfo.hide()
+            self._tblsubinfo.hide()
+            self._tblaudiochaninfo.hide()
+        elif isinstance(self._selected, Video):
+            self._tblimginfo.hide()
+        elif isinstance(self._selected, Photo):
+            self._tblmediainfo.hide()
+            self._tblvideoinfo.hide()
+            self._tblaudioinfo.hide()
+            self._tblsubinfo.hide()
+        else:
+            self._tblimginfo.hide()
+            self._tblmediainfo.hide()
+            self._tblvideoinfo.hide()
+            self._tblaudioinfo.hide()
+            self._tblsubinfo.hide()
+
+    def hide_progressbar(self):
+        """This is refactored into a method because other classes use it"""
+        self._hbpbar.hide()
+
     #################################        
     #Callbacks
     #################################
+    def btncancel_clicked_cb(self, widget):
+        """Callback used when cancelling the indexing process"""
+        self._dbmanager.stop = True
+        self._pbar.set_text("Indexing process of " + self._path +
+                            " cancelled.")
+        gobject.timeout_add(2000, self.hide_progressbar)
+
     def tvdirtree_cursor_changed_cb(self, tvdt):
         """Callback that handles the selection in the directory treeview.
         
@@ -290,7 +513,7 @@ class TVHandler(object):
         #                                                       self._root)
         node = File.select(File.q.strabs == path, connection = self._conn)
         node = node[0]
-        self._mainhandler.set_infopane_content(node)
+        self.set_infopane_content(node)
 
     def tvfilelist_row_activated_cb(self, tvfl, path, view_column):
         """Callback that handles row activation in the file list treeview.
@@ -314,3 +537,51 @@ class TVHandler(object):
             path = self._tmfdirtree.get_path(self._candidate)
             self._tvdirtree.expand_to_path(path)
             self._tvdirtree.set_cursor(path)
+
+    #Info pane labels size fix
+    def hplistpane_size_allocate_cb(self, widget, alloc):
+        """Callback to detect a change in the info pane size."""
+        result = self.get_pane_width()
+        self.set_labels_sizes(result - 22)
+
+    def get_pane_width(self):
+        """Calculates and returns the info pane's width."""
+        firststep = self._hptreelist.get_position()
+        secondstep = self._hplistpane.get_position()
+        idle = 12
+        total = self._scanframe.get_allocation().width
+        result = total - idle - firststep - secondstep
+        return result
+
+    def set_labels_sizes(self, width):
+        """Resizes the labels so they wrap accordingly.
+        
+        This method is called each time the slider for the info pane
+        is moved.
+        """
+        if width < 200:
+            pass
+        else:
+            self._lblinfoname.set_size_request(width - 80, -1)
+            self._lblinfoabspath.set_size_request(width - 80, -1)
+            self._lblinforelpath.set_size_request(width - 80, -1)
+            self._lblinfosize.set_size_request(width - 80, -1)
+            self._lblinfomime.set_size_request(width - 80, -1)
+            self._lblinfoatime.set_size_request(width - 80, -1)
+            self._lblinfomtime.set_size_request(width - 80, -1)
+            self._lblmedialength.set_size_request(width - 80, -1)
+            self._lblvideocodec.set_size_request(width - 80, -1)
+            self._lblvideobitrate.set_size_request(width - 80, -1)
+            self._lblvideores.set_size_request(width - 80, -1)
+            self._lblvideofps.set_size_request(width - 80, -1)
+            self._lblvideoar.set_size_request(width - 80, -1)
+            self._lblaudiobitrate.set_size_request(width - 80, -1)
+            self._lblaudiosample.set_size_request(width - 80, -1)
+            self._lblaudiocodec.set_size_request(width - 80, -1)
+            self._lblaudiochan.set_size_request(width - 80, -1)
+            self._lblimgres.set_size_request(width - 80, -1)
+            self._lblimgdate.set_size_request(width - 80, -1)
+            self._lblimgauthor.set_size_request(width - 80, -1)
+            self._lblimgsoft.set_size_request(width - 80, -1)
+            self._lblsublangs.set_size_request(width - 80, -1)
+

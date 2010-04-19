@@ -33,8 +33,9 @@ from constants import ICONS, MIMES, NO_INFO, NOT_AUDIO, SEPARATOR
 
 class Factory(object):
 
-    def __init__(self, conn):
-        self._conn = conn
+    def __init__(self, dbmanager):
+        self._dbmanager = dbmanager
+        self._conn = dbmanager.conn
         MetaDir.createTable(connection = self._conn)
         File.createTable(connection = self._conn)
         Directory.createTable(connection = self._conn)
@@ -42,8 +43,19 @@ class Factory(object):
         Audio.createTable(connection = self._conn)
         Photo.createTable(connection = self._conn)
 
-    def new_metadir(self, target, files, dirs, size, strsize):
-        return MetaDir(target = target, files = files, dirs = dirs,
+#==============================================================================
+#    def get_indexer(self):
+#        return self._indexer
+# 
+#    def set_indexer(self, value):
+#        self._indexer = value
+# 
+#    indexer = property(get_indexer, set_indexer)
+#==============================================================================
+
+
+    def new_metadir(self, target, files, dirs, size, strsize, name):
+        return MetaDir(name = name, target = target, files = files, dirs = dirs,
                        size = size, strsize = strsize,
                        connection = self._conn)
 
@@ -65,11 +77,13 @@ class Factory(object):
                 strsize, strabs, isdir = True):
         atime, mtime = self._check_stat(atime, mtime)
         mimetype = "inode/folder"
-        return Directory(parent = parent, name = name, relpath = relpath,
+        _dir = Directory(parent = parent, name = name, relpath = relpath,
                          mimetype = mimetype, atime = atime, mtime = mtime,
                          size = size, strsize = strsize, isdir = isdir,
                          strabs = strabs, root = root,
                          connection = self._conn)
+        return _dir
+
 
     def new_video(self, parent, name, relpath, mimetype, atime, mtime,
                   root, size, strsize, strabs):

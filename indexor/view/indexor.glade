@@ -268,10 +268,25 @@
               </packing>
             </child>
             <child>
-              <object class="GtkViewport" id="vwpscan">
+              <object class="GtkNotebook" id="notebook">
                 <property name="visible">True</property>
-                <property name="resize_mode">queue</property>
+                <property name="can_focus">True</property>
                 <child>
+                  <placeholder/>
+                </child>
+                <child type="tab">
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child type="tab">
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child type="tab">
                   <placeholder/>
                 </child>
               </object>

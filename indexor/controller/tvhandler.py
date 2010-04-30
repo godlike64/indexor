@@ -118,6 +118,9 @@ class TVHandler(object):
         """Property"""
         return self._tmffilelist
 
+    def get_hbpbar(self):
+        return self._hbpbar
+
     def get_pbar(self):
         return self._pbar
 
@@ -130,6 +133,7 @@ class TVHandler(object):
     lsfilelist = property(get_lsfilelist, set_lsfilelist)
     tvdirtree = property(get_tvdirtree)
     tmffilelist = property(get_tmffilelist)
+    hbpbar = property(get_hbpbar)
     pbar = property(get_pbar)
     infopane = property(get_infopane)
 
@@ -137,8 +141,10 @@ class TVHandler(object):
     #Methods  
     #################################
     def add_to_viewport(self):
-        if len(self._mainhandler.vwpscan.get_children()) == 0:
-            self._mainhandler.vwpscan.add(self._scanframe)
+        vwp = gtk.Viewport()
+        vwp.add(self._scanframe)
+        vwp.show()
+        self._mainhandler.notebook.append_page(vwp, gtk.Label("1"))
         self.clear_stores()
 
     def _load_infopane_variables(self):

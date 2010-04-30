@@ -85,7 +85,8 @@ class MainHandler(object):
         self._tbnewpath = self._wtree.get_object("tbnewpath")
         self._tbsave = self._wtree.get_object("tbsave")
         self._tbloadfile = self._wtree.get_object("tbloadfile")
-        self._vwpscan = self._wtree.get_object("vwpscan")
+        #self._vwpscan = self._wtree.get_object("vwpscan")
+        self._notebook = self._wtree.get_object("notebook")
 
         self._hpscanlist = self._wtree.get_object("hpscanlist")
         self._tvscanlist = self._wtree.get_object("tvscanlist")
@@ -163,8 +164,11 @@ class MainHandler(object):
     def get_pbar(self):
         return self._pbar
 
-    def get_vwpscan(self):
-        return self._vwpscan
+    #def get_vwpscan(self):
+    #    return self._vwpscan
+
+    def get_notebook(self):
+        return self._notebook
 
     currentpath = property(get_currentpath, set_currentpath)
     currentnode = property(get_currentnode, set_currentnode)
@@ -173,7 +177,8 @@ class MainHandler(object):
     chkmnlog = property(get_chkmnlog)
     window = property(get_window)
     pbar = property(get_pbar)
-    vwpscan = property(get_vwpscan)
+    notebook = property(get_notebook)
+    #vwpscan = property(get_vwpscan)
 
     #################################
     #Methods
@@ -390,6 +395,8 @@ class MainHandler(object):
         if (self._path is not None):
             self.set_buttons_sensitivity(False)
             self._tvhandler.add_to_viewport()
+            self._tvhandler.pbar.set_text("")
+            self._tvhandler.hbpbar.show()
             self._dbmanager = DBManager(self, self._tvhandler)
             if self._dbmanager.index_new_dir(self._path) is True:
                 fscountthread = self._dbmanager.start_counting()
@@ -552,17 +559,19 @@ class MainHandler(object):
     #################################
     #Callbacks
     #################################
-    def tvdirtree_cursor_changed_cb(self, tvdt):
-        """Callback redirected to TVHandler."""
-        self._tvhandler.tvdirtree_cursor_changed_cb(tvdt)
-
-    def tvfilelist_cursor_changed_cb(self, tvfl):
-        """Callback redirected to TVHandler."""
-        self._tvhandler.tvfilelist_cursor_changed_cb(tvfl)
-
-    def tvfilelist_row_activated_cb(self, tvdt, path, view_column):
-        """Callback redirected to TVHandler."""
-        self._tvhandler.tvfilelist_row_activated_cb(tvdt, path, view_column)
+#===============================================================================
+#    def tvdirtree_cursor_changed_cb(self, tvdt):
+#        """Callback redirected to TVHandler."""
+#        self._tvhandler.tvdirtree_cursor_changed_cb(tvdt)
+# 
+#    def tvfilelist_cursor_changed_cb(self, tvfl):
+#        """Callback redirected to TVHandler."""
+#        self._tvhandler.tvfilelist_cursor_changed_cb(tvfl)
+# 
+#    def tvfilelist_row_activated_cb(self, tvdt, path, view_column):
+#        """Callback redirected to TVHandler."""
+#        self._tvhandler.tvfilelist_row_activated_cb(tvdt, path, view_column)
+#===============================================================================
 
     def tbnewpath_clicked_cb(self, widget):
         """Shows the "New Path" dialog."""

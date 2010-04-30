@@ -32,8 +32,8 @@ def find_data_files(srcdir, *wildcards, **kw):
             for f in files:
                 filename = opj(dirname, f)
 
-                if fnmatch.fnmatch(filename, wc_name) and not
-                os.path.isdir(filename):
+                if fnmatch.fnmatch(filename, wc_name) and not\
+                    os.path.isdir(filename):
                     names.append(filename)
         if names:
             lst.append((dirname, names))

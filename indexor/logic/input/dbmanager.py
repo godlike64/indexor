@@ -56,9 +56,16 @@ class DBManager(object):
     def get_conn(self):
         return self._conn
 
+    def get_tvhandler(self):
+        return self._tvhandler
+
+    def set_tvhandler(self, value):
+        self._tvhandler = value
+
     stop = property(get_stop, set_stop)
     indexer = property(get_indexer, set_indexer)
     conn = property(get_conn)
+    tvhandler = property(get_tvhandler, set_tvhandler)
 
     #################################
     #Methods
@@ -148,4 +155,12 @@ class DBManager(object):
     def reload_connection(self):
         self._conn.close()
         self._conn = connectionForURI("sqlite://" + self._scanningcatalog)
+
+def get_scanned_path_from_catalog(entry):
+    con_str = "sqlite://" + entry
+    conn = connectionForURI(con_str)
+    metadircount = MetaDir.select(connection = conn).count()
+    if metadircount > 0:
+        return MetaDir.select(connection = conn)[0].target
+    #return metadir.target == path
 

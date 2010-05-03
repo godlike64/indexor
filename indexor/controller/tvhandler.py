@@ -16,6 +16,7 @@
 """Module for the handler of the treeviews"""
 
 import gtk
+import pango
 import gobject
 
 #import fs.entries
@@ -31,7 +32,8 @@ class TVHandler(object):
     to keep things tidy.
     """
 
-    def __init__(self, mainhandler):
+    def __init__(self, mainhandler, path):
+        self._path = path
         self._dbmanager = None
         self._root = None
         self._wtree = gtk.Builder()
@@ -76,6 +78,10 @@ class TVHandler(object):
         self._load_infopane_variables()
         self._hplistpane.set_position(SETTINGS.infopanesize)
         self._hide_after_shown()
+        if self._mainhandler.chkmninfopane.get_active() is True:
+            self._infopane.show()
+        else:
+            self._infopane.hide()
 
     #################################
     #Properties
@@ -127,6 +133,9 @@ class TVHandler(object):
     def get_infopane(self):
         return self._infopane
 
+    def get_path(self):
+        return self._path
+
     root = property(get_root, set_root)
     dbmanager = property(get_dbmanager, set_dbmanager)
     tmfdirtree = property(get_tmfdirtree)
@@ -136,6 +145,7 @@ class TVHandler(object):
     hbpbar = property(get_hbpbar)
     pbar = property(get_pbar)
     infopane = property(get_infopane)
+    path = property(get_path)
 
     #################################
     #Methods  
@@ -144,7 +154,22 @@ class TVHandler(object):
         vwp = gtk.Viewport()
         vwp.add(self._scanframe)
         vwp.show()
-        self._mainhandler.notebook.append_page(vwp, gtk.Label("1"))
+        hbox = gtk.HBox(False, 2)
+        label = gtk.Label(self._path)
+        label.set_ellipsize(pango.ELLIPSIZE_MIDDLE)
+        label.set_width_chars(30)
+        hbox.pack_start(label, False)
+        button = gtk.Button()
+        button.connect("clicked", self._mainhandler.tabbtn_clicked_cb, self)
+        button.set_relief(gtk.RELIEF_NONE)
+        pixbuf = gtk.icon_theme_get_default().load_icon("process-stop", 16,
+                                   gtk.ICON_LOOKUP_NO_SVG)
+        image = gtk.image_new_from_pixbuf(pixbuf)
+        button.set_image(image)
+        hbox.pack_start(button, False)
+        hbox.show_all()
+        index = self._mainhandler.notebook.append_page(vwp, hbox)
+        self._mainhandler.notebook.set_current_page(index)
         self.clear_stores()
 
     def _load_infopane_variables(self):
@@ -208,7 +233,7 @@ class TVHandler(object):
 
     def _hide_after_shown(self):
         """Hide things that should not be shown immediately."""
-        #self._hbpbar.hide()
+        self._hbpbar.hide()
         self._infopane.hide()
         self._tblmediainfo.hide()
         self._tblimginfo.hide()
@@ -230,6 +255,39 @@ class TVHandler(object):
             _iter = self._tsdirtree.append(piter, ['folder', dirchild.name,
                                        dirchild.__str__()])
             self.append_directories(_iter, dirchild)
+
+    def check_if_counting_finished(self, fscountthread):
+        """Checks if the counting process finished.
+        
+        If Indexor has finished counting files, starts indexing them.
+        Called from gobject.timeout_add.
+        """
+        if not fscountthread.is_alive():
+            fsindexthread = self._dbmanager.start_indexing()
+            gobject.timeout_add(500, self.check_if_indexing_finished,
+                                fsindexthread)
+            return False
+        else:
+            return True
+
+    def check_if_indexing_finished(self, fsindexthread):
+        """Checks if the indexing process finished.
+        
+        If Indexor has finished indexing files, orders the TVHandler
+        to populate the treeviews. Called from gobject.timeout_add.
+        """
+        if not fsindexthread.is_alive():
+            self._root = None
+            #self._dbmanager.close_transaction()
+            #self._dbmanager.reload_connection()
+            #self._tvhandler.dbmanager = self._dbmanager
+            #self._dbmanager.create_metadir()
+            self.print_output()
+            print "Total time consumed: " + str(self._dbmanager.\
+                                                get_time_consumed()) + " ms."
+            return False
+        else:
+            return True
 
     def print_output(self):
         """Populates the directory tree treestore.

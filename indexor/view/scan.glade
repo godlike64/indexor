@@ -1269,6 +1269,7 @@
           <object class="GtkProgressBar" id="pbar">
             <property name="height_request">25</property>
             <property name="visible">True</property>
+            <property name="ellipsize">middle</property>
           </object>
           <packing>
             <property name="position">0</property>

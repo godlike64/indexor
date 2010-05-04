@@ -280,6 +280,17 @@ class MainHandler(object):
             tvhandler.add_to_viewport()
             tvhandler.print_output()
 
+
+    def set_infopanes_visibility(self, value):
+        if value is None:
+            value = self._chkmninfopane.get_active()
+        if value is True:
+            for tvhandler in self._tvhandlers:
+                tvhandler.infopane.show()
+        else:
+            for tvhandler in self._tvhandlers:
+                tvhandler.infopane.hide()
+
     #################################
     #Callbacks
     #################################
@@ -393,12 +404,7 @@ class MainHandler(object):
 
     def chkmninfopane_toggled_cb(self, widget):
         """Shows/hides the info pane."""
-        if widget.get_active() is True:
-            for tvhandler in self._tvhandlers:
-                tvhandler.infopane.show()
-        else:
-            for tvhandler in self._tvhandlers:
-                tvhandler.infopane.hide()
+        self.set_infopanes_visibility(widget.get_active())
 
     def imgmnsettings_activate_cb(self, widget):
         """Shows the options window"""

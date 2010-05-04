@@ -36,6 +36,7 @@ class TVHandler(object):
         self._path = path
         self._dbmanager = None
         self._root = None
+        self._is_scanning = False
         self._wtree = gtk.Builder()
         self._wtree.add_from_file("view/scan.glade")
         self._wtree.connect_signals(self)
@@ -48,7 +49,6 @@ class TVHandler(object):
         self._entrysearch = self._wtree.get_object("entrysearch")
         self._tsdirtree = gtk.TreeStore(str, str, str)
         self._tmfdirtree = self._tsdirtree.filter_new()
-        #self._tmfdirtree.set_visible_func(self._mainhandler.search_in_dirtree)
         self._tvdirtree.set_model(self._tmfdirtree)
         self._crpdirtree = gtk.CellRendererPixbuf()
         self._crnamefilelist = gtk.CellRendererText()
@@ -60,7 +60,6 @@ class TVHandler(object):
         self._tvfilelist = self._wtree.get_object("tvfilelist")
         self._lsfilelist = gtk.ListStore(gtk.gdk.Pixbuf, str, str, str)
         self._tmffilelist = self._lsfilelist.filter_new()
-        #self._tmffilelist.set_visible_func(self._mainhandler.search_in_filelist)
         self._tvfilelist.set_model(self._tmffilelist)
         self._crpfilelist = gtk.CellRendererPixbuf()
         self._crnamefilelist = gtk.CellRendererText()
@@ -136,6 +135,12 @@ class TVHandler(object):
     def get_path(self):
         return self._path
 
+    def get_is_scanning(self):
+        return self._is_scanning
+
+    def set_is_scanning(self, value):
+        self._is_scanning = value
+
     root = property(get_root, set_root)
     dbmanager = property(get_dbmanager, set_dbmanager)
     tmfdirtree = property(get_tmfdirtree)
@@ -146,6 +151,7 @@ class TVHandler(object):
     pbar = property(get_pbar)
     infopane = property(get_infopane)
     path = property(get_path)
+    is_scanning = property(get_is_scanning, set_is_scanning)
 
     #################################
     #Methods  
@@ -278,10 +284,6 @@ class TVHandler(object):
         """
         if not fsindexthread.is_alive():
             self._root = None
-            #self._dbmanager.close_transaction()
-            #self._dbmanager.reload_connection()
-            #self._tvhandler.dbmanager = self._dbmanager
-            #self._dbmanager.create_metadir()
             self.print_output()
             print "Total time consumed: " + str(self._dbmanager.\
                                                 get_time_consumed()) + " ms."
@@ -297,7 +299,7 @@ class TVHandler(object):
         indexing process. Then does the needed thingies in the GUI to
         keep it consistent.
         """
-        #self._tsdirtree.clear()
+        self._is_scanning = False
         self._dbmanager.create_metadir()
         rootselect = Directory.select(Directory.q.relpath == "/",
                                       connection = self._conn)
@@ -328,11 +330,6 @@ class TVHandler(object):
         """
         lsfl.clear()
         for dirchild in parent.dirs:
-
-            #gtk.icon_theme_get_default().\
-            #load_icon(ICONS[MIMES[self._mimetype]]
-
-
             lsfl.append([gtk.icon_theme_get_default().\
                          load_icon(ICONS[MIMES[dirchild.mimetype]],
                                    SETTINGS.iconlistsize,
@@ -351,18 +348,6 @@ class TVHandler(object):
                                        gtk.ICON_LOOKUP_FORCE_SVG),
                                        filechild.name, filechild.strsize,
                                        filechild.__str__()])
-        #======================================================================
-        # else:
-        #    text = self._entrysearch.get_text()
-        #    for dirchild in parent.dirs:
-        #        if self._mainhandler.find_cased_string(dirchild.name, text):
-        #            lsfl.append([dirchild.icon, dirchild.name,
-        #                         dirchild.strsize, dirchild.__str__()])
-        #    for filechild in parent.files:
-        #        if self._mainhandler.find_cased_string(filechild.name, text):
-        #            lsfl.append([filechild.icon, filechild.name,
-        #                      filechild.strsize, filechild.__str__()])
-        #======================================================================
 
     def switch_to_node_from_fs_path(self, fs_path, parent):
         """Switch to a node in the structure with a given fs path.
@@ -542,7 +527,8 @@ class TVHandler(object):
         self._dbmanager.stop = True
         self._pbar.set_text("Indexing process of " + self._path +
                             " cancelled.")
-        gobject.timeout_add(2000, self.hide_progressbar)
+        gobject.timeout_add(1000, self.hide_progressbar)
+        gobject.timeout_add(2000, self._mainhandler.remove_scan, self)
 
     def tvdirtree_cursor_changed_cb(self, tvdt):
         """Callback that handles the selection in the directory treeview.

@@ -199,189 +199,6 @@ class MainHandler(object):
         LOADER.save_settings()
         gtk.main_quit()
 
-    #===========================================================================
-    # def _load_infopane_variables(self):
-    #    """Create the objects needed for info pane handling."""
-    #    #Pane and tables
-    #    self._vwpinfoimg = self._wtree.get_object("vwpinfoimg")
-    #    self._infopane = self._wtree.get_object("swinfopane")
-    #    self._geninfo = self._wtree.get_object("tblgeninfo")
-    #    self._tblinfoabspath = self._wtree.get_object("tblinfoabspath")
-    #    self._tblinforelpath = self._wtree.get_object("tblinforelpath")
-    #    self._tblinfosize = self._wtree.get_object("tblinfosize")
-    #    self._tblinfomime = self._wtree.get_object("tblinfomime")
-    #    self._tblinfoatime = self._wtree.get_object("tblinfoatime")
-    #    self._tblinfomtime = self._wtree.get_object("tblinfomtime")
-    #    self._tblmediainfo = self._wtree.get_object("tblmediainfo")
-    #    self._tblvideoinfo = self._wtree.get_object("tblvideoinfo")
-    #    self._tblvideocodec = self._wtree.get_object("tblvideocodec")
-    #    self._tblvideobitrate = self._wtree.get_object("tblvideobitrate")
-    #    self._tblvideores = self._wtree.get_object("tblvideores")
-    #    self._tblvideofps = self._wtree.get_object("tblvideofps")
-    #    self._tblvideoar = self._wtree.get_object("tblvideoar")
-    #    self._tblaudioinfo = self._wtree.get_object("tblaudioinfo")
-    #    self._tblaudiobitrate = self._wtree.get_object("tblaudiobitrate")
-    #    self._tblaudiosample = self._wtree.get_object("tblaudiosample")
-    #    self._tblaudiocodec = self._wtree.get_object("tblaudiocodec")
-    #    self._tblaudiochan = self._wtree.get_object("tblaudiochan")
-    #    self._tblaudiochaninfo = self._wtree.get_object("tblaudiochan")
-    #    self._tblsubinfo = self._wtree.get_object("tblsubinfo")
-    #    self._tblsublangs = self._wtree.get_object("tblsublangs")
-    #    self._tblimginfo = self._wtree.get_object("tblimginfo")
-    #    self._tblimgres = self._wtree.get_object("tblimgres")
-    #    self._tblimgdate = self._wtree.get_object("tblimgdate")
-    #    self._tblimgauthor = self._wtree.get_object("tblimgauthor")
-    #    self._tblimgsoft = self._wtree.get_object("tblimgsoft")
-    #    self._tblmedialength = self._wtree.get_object("tblmedialength")
-    #    #Labels
-    #    self._lblinfoname = self._wtree.get_object("lblinfoname")
-    #    self._lblinfoabspath = self._wtree.get_object("lblinfoabspath")
-    #    self._lblinforelpath = self._wtree.get_object("lblinforelpath")
-    #    self._lblinfosize = self._wtree.get_object("lblinfosize")
-    #    self._lblinfomime = self._wtree.get_object("lblinfomime")
-    #    self._lblinfoatime = self._wtree.get_object("lblinfoatime")
-    #    self._lblinfomtime = self._wtree.get_object("lblinfomtime")
-    #    self._lblmedialength = self._wtree.get_object("lblmedialength")
-    #    self._lblvideocodec = self._wtree.get_object("lblvideocodec")
-    #    self._lblvideobitrate = self._wtree.get_object("lblvideobitrate")
-    #    self._lblvideores = self._wtree.get_object("lblvideores")
-    #    self._lblvideofps = self._wtree.get_object("lblvideofps")
-    #    self._lblvideoar = self._wtree.get_object("lblvideoar")
-    #    self._lblaudiobitrate = self._wtree.get_object("lblaudiobitrate")
-    #    self._lblaudiosample = self._wtree.get_object("lblaudiosample")
-    #    self._lblaudiocodec = self._wtree.get_object("lblaudiocodec")
-    #    self._lblaudiochan = self._wtree.get_object("lblaudiochan")
-    #    self._lblsublangs = self._wtree.get_object("lblsublangs")
-    #    self._lblimgres = self._wtree.get_object("lblimgres")
-    #    self._lblimgdate = self._wtree.get_object("lblimgdate")
-    #    self._lblimgauthor = self._wtree.get_object("lblimgauthor")
-    #    self._lblimgsoft = self._wtree.get_object("lblimgsoft")
-    #    self._hptreelist = self._wtree.get_object("hptreelist")
-    #    self._hplistpane = self._wtree.get_object("hplistpane")
-    #===========================================================================
-
-    #===========================================================================
-    # def set_labels_sizes(self, width):
-    #    """Resizes the labels so they wrap accordingly.
-    #    
-    #    This method is called each time the slider for the info pane
-    #    is moved.
-    #    """
-    #    if width < 200:
-    #        pass
-    #    else:
-    #        self._lblinfoname.set_size_request(width - 80, -1)
-    #        self._lblinfoabspath.set_size_request(width - 80, -1)
-    #        self._lblinforelpath.set_size_request(width - 80, -1)
-    #        self._lblinfosize.set_size_request(width - 80, -1)
-    #        self._lblinfomime.set_size_request(width - 80, -1)
-    #        self._lblinfoatime.set_size_request(width - 80, -1)
-    #        self._lblinfomtime.set_size_request(width - 80, -1)
-    #        self._lblmedialength.set_size_request(width - 80, -1)
-    #        self._lblvideocodec.set_size_request(width - 80, -1)
-    #        self._lblvideobitrate.set_size_request(width - 80, -1)
-    #        self._lblvideores.set_size_request(width - 80, -1)
-    #        self._lblvideofps.set_size_request(width - 80, -1)
-    #        self._lblvideoar.set_size_request(width - 80, -1)
-    #        self._lblaudiobitrate.set_size_request(width - 80, -1)
-    #        self._lblaudiosample.set_size_request(width - 80, -1)
-    #        self._lblaudiocodec.set_size_request(width - 80, -1)
-    #        self._lblaudiochan.set_size_request(width - 80, -1)
-    #        self._lblimgres.set_size_request(width - 80, -1)
-    #        self._lblimgdate.set_size_request(width - 80, -1)
-    #        self._lblimgauthor.set_size_request(width - 80, -1)
-    #        self._lblimgsoft.set_size_request(width - 80, -1)
-    #        self._lblsublangs.set_size_request(width - 80, -1)
-    #===========================================================================
-
-
-    #==========================================================================
-    # def _clear_infopane(self):
-    #    """Hides all non-common attributes from the info pane."""
-    #    self._tblmediainfo.hide()
-    #    self._tblaudioinfo.hide()
-    #    self._tblaudiochaninfo.hide()
-    #    self._tblsubinfo.hide()
-    #    self._tblvideoinfo.hide()
-    #    self._tblimginfo.hide()
-    #==========================================================================
-
-#==============================================================================
-#    def set_infopane_content(self, node):
-#        """Sets the labels of the info pane.
-#        
-#        This method is called each time an entry is selected in the file
-#        list. Then sets the info pane labels to the correct values.
-#        """
-#        self._selected = node
-#        self._clear_infopane()
-#        self._lblinfoname.set_text(node.name)
-#        self._lblinfoabspath.set_text(node.parent + SEPARATOR)
-#        self._lblinforelpath.set_text(node.relpath)
-#        self._lblinfosize.set_text(node.strsize)
-#        self._lblinfomime.set_text(node.mimetype)
-#        self._lblinfoatime.set_text(node.atime)
-#        self._lblinfomtime.set_text(node.mtime)
-#        if hasattr(self, "_infoimg"):
-#            self._vwpinfoimg.remove(self._infoimg)
-# 
-#        #======================================================================
-#        # if isinstance(node, Directory):
-#        #    self._infoimg = gtk.image_new_from_pixbuf\
-#        #                        (gtk.icon_theme_get_default().\
-#        #                         load_icon('folder', SETTINGS.iconpanesize,
-#        #                                   gtk.ICON_LOOKUP_FORCE_SVG))
-#        #    self._lblinfomime.set_text("folder")
-#        #======================================================================
-#        if isinstance(node, Photo):
-#            self._infoimg = gtk.image_new_from_pixbuf(node.thumb)
-#            self._lblimgres.set_text(node.res)
-#            self._lblimgdate.set_text(node.date_taken)
-#            self._lblimgauthor.set_text(node.author)
-#            self._lblimgsoft.set_text(node.soft)
-#            self._tblimginfo.show()
-#        else:
-#            if isinstance(node, Audio):
-#                self._tblmediainfo.show()
-#                self._tblaudioinfo.show()
-#                self._lblmedialength.set_text(node.length)
-#                self._lblaudiobitrate.set_text(node.bitrate)
-#                self._lblaudiosample.set_text(node.samplerate)
-#                self._lblaudiocodec.set_text(node.codec)
-#            if isinstance(node, Video):
-#                self._tblmediainfo.show()
-#                self._tblaudioinfo.show()
-#                self._tblaudiochaninfo.show()
-#                self._tblvideoinfo.show()
-#                if hasattr(node, "_sublangs"):
-#                    self._tblsubinfo.show()
-#                    self._lblsublangs.set_text(node.sublangs)
-#                print node.length
-#                self._lblmedialength.set_text(node.length)
-#                self._lblvideocodec.set_text(node.videocodec)
-#                self._lblvideobitrate.set_text(node.videobitrate)
-#                self._lblvideores.set_text(node.videores)
-#                self._lblvideofps.set_text(node.videofps)
-#                self._lblvideoar.set_text(node.videoar)
-#                self._lblaudiobitrate.set_text(node.audiobitrate)
-#                self._lblaudiosample.set_text(node.audiosamplerate)
-#                self._lblaudiocodec.set_text(node.audiocodec)
-#                self._lblaudiochan.set_text(node.audiochannels)
-#            self._infoimg = gtk.image_new_from_pixbuf\
-#                                (gtk.icon_theme_get_default().\
-#                                 load_icon(ICONS[MIMES[node.mimetype]],
-#                                           SETTINGS.iconpanesize,
-#                                           gtk.ICON_LOOKUP_FORCE_SVG))
-#        self._infoimg.show()
-#        self._vwpinfoimg.add(self._infoimg)
-#        self.set_infopanes_visibility()
-#==============================================================================
-
-    #===========================================================================
-    # def set_infopanes_visibility(self):
-    #    self._tvhandler.set_infopanes_visibility()
-    #===========================================================================
-
     def get_pane_width(self):
         """Calculates and returns the info pane's width."""
         firststep = self._hptreelist.get_position()
@@ -408,7 +225,7 @@ class MainHandler(object):
         if (path is not None):
             tvhandler = TVHandler(self, path)
             self._tvhandlers.append(tvhandler)
-            self.set_buttons_sensitivity(False)
+            #self.set_buttons_sensitivity(False)
             tvhandler.add_to_viewport()
             tvhandler.pbar.set_text("")
             tvhandler.hbpbar.show()
@@ -420,140 +237,21 @@ class MainHandler(object):
                 gobject.timeout_add(500, tvhandler.check_if_counting_finished,
                                     fscountthread)
                 tvhandler.hbpbar.show()
-                #self._tvhandler.root = None
-                #self._tvhandler.clear_stores()
-                #self._pbar.set_text("")
-                #self._hbpbar.show()
+                tvhandler.is_scanning = True
             else:
                 self.set_buttons_sensitivity(True)
 
-    def find_dir_with_fs_path(self, path, root):
-        """Finds a directory with a given path"""
-        if root.__str__() == path:
-            return root
-        else:
-            for _dir in root.dirs:
-                if (self.find_dir_with_fs_path(path, _dir) is not None):
-                    return self.find_dir_with_fs_path(path, _dir)
-
-    def find_dir_or_file_with_fs_path(self, path, root):
-        """Finds a directory or a file with a given path"""
-        if root.__str__() == path:
-            return root
-        else:
-            if hasattr(root, "dirs"):
-                for _dir in root.dirs:
-                    if (self.find_dir_or_file_with_fs_path(path, _dir)
-                        is not None):
-                        return self.find_dir_or_file_with_fs_path(path, _dir)
-            if hasattr(root, "files"):
-                for _file in root.files:
-                    if (self.find_dir_or_file_with_fs_path(path, _file)
-                        is not None):
-                        return self.find_dir_or_file_with_fs_path(path, _file)
-
-    def find_cased_dir_or_file(self, text, root):
-        """Checks if a dir or file match the specified text.
-        
-        Used when filtering in treeviews.
-        """
-        if root.name.lower().find(text.lower()) != -1:
-            return True
-        else:
-            for _dir in root.dirs:
-                if self.find_cased_dir_or_file(text, _dir):
-                    return True
-            for _file in root.files:
-                if self.find_cased_file(text, _file):
-                    return True
-
-    def find_cased_file(self, text, _file):
-        """Checks if a file name matches the specified text."""
-        if hasattr(_file, "name"):
-            if _file.name.lower().find(text.lower()) != -1:
-                return True
-
-    def find_cased_string(self, name, text):
-        """Checks if name contains text.
-        
-        Used when filtering in treeviews.
-        """
-        if name.lower().find(text.lower()) != -1:
-            return True
-        else:
-            return False
-
-    def check_if_counting_finished(self, fscountthread):
-        """Checks if the counting process finished.
-        
-        If Indexor has finished counting files, starts indexing them.
-        Called from gobject.timeout_add.
-        """
-        if not fscountthread.is_alive():
-            fsindexthread = self._dbmanager.start_indexing()
-            gobject.timeout_add(500, self.check_if_indexing_finished,
-                                fsindexthread)
-            return False
-        else:
-            return True
-
-    def check_if_indexing_finished(self, fsindexthread):
-        """Checks if the indexing process finished.
-        
-        If Indexor has finished indexing files, orders the TVHandler
-        to populate the treeviews. Called from gobject.timeout_add.
-        """
-        if not fsindexthread.is_alive():
-            self._root = None
-            #self._dbmanager.close_transaction()
-            #self._dbmanager.reload_connection()
-            #self._tvhandler.dbmanager = self._dbmanager
-            #self._dbmanager.create_metadir()
-            self._tvhandler.print_output()
-            print "Total time consumed: " + str(self._dbmanager.\
-                                                get_time_consumed()) + " ms."
-            return False
-        else:
-            return True
-
-    #def search_in_dirtree(self, model, _iter):
-        """Filtering function for directory tree treeview filter."""
-        #text = self._entrysearch.get_text()
-        #if text == "" or model.get_value(_iter, 1) is None:
-        #    return True
-        #node = self.find_dir_with_fs_path(model.get_value(_iter, 2),
-        #                                   self._root)
-        #if self.find_cased_dir_or_file(text, node) is True:
-        #    return True
-        #else:
-        #    return False
-
-    #def search_in_filelist(self, model, _iter):
-        """Filtering function for file list treeview filter."""
-        #text = self._entrysearch.get_text()
-        #if text == "" or model.get_value(_iter, 1) is None:
-        #    return True
-        #node = self.find_dir_or_file_with_fs_path\
-        #        (model.get_value(_iter, 2), self._root)
-        #if self.find_cased_file(text, node) is True:
-        #    return True
-        #else:
-        #    return False
-
-    def hide_progressbar(self):
-        """This is refactored into a method because other classes use it"""
-        #self._hbpbar.hide()
-        print "This method should not be used anymore, please review"
+    def remove_scan(self, tvhandler):
+        index = self._tvhandlers.index(tvhandler)
+        self._tvhandlers.pop(index)
+        self._dbmanagers.pop(index)
+        self._notebook.remove_page(index)
 
     def set_buttons_sensitivity(self, sensitive):
         """Sets buttons (and menus) sensitivity according to value given
         
         This method is used when the indexing process begins or ends.
         """
-        #if sensitive is True:
-        #    self._btncancel.hide()
-        #else:
-        #    self._btncancel.show()
         self._tbnewpath.set_sensitive(sensitive)
         self._tbloadfile.set_sensitive(sensitive)
         self._imgmnscan.set_sensitive(sensitive)
@@ -566,13 +264,6 @@ class MainHandler(object):
             self._imgmnsaveas.set_sensitive(False)
 
     def load_catalog_from_filename(self, filename):
-        #self._tvhandler.clear_stores()
-        #self.set_buttons_sensitivity(False)
-        #self._tvhandler.add_to_viewport()
-        #self._dbmanager = DBManager(self, self._tvhandler)
-        #self._dbmanager.create_connection(filename)
-        #self._tvhandler.dbmanager = self._dbmanager
-        #self._tvhandler.print_output()
         opened = False
         for tvhandler in self._tvhandlers:
             if tvhandler.path == get_scanned_path_from_catalog(filename):
@@ -592,20 +283,6 @@ class MainHandler(object):
     #################################
     #Callbacks
     #################################
-#===============================================================================
-#    def tvdirtree_cursor_changed_cb(self, tvdt):
-#        """Callback redirected to TVHandler."""
-#        self._tvhandler.tvdirtree_cursor_changed_cb(tvdt)
-# 
-#    def tvfilelist_cursor_changed_cb(self, tvfl):
-#        """Callback redirected to TVHandler."""
-#        self._tvhandler.tvfilelist_cursor_changed_cb(tvfl)
-# 
-#    def tvfilelist_row_activated_cb(self, tvdt, path, view_column):
-#        """Callback redirected to TVHandler."""
-#        self._tvhandler.tvfilelist_row_activated_cb(tvdt, path, view_column)
-#===============================================================================
-
     def tbnewpath_clicked_cb(self, widget):
         """Shows the "New Path" dialog."""
         opendialog = \
@@ -617,11 +294,6 @@ class MainHandler(object):
                                          gtk.STOCK_OK, gtk.RESPONSE_OK))
         response = opendialog.run()
         if response == gtk.RESPONSE_OK:
-            #self._tvhandler.clear_stores()
-            #self._infopane.hide()
-            #if self._entrysearch.get_text() != "":
-                #self._entrysearch.set_text("")
-                #self.entrysearch_changed_cb(self._entrysearch)
             if hasattr(self, "_searchhandler"):
                 self._searchhandler.destroy(self._window)
             self._tbsearch.set_sensitive(False)
@@ -655,7 +327,6 @@ class MainHandler(object):
                 PlainTextWriter(savedialog.get_filename(), self._root)
         savedialog.destroy()
 
-
     def tbloadfile_clicked_cb(self, widget):
         """Shows the "Load" dialog."""
         opendialog = \
@@ -672,19 +343,6 @@ class MainHandler(object):
             if hasattr(self, "_searchhandler"):
                 self._searchhandler.destroy(self._window)
             opendialog.destroy()
-
-            #self._root = binreader.get_root()
-            #self._tvhandler.root = self._root
-
-
-    #def entrysearch_changed_cb(self, widget):
-        """Callback used for the filtering text entry."""
-        #self._tmfdirtree.refilter()
-        #self.generate_file_list(self._currentnode,
-                                #self._tvhandler.lsfilelist)
-        #gobject.idle_add(self.generate_file_list, self._currentnode,
-                         #self._tvhandler.lsfilelist)
-        pass
 
     def tbsearch_clicked_cb(self, widget):
         """Shows the search window.
@@ -703,10 +361,7 @@ class MainHandler(object):
 
     #Notebook
     def tabbtn_clicked_cb(self, widget, tvhandler):
-        index = self._tvhandlers.index(tvhandler)
-        self._tvhandlers.pop(index)
-        self._dbmanagers.pop(index)
-        self._notebook.remove_page(index)
+        self.remove_scan(tvhandler)
     #Menu
     def imgmnscan_activate_cb(self, widget):
         """Redirects to "tbnew" method"""

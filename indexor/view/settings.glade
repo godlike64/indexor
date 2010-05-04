@@ -12,50 +12,18 @@
         <property name="visible">True</property>
         <property name="spacing">8</property>
         <child>
-          <object class="GtkToolbar" id="tboptions">
+          <object class="GtkTreeView" id="tvconfig">
             <property name="visible">True</property>
-            <property name="orientation">vertical</property>
+            <property name="can_focus">True</property>
+            <signal name="cursor_changed" handler="tvconfig_cursor_changed_cb"/>
             <child>
-              <object class="GtkToolButton" id="tbinterface">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">Interface</property>
-                <property name="icon_name">preferences-desktop-theme</property>
-                <signal name="clicked" handler="tbinterface_clicked_cb"/>
+              <object class="GtkTreeViewColumn" id="tvcol_section">
+                <property name="title">Section</property>
               </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToolButton" id="tblogs">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">Logs</property>
-                <property name="use_underline">True</property>
-                <property name="icon_name">edit-find</property>
-                <signal name="clicked" handler="tblogs_clicked_cb"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToolButton" id="tbfilters">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">Filters</property>
-                <property name="use_underline">True</property>
-                <property name="icon_name">system-search</property>
-                <signal name="clicked" handler="tbfilters_clicked_cb"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">True</property>
-              </packing>
             </child>
           </object>
           <packing>
-            <property name="expand">False</property>
+            <property name="padding">8</property>
             <property name="position">0</property>
           </packing>
         </child>
@@ -1556,6 +1524,135 @@ a ~ to the original filename (e.g. text1.txt~)</property>
                             <property name="position">2</property>
                           </packing>
                         </child>
+                        <child>
+                          <object class="GtkTable" id="tbltabs">
+                            <property name="visible">True</property>
+                            <property name="n_rows">5</property>
+                            <property name="n_columns">2</property>
+                            <child>
+                              <object class="GtkLabel" id="label47">
+                                <property name="width_request">300</property>
+                                <property name="visible">True</property>
+                                <property name="xalign">0</property>
+                                <property name="label" translatable="yes">Tabs appearance:</property>
+                              </object>
+                              <packing>
+                                <property name="right_attach">2</property>
+                                <property name="x_options">GTK_FILL</property>
+                                <property name="y_options">GTK_FILL</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkHSeparator" id="hseparator6">
+                                <property name="visible">True</property>
+                              </object>
+                              <packing>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
+                                <property name="x_options">GTK_FILL</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label48">
+                                <property name="visible">True</property>
+                                <property name="tooltip_text" translatable="yes">Truncate tab title when it exceeds a
+certain length.</property>
+                                <property name="xalign">0</property>
+                                <property name="label" translatable="yes">Ellipsize tab names? </property>
+                              </object>
+                              <packing>
+                                <property name="top_attach">2</property>
+                                <property name="bottom_attach">3</property>
+                                <property name="x_options">GTK_FILL</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkCheckButton" id="chktabellipsize">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="tooltip_text" translatable="yes">Truncate tab title when it exceeds a
+certain length.</property>
+                                <property name="xalign">0</property>
+                                <property name="draw_indicator">True</property>
+                                <signal name="toggled" handler="chktabellipsize_toggled_cb"/>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">2</property>
+                                <property name="bottom_attach">3</property>
+                                <property name="x_options"></property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label49">
+                                <property name="visible">True</property>
+                                <property name="xalign">0</property>
+                                <property name="label" translatable="yes">Maximum tab name length</property>
+                              </object>
+                              <packing>
+                                <property name="top_attach">4</property>
+                                <property name="bottom_attach">5</property>
+                                <property name="x_options">GTK_FILL</property>
+                                <property name="y_options">GTK_FILL</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label50">
+                                <property name="visible">True</property>
+                                <property name="xalign">0</property>
+                                <property name="label" translatable="yes">Ellipsize place</property>
+                              </object>
+                              <packing>
+                                <property name="top_attach">3</property>
+                                <property name="bottom_attach">4</property>
+                                <property name="x_options">GTK_FILL</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkComboBox" id="cmbtabellipplace">
+                                <property name="visible">True</property>
+                                <property name="model">lsellipplace</property>
+                                <signal name="changed" handler="cmbtabellipplace_changed_cb"/>
+                                <child>
+                                  <object class="GtkCellRendererText" id="cell_ellipplace"/>
+                                  <attributes>
+                                    <attribute name="text">0</attribute>
+                                  </attributes>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">3</property>
+                                <property name="bottom_attach">4</property>
+                                <property name="x_options">GTK_FILL</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSpinButton" id="spintablength">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="invisible_char">&#x25CF;</property>
+                                <property name="adjustment">adjspintablength</property>
+                                <signal name="value_changed" handler="spintablength_value_changed_cb"/>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">4</property>
+                                <property name="bottom_attach">5</property>
+                                <property name="x_options">GTK_FILL</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="position">3</property>
+                          </packing>
+                        </child>
                       </object>
                     </child>
                   </object>
@@ -1566,53 +1663,72 @@ a ~ to the original filename (e.g. text1.txt~)</property>
               </packing>
             </child>
             <child>
-              <object class="GtkHBox" id="hbox2">
+              <object class="GtkVBox" id="vbox3">
                 <property name="visible">True</property>
-                <property name="spacing">4</property>
+                <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkLabel" id="label17">
+                  <object class="GtkHSeparator" id="hseparator5">
                     <property name="visible">True</property>
-                    <property name="xalign">0</property>
-                    <property name="label" translatable="yes">Some settings will be applied to the next indexing process!</property>
-                    <property name="wrap">True</property>
-                    <property name="wrap_mode">word-char</property>
-                    <attributes>
-                      <attribute name="size" value="9000"/>
-                    </attributes>
                   </object>
                   <packing>
+                    <property name="expand">False</property>
+                    <property name="padding">2</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="btnclose">
-                    <property name="label">gtk-close</property>
+                  <object class="GtkHBox" id="hbox2">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="tooltip_text" translatable="yes">Close window (settings are applied automatically)</property>
-                    <property name="use_stock">True</property>
-                    <signal name="clicked" handler="btnclose_clicked_cb"/>
+                    <property name="spacing">4</property>
+                    <child>
+                      <object class="GtkLabel" id="label17">
+                        <property name="visible">True</property>
+                        <property name="xalign">0</property>
+                        <property name="label" translatable="yes">Some settings will be applied to the next indexing process!</property>
+                        <property name="wrap">True</property>
+                        <property name="wrap_mode">word-char</property>
+                        <attributes>
+                          <attribute name="size" value="9000"/>
+                        </attributes>
+                      </object>
+                      <packing>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="btnclose">
+                        <property name="label">gtk-close</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="use_stock">True</property>
+                        <signal name="clicked" handler="btnclose_clicked_cb"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="btnsave">
+                        <property name="label">gtk-save</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="use_stock">True</property>
+                        <signal name="clicked" handler="btnsave_clicked_cb"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
-                    <property name="fill">False</property>
+                    <property name="padding">2</property>
                     <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButton" id="btnsave">
-                    <property name="label">gtk-save</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="tooltip_text" translatable="yes">Save settings to disk</property>
-                    <property name="use_stock">True</property>
-                    <signal name="clicked" handler="btnsave_clicked_cb"/>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="position">2</property>
                   </packing>
                 </child>
               </object>
@@ -1713,6 +1829,29 @@ a ~ to the original filename (e.g. text1.txt~)</property>
     <property name="value">32</property>
     <property name="lower">1</property>
     <property name="upper">999</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+    <property name="page_size">10</property>
+  </object>
+  <object class="GtkListStore" id="lsellipplace">
+    <columns>
+      <!-- column-name place -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Start</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Middle</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">End</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkAdjustment" id="adjspintablength">
+    <property name="upper">1000</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
     <property name="page_size">10</property>

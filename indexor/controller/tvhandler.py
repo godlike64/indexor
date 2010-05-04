@@ -162,8 +162,9 @@ class TVHandler(object):
         vwp.show()
         hbox = gtk.HBox(False, 2)
         label = gtk.Label(self._path)
-        label.set_ellipsize(pango.ELLIPSIZE_MIDDLE)
-        label.set_width_chars(30)
+        if SETTINGS.tabellipsize is True:
+            label.set_ellipsize(SETTINGS.tabellipplace)
+        label.set_width_chars(SETTINGS.tablength)
         hbox.pack_start(label, False)
         button = gtk.Button()
         button.connect("clicked", self._mainhandler.tabbtn_clicked_cb, self)

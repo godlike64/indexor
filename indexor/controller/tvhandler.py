@@ -176,6 +176,8 @@ class TVHandler(object):
         hbox.pack_start(button, False)
         hbox.show_all()
         index = self._mainhandler.notebook.append_page(vwp, hbox)
+        self._mainhandler.notebook.child_set_property(vwp, "tab-expand", False)
+        self._mainhandler.notebook.child_set_property(vwp, "tab-fill", False)
         self._mainhandler.notebook.set_current_page(index)
         self.clear_stores()
 

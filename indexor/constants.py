@@ -69,6 +69,7 @@ MIMES = {
         "macroenabled.12"                               :   "spreadsheet",
         "application/vnd.ms-pki.seccat"                 :   "archive",
         "application/vnd.ms-powerpoint"                 :   "presentation",
+        "application/vnd.ms-project"                    :   "document",
         "application/vnd.oasis.opendocument.database"   :   "document",
         "application/vnd.oasis.opendocument.formula"    :   "document",
         "application/vnd.oasis.opendocument." +

@@ -444,6 +444,6 @@ class Indexer(object):
             return False
         else:
             self.progress.set_text(self.last)
-            self.progress.set_fraction(round(float(self.position), 8)
+            self.progress.set_fraction(float(self.position)
                                        / self.count)
             return True

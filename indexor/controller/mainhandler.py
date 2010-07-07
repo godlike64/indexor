@@ -90,7 +90,7 @@ class MainHandler(object):
         self._tbloadfile = self._wtree.get_object("tbloadfile")
         #self._vwpscan = self._wtree.get_object("vwpscan")
         self._notebook = self._wtree.get_object("notebook")
-        self._notebook.set_scrollable(True)
+        #self._notebook.set_scrollable(True)
         self._hpscanlist = self._wtree.get_object("hpscanlist")
         self._tvscanlist = self._wtree.get_object("tvscanlist")
         self._lsscanlist = gtk.ListStore(gtk.gdk.Pixbuf, str, str)

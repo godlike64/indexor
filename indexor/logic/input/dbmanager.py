@@ -68,12 +68,16 @@ class DBManager(object):
     def get_root(self):
         return self._root
 
+    def get_scanningcatalog(self):
+        return self._scanningcatalog
+
     stop = property(get_stop, set_stop)
     indexer = property(get_indexer, set_indexer)
     conn = property(get_conn)
     tvhandler = property(get_tvhandler, set_tvhandler)
     path = property(get_path)
     root = property(get_root)
+    scanningcatalog = property(get_scanningcatalog)
 
     #################################
     #Methods

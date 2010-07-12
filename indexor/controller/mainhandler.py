@@ -28,7 +28,6 @@ import shutil
 from fs.entities import File, Directory, Video, Audio, Photo
 from constants import ICONS, MIMES, SEPARATOR
 from logic.input.indexer import Indexer
-from logic.output.binary import BinaryReader, BinaryWriter
 from logic.output.plaintext import PlainTextWriter
 from tvhandler import TVHandler
 from searchhandler import SearchHandler
@@ -249,6 +248,7 @@ class MainHandler(object):
         self._notebook.remove_page(index)
         if len(self._tvhandlers) == 0:
             self._root = None
+            self._catalog_to_save = None
             self.set_buttons_sensitivity(True)
 
     def set_buttons_sensitivity(self, sensitive):
@@ -346,15 +346,7 @@ class MainHandler(object):
         savedialog.set_do_overwrite_confirmation(True)
         response = savedialog.run()
         if response == gtk.RESPONSE_OK:
-            #==================================================================
-            # widget = self._notebook.get_nth_page(self._notebook.get_current_page())
-            # label = self._notebook.get_tab_label(widget).get_children()[0].get_text()
-            # for dbmanager in self._dbmanagers:
-            #    if dbmanager.path == label:
-            #        self._root = dbmanager.root
-            #==================================================================
             if savedialog.get_filter() == binaryfilter:
-                #BinaryWriter(savedialog.get_filename(), self._root)
                 shutil.copy(self._catalog_to_save, savedialog.get_filename())
             if savedialog.get_filter() == plainfilter:
                 PlainTextWriter(savedialog.get_filename(), self._root)

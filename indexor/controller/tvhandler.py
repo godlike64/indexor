@@ -304,6 +304,7 @@ class TVHandler(object):
         """
         self._is_scanning = False
         self._dbmanager.create_metadir()
+        self._dbmanager.set_root_node()
         rootselect = Directory.select(Directory.q.relpath == "/",
                                       connection = self._conn)
         root = rootselect[0]

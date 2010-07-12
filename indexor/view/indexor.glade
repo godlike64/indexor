@@ -276,6 +276,7 @@
                 <property name="tab_border">0</property>
                 <property name="tab_hborder">0</property>
                 <property name="tab_vborder">0</property>
+                <signal name="switch_page" handler="notebook_switch_page_cb"/>
                 <child>
                   <placeholder/>
                 </child>

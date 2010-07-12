@@ -62,19 +62,28 @@ class DBManager(object):
     def set_tvhandler(self, value):
         self._tvhandler = value
 
+    def get_path(self):
+        return self._path
+
+    def get_root(self):
+        return self._root
+
     stop = property(get_stop, set_stop)
     indexer = property(get_indexer, set_indexer)
     conn = property(get_conn)
     tvhandler = property(get_tvhandler, set_tvhandler)
+    path = property(get_path)
+    root = property(get_root)
 
     #################################
     #Methods
     #################################
 
-    def create_connection(self, file_str):
+    def create_connection(self, file_str, path):
         con_str = "sqlite://" + file_str
         self._scanningcatalog = file_str
         self._conn = connectionForURI(con_str)
+        self._path = path
 
     def index_new_dir(self, path):
         if self._check_if_was_scanned(path) is True:
@@ -82,7 +91,7 @@ class DBManager(object):
                     strftime("%Y.%m.%d-%H.%M.%S")
             file_str = CATALOGDIR + os.path.basename(path) + ".-." + date \
                         + ".db"
-            self.create_connection(file_str)
+            self.create_connection(file_str, path)
             self._factory = Factory(self)
             self._indexer = Indexer(path, self._tvhandler.pbar, self._tvhandler,
                                     self._factory)
@@ -155,6 +164,11 @@ class DBManager(object):
     def reload_connection(self):
         self._conn.close()
         self._conn = connectionForURI("sqlite://" + self._scanningcatalog)
+
+    def set_root_node(self):
+        rootselect = Directory.select(Directory.q.relpath == "/",
+                                      connection = self._conn)
+        self._root = rootselect[0]
 
 def get_scanned_path_from_catalog(entry):
     con_str = "sqlite://" + entry

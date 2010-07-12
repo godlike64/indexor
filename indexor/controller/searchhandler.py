@@ -26,11 +26,9 @@ class SearchHandler(object):
     and to me it doesn't justify creating another module/class for it.
     """
 
-    def __init__(self, gladefile, mainhandler, tvhandler):
-        self._gladefile = gladefile
+    def __init__(self, mainhandler):
+        self._gladefile = "view/search.glade"
         self._mainhandler = mainhandler
-        self._tvhandler = tvhandler
-        self._root = self._mainhandler.root
         self._wtree = gtk.Builder()
         self._wtree.add_from_file(gladefile)
         self._window = self._wtree.get_object("searchwindow")

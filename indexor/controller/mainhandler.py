@@ -22,6 +22,7 @@ import gobject
 import pygtk
 pygtk.require('2.0')
 import gtk
+import shutil
 
 #Local imports
 from fs.entities import File, Directory, Video, Audio, Photo
@@ -246,6 +247,9 @@ class MainHandler(object):
         self._tvhandlers.pop(index)
         self._dbmanagers.pop(index)
         self._notebook.remove_page(index)
+        if len(self._tvhandlers) == 0:
+            self._root = None
+            self.set_buttons_sensitivity(True)
 
     def set_buttons_sensitivity(self, sensitive):
         """Sets buttons (and menus) sensitivity according to value given
@@ -302,6 +306,7 @@ class MainHandler(object):
         for dbmanager in self._dbmanagers:
             if dbmanager.path == label:
                 self._root = dbmanager.root
+                self._catalog_to_save = dbmanager.scanningcatalog
 
     def tbnewpath_clicked_cb(self, widget):
         """Shows the "New Path" dialog."""
@@ -349,7 +354,8 @@ class MainHandler(object):
             #        self._root = dbmanager.root
             #==================================================================
             if savedialog.get_filter() == binaryfilter:
-                BinaryWriter(savedialog.get_filename(), self._root)
+                #BinaryWriter(savedialog.get_filename(), self._root)
+                shutil.copy(self._catalog_to_save, savedialog.get_filename())
             if savedialog.get_filter() == plainfilter:
                 PlainTextWriter(savedialog.get_filename(), self._root)
         savedialog.destroy()
@@ -389,6 +395,7 @@ class MainHandler(object):
     #Notebook
     def tabbtn_clicked_cb(self, widget, tvhandler):
         self.remove_scan(tvhandler)
+
     #Menu
     def imgmnscan_activate_cb(self, widget):
         """Redirects to "tbnew" method"""

@@ -271,11 +271,13 @@ class MainHandler(object):
                                                 index(tvhandler))
                 opened = True
         if opened is False:
-            tvhandler = TVHandler(self, get_scanned_path_from_catalog(filename))
+            path = get_scanned_path_from_catalog(filename)
+            tvhandler = TVHandler(self, path)
             self._tvhandlers.append(tvhandler)
             dbmanager = DBManager(self, tvhandler)
             self._dbmanagers.append(dbmanager)
-            dbmanager.create_connection(filename)
+            dbmanager.create_connection(filename, path)
+            dbmanager.set_root_node()
             tvhandler.dbmanager = dbmanager
             tvhandler.add_to_viewport()
             tvhandler.print_output()
@@ -294,6 +296,13 @@ class MainHandler(object):
     #################################
     #Callbacks
     #################################
+    def notebook_switch_page_cb(self, notebook, page, page_num):
+        widget = self._notebook.get_nth_page(page_num)
+        label = self._notebook.get_tab_label(widget).get_children()[0].get_text()
+        for dbmanager in self._dbmanagers:
+            if dbmanager.path == label:
+                self._root = dbmanager.root
+
     def tbnewpath_clicked_cb(self, widget):
         """Shows the "New Path" dialog."""
         opendialog = \
@@ -332,6 +341,13 @@ class MainHandler(object):
         savedialog.set_do_overwrite_confirmation(True)
         response = savedialog.run()
         if response == gtk.RESPONSE_OK:
+            #==================================================================
+            # widget = self._notebook.get_nth_page(self._notebook.get_current_page())
+            # label = self._notebook.get_tab_label(widget).get_children()[0].get_text()
+            # for dbmanager in self._dbmanagers:
+            #    if dbmanager.path == label:
+            #        self._root = dbmanager.root
+            #==================================================================
             if savedialog.get_filter() == binaryfilter:
                 BinaryWriter(savedialog.get_filename(), self._root)
             if savedialog.get_filter() == plainfilter:

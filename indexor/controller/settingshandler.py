@@ -231,7 +231,6 @@ class SettingsHandler(object):
         if SETTINGS.tabellipplace == pango.ELLIPSIZE_START:
             tabellipplace = 0
         elif SETTINGS.tabellipplace == pango.ELLIPSIZE_MIDDLE:
-            print "setting middle"
             tabellipplace = 1
         elif SETTINGS.tabellipplace == pango.ELLIPSIZE_END:
             tabellipplace = 2

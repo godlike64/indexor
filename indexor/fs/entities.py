@@ -17,18 +17,20 @@
 import gtk
 from sqlobject import SQLObject, StringCol, FloatCol, BoolCol, IntCol, \
                         ForeignKey, DateTimeCol, PickleCol, MultipleJoin, \
-                        RelatedJoin
+                        RelatedJoin, DateTimeCol
 from sqlobject.inheritance import InheritableSQLObject
 
 from constants import SEPARATOR
 
 class MetaDir(SQLObject):
+    date = DateTimeCol()
     name = StringCol()
     target = StringCol()
     files = IntCol()
     dirs = IntCol()
     size = FloatCol()
     strsize = StringCol()
+    time = IntCol()
     category = StringCol(default = "None")
 
 class File(InheritableSQLObject):

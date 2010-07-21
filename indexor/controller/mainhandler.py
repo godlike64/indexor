@@ -33,11 +33,12 @@ from tvhandler import TVHandler
 from searchhandler import SearchHandler
 from settingshandler import SettingsHandler
 from logic.midput import LOADER, SETTINGS
+from logic.midput.settings import CATALOGDIR
 #from controller import LOGHANDLER
 from controller.loghandler import LogHandler
 from controller.abouthandler import AboutHandler
 from logic.logging import MANAGER
-from logic.input.dbmanager import DBManager, get_scanned_path_from_catalog
+from logic.input.dbmanager import DBManager, get_scanned_path_from_catalog, get_correct_filename_from_catalog
 from logic.input.mdmanager import MDManager
 
 
@@ -275,6 +276,9 @@ class MainHandler(object):
                                                 index(tvhandler))
                 opened = True
         if opened is False:
+            dest = get_correct_filename_from_catalog(filename)
+            shutil.copy(filename, CATALOGDIR + "/" + dest)
+            filename = CATALOGDIR + "/" + dest
             path = get_scanned_path_from_catalog(filename)
             tvhandler = TVHandler(self, path)
             self._tvhandlers.append(tvhandler)
@@ -339,7 +343,7 @@ class MainHandler(object):
         plainfilter.add_mime_type("text/plain")
         plainfilter.set_name("Plain text")
         binaryfilter = gtk.FileFilter()
-        binaryfilter.add_pattern("*.gz")
+        binaryfilter.add_pattern("*.db")
         binaryfilter.set_name("Binary file")
         savedialog.add_filter(binaryfilter)
         savedialog.add_filter(plainfilter)
@@ -354,6 +358,9 @@ class MainHandler(object):
 
     def tbloadfile_clicked_cb(self, widget):
         """Shows the "Load" dialog."""
+        binaryfilter = gtk.FileFilter()
+        binaryfilter.add_pattern("*.db")
+        binaryfilter.set_name("Binary file")
         opendialog = \
         gtk.FileChooserDialog(title = "Point me a source...",
                               parent = self._window,
@@ -361,13 +368,14 @@ class MainHandler(object):
                               buttons = (gtk.STOCK_CANCEL,
                                          gtk.RESPONSE_CANCEL,
                                          gtk.STOCK_OK, gtk.RESPONSE_OK))
+        opendialog.add_filter(binaryfilter)
         response = opendialog.run()
         if response == gtk.RESPONSE_OK:
             filename = opendialog.get_filename()
             self.load_catalog_from_filename(filename)
             if hasattr(self, "_searchhandler"):
                 self._searchhandler.destroy(self._window)
-            opendialog.destroy()
+        opendialog.destroy()
 
     def tbsearch_clicked_cb(self, widget):
         """Shows the search window.
@@ -380,7 +388,7 @@ class MainHandler(object):
     def btncancel_clicked_cb(self, widget):
         """Callback used when cancelling the indexing process"""
         self._dbmanager.stop = True
-        self._pbar.set_text("Indexing process of " + self._path +
+        self._pbar.set_text("Indexing process of " + self._path + 
                             " cancelled.")
         gobject.timeout_add(2000, self._tvhandler.hide_progressbar)
 

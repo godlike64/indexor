@@ -54,9 +54,9 @@ class Factory(object):
 #==============================================================================
 
 
-    def new_metadir(self, target, files, dirs, size, strsize, name):
-        return MetaDir(name = name, target = target, files = files, dirs = dirs,
-                       size = size, strsize = strsize,
+    def new_metadir(self, date, target, files, dirs, size, strsize, name, time):
+        return MetaDir(date = date, name = name, target = target, files = files, dirs = dirs,
+                       size = size, strsize = strsize, time = time,
                        connection = self._conn)
 
     def new_file(self, parent, name, relpath, mimetype, atime, mtime,

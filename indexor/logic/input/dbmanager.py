@@ -91,6 +91,7 @@ class DBManager(object):
 
     def index_new_dir(self, path):
         if self._check_if_was_scanned(path) is True:
+            self._date = datetime.datetime.now()
             date = datetime.datetime.fromtimestamp(time.time()).\
                     strftime("%Y.%m.%d-%H.%M.%S")
             file_str = CATALOGDIR + os.path.basename(path) + ".-." + date \
@@ -109,7 +110,7 @@ class DBManager(object):
                 if self._check_if_is_same_dir(entry, path) is True:
                     label = gtk.Label()
                     label.set_markup("Indexor has already registered " + \
-                                      "this directory. Do you wish\n" +
+                                      "this directory. Do you wish\n" + 
                                       "to overwrite the catalog with the " + \
                                       "updated one?")
                     hbox = gtk.HBox(spacing = 8)
@@ -157,10 +158,10 @@ class DBManager(object):
         metadircount = MetaDir.select(connection = self._conn).count()
         if not metadircount == 1:
             root = Directory.select(Directory.q.strabs == self._indexer.path, connection = self._conn).getOne()
-            self._factory.new_metadir(self._indexer.path,
+            self._factory.new_metadir(self._date, self._indexer.path,
                                       self._indexer.countfiles,
                                       self._indexer.countdirs, root.size,
-                                      root.strsize, root.name)
+                                      root.strsize, root.name, self._indexer.timer)
 
     def get_time_consumed(self):
         return self._indexer.timer
@@ -182,3 +183,12 @@ def get_scanned_path_from_catalog(entry):
         return MetaDir.select(connection = conn)[0].target
     #return metadir.target == path
 
+def get_correct_filename_from_catalog(entry):
+    con_str = "sqlite://" + entry
+    conn = connectionForURI(con_str)
+    metadircount = MetaDir.select(connection = conn).count()
+    if metadircount > 0:
+        md = MetaDir.select(connection = conn)[0]
+        datestr = md.date.strftime("%Y.%m.%d-%H.%M.%S")
+        name = md.name
+        return name + ".-." + datestr + ".db"

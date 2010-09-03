@@ -85,7 +85,7 @@ class MainHandler(object):
         self._imgmnload = self._wtree.get_object("imgmnload")
         self._imgmnsaveas = self._wtree.get_object("imgmnsaveas")
         self._tbsearch = self._wtree.get_object("tbsearch")
-        self._tbsearch.set_sensitive(False)
+        #self._tbsearch.set_sensitive(False)
         self._tbnewpath = self._wtree.get_object("tbnewpath")
         self._tbsave = self._wtree.get_object("tbsave")
         self._tbloadfile = self._wtree.get_object("tbloadfile")
@@ -276,9 +276,6 @@ class MainHandler(object):
                                                 index(tvhandler))
                 opened = True
         if opened is False:
-            dest = get_correct_filename_from_catalog(filename)
-            shutil.copy(filename, CATALOGDIR + "/" + dest)
-            filename = CATALOGDIR + "/" + dest
             path = get_scanned_path_from_catalog(filename)
             tvhandler = TVHandler(self, path)
             self._tvhandlers.append(tvhandler)
@@ -325,7 +322,6 @@ class MainHandler(object):
         if response == gtk.RESPONSE_OK:
             if hasattr(self, "_searchhandler"):
                 self._searchhandler.destroy(self._window)
-            self._tbsearch.set_sensitive(False)
             self._tbloadfile.set_sensitive(False)
             self.init_index_process(opendialog.get_filename())
         opendialog.destroy()
@@ -372,6 +368,9 @@ class MainHandler(object):
         response = opendialog.run()
         if response == gtk.RESPONSE_OK:
             filename = opendialog.get_filename()
+            dest = get_correct_filename_from_catalog(filename)
+            shutil.copy(filename, CATALOGDIR + "/" + dest)
+            filename = CATALOGDIR + "/" + dest
             self.load_catalog_from_filename(filename)
             if hasattr(self, "_searchhandler"):
                 self._searchhandler.destroy(self._window)
@@ -382,8 +381,7 @@ class MainHandler(object):
         
         Creates a new SearchHandler and shows its window.
         """
-        self._searchhandler = SearchHandler("view/search.glade", self,
-                                            self._tvhandler)
+        self._searchhandler = SearchHandler(self)
 
     def btncancel_clicked_cb(self, widget):
         """Callback used when cancelling the indexing process"""

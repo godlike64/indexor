@@ -176,6 +176,9 @@ class MainHandler(object):
 
     def get_chkmninfopane(self):
         return self._chkmninfopane
+    
+    def get_tvhandlers(self):
+        return self._tvhandlers
 
     currentpath = property(get_currentpath, set_currentpath)
     currentnode = property(get_currentnode, set_currentnode)
@@ -186,6 +189,7 @@ class MainHandler(object):
     pbar = property(get_pbar)
     notebook = property(get_notebook)
     chkmninfopane = property(get_chkmninfopane)
+    tvhandlers = property(get_tvhandlers)
     #vwpscan = property(get_vwpscan)
 
     #################################

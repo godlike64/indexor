@@ -314,9 +314,9 @@ class TVHandler(object):
             self._mainhandler.root = self._root
             self._rootiter = self._tsdirtree.append(None,
                                                     ['drive-harddisk',
-                                                     self._root.name +
-                                                     " (" +
-                                                     self._root.strsize +
+                                                     self._root.name + 
+                                                     " (" + 
+                                                     self._root.strsize + 
                                                      ")",
                                                      self._root.__str__()])
             self.append_directories(self._rootiter, self._root)
@@ -361,6 +361,8 @@ class TVHandler(object):
         until it finds the selected node and parent. Then selects the parent
         so the node's directory is loaded in the right treeview.
         """
+        #print fs_path
+        #print parent
         self._switching = None
         if self._root.parent == parent:
             for row in self._tsdirtree:
@@ -376,6 +378,9 @@ class TVHandler(object):
         self._currentpath = self._switching.path
         self._tvdirtree.expand_to_path(self._currentpath)
         self._tvdirtree.set_cursor(self._currentpath)
+        for row in self._lsfilelist:
+            if row[3] == fs_path:
+                self._tvfilelist.set_cursor(row.path)
 
     def iterate_over_children(self, parent, row):
         """Iterates over the children of a treeview row.
@@ -529,7 +534,7 @@ class TVHandler(object):
     def btncancel_clicked_cb(self, widget):
         """Callback used when cancelling the indexing process"""
         self._dbmanager.stop = True
-        self._pbar.set_text("Indexing process of " + self._path +
+        self._pbar.set_text("Indexing process of " + self._path + 
                             " cancelled.")
         gobject.timeout_add(1000, self.hide_progressbar)
         gobject.timeout_add(2000, self._mainhandler.remove_scan, self)

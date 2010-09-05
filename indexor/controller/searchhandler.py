@@ -84,12 +84,12 @@ class SearchHandler(object):
         self._crawlers = []
         self._crawlersstore = []
         self._crawlersstore.append(gtk.ListStore(str, str, str, str,
-                                       str, float))
+                                       str, float, str, str))
         for catalog in os.listdir(CATALOGDIR):
             crawler = Crawler(self, catalog)
             self._crawlers.append(crawler)
             self._crawlersstore.append(gtk.ListStore(str, str, str, str,
-                                                     str, float))
+                                                     str, float, str, str))
             
         self._window.show_all()
         
@@ -114,6 +114,8 @@ class SearchHandler(object):
     def clear_liststores(self):
         self._lssearch.clear()
         self._lssearchlocations.clear()
+        for store in self._crawlersstore:
+            store.clear()
     
     def notify_and_add(self, crawler, node):
         index = self._crawlers.index(crawler) + 1
@@ -175,4 +177,15 @@ class SearchHandler(object):
         index = path[0]
         self._tvsearch.set_model(self._crawlersstore[index])
 
- 
+    def tvsearch_row_activated_cb(self, tvs, path, view_column):
+        treeselection = self._tvsearchlocations.get_selection()
+        (model, iter_) = treeselection.get_selected()
+        pathloc = self._lssearchlocations.get_path(iter_)
+        index = pathloc[0]
+        filename = self._crawlersstore[index][path][6]
+        parent = self._crawlersstore[index][path][4]
+        absname = self._crawlersstore[index][path][3]
+        self._mainhandler.load_catalog_from_filename(CATALOGDIR + filename)
+        indexpage = self._mainhandler.notebook.get_current_page()
+        tvhandler = self._mainhandler.tvhandlers[indexpage]
+        tvhandler.switch_to_node_from_fs_path(absname, parent)

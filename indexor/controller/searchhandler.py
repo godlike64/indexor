@@ -112,10 +112,14 @@ class SearchHandler(object):
             self._lssearchlocations.append(["folder", crawler.name, "0"])
             
     def clear_liststores(self):
+        self._tvsearch.get_selection().unselect_all()
+        self._tvsearchlocations.get_selection().unselect_all()
         self._lssearch.clear()
         self._lssearchlocations.clear()
         for store in self._crawlersstore:
             store.clear()
+        self._tvsearch.set_model(None)
+
     
     def notify_and_add(self, crawler, node):
         index = self._crawlers.index(crawler) + 1

@@ -33,11 +33,12 @@ from tvhandler import TVHandler
 from searchhandler import SearchHandler
 from settingshandler import SettingsHandler
 from logic.midput import LOADER, SETTINGS
+from logic.midput.settings import CATALOGDIR
 #from controller import LOGHANDLER
 from controller.loghandler import LogHandler
 from controller.abouthandler import AboutHandler
 from logic.logging import MANAGER
-from logic.input.dbmanager import DBManager, get_scanned_path_from_catalog
+from logic.input.dbmanager import DBManager, get_scanned_path_from_catalog, get_correct_filename_from_catalog
 from logic.input.mdmanager import MDManager
 
 
@@ -84,7 +85,7 @@ class MainHandler(object):
         self._imgmnload = self._wtree.get_object("imgmnload")
         self._imgmnsaveas = self._wtree.get_object("imgmnsaveas")
         self._tbsearch = self._wtree.get_object("tbsearch")
-        self._tbsearch.set_sensitive(False)
+        #self._tbsearch.set_sensitive(False)
         self._tbnewpath = self._wtree.get_object("tbnewpath")
         self._tbsave = self._wtree.get_object("tbsave")
         self._tbloadfile = self._wtree.get_object("tbloadfile")
@@ -103,8 +104,8 @@ class MainHandler(object):
         self._tvcolsl_data.pack_start(self._cellsl_data, False)
         self._tvcolsl_data.add_attribute(self._cellsl_icon, "pixbuf", 0)
         self._tvcolsl_data.add_attribute(self._cellsl_data, "markup", 1)
-        #self._lsscanlist.append(["folder", "holaaa\n<b>despiertense todos</b>"])
 
+        self.scanlist_popup = self._wtree.get_object("scanlist_popup")
         self._mdmanager = MDManager(self, self._lsscanlist)
         self._mdmanager.populate_catalog_list()
 
@@ -175,6 +176,9 @@ class MainHandler(object):
 
     def get_chkmninfopane(self):
         return self._chkmninfopane
+    
+    def get_tvhandlers(self):
+        return self._tvhandlers
 
     currentpath = property(get_currentpath, set_currentpath)
     currentnode = property(get_currentnode, set_currentnode)
@@ -185,6 +189,7 @@ class MainHandler(object):
     pbar = property(get_pbar)
     notebook = property(get_notebook)
     chkmninfopane = property(get_chkmninfopane)
+    tvhandlers = property(get_tvhandlers)
     #vwpscan = property(get_vwpscan)
 
     #################################
@@ -321,7 +326,6 @@ class MainHandler(object):
         if response == gtk.RESPONSE_OK:
             if hasattr(self, "_searchhandler"):
                 self._searchhandler.destroy(self._window)
-            self._tbsearch.set_sensitive(False)
             self._tbloadfile.set_sensitive(False)
             self.init_index_process(opendialog.get_filename())
         opendialog.destroy()
@@ -339,7 +343,7 @@ class MainHandler(object):
         plainfilter.add_mime_type("text/plain")
         plainfilter.set_name("Plain text")
         binaryfilter = gtk.FileFilter()
-        binaryfilter.add_pattern("*.gz")
+        binaryfilter.add_pattern("*.db")
         binaryfilter.set_name("Binary file")
         savedialog.add_filter(binaryfilter)
         savedialog.add_filter(plainfilter)
@@ -354,6 +358,9 @@ class MainHandler(object):
 
     def tbloadfile_clicked_cb(self, widget):
         """Shows the "Load" dialog."""
+        binaryfilter = gtk.FileFilter()
+        binaryfilter.add_pattern("*.db")
+        binaryfilter.set_name("Binary file")
         opendialog = \
         gtk.FileChooserDialog(title = "Point me a source...",
                               parent = self._window,
@@ -361,26 +368,29 @@ class MainHandler(object):
                               buttons = (gtk.STOCK_CANCEL,
                                          gtk.RESPONSE_CANCEL,
                                          gtk.STOCK_OK, gtk.RESPONSE_OK))
+        opendialog.add_filter(binaryfilter)
         response = opendialog.run()
         if response == gtk.RESPONSE_OK:
             filename = opendialog.get_filename()
+            dest = get_correct_filename_from_catalog(filename)
+            shutil.copy(filename, CATALOGDIR + "/" + dest)
+            filename = CATALOGDIR + "/" + dest
             self.load_catalog_from_filename(filename)
             if hasattr(self, "_searchhandler"):
                 self._searchhandler.destroy(self._window)
-            opendialog.destroy()
+        opendialog.destroy()
 
     def tbsearch_clicked_cb(self, widget):
         """Shows the search window.
         
         Creates a new SearchHandler and shows its window.
         """
-        self._searchhandler = SearchHandler("view/search.glade", self,
-                                            self._tvhandler)
+        self._searchhandler = SearchHandler(self)
 
     def btncancel_clicked_cb(self, widget):
         """Callback used when cancelling the indexing process"""
         self._dbmanager.stop = True
-        self._pbar.set_text("Indexing process of " + self._path +
+        self._pbar.set_text("Indexing process of " + self._path + 
                             " cancelled.")
         gobject.timeout_add(2000, self._tvhandler.hide_progressbar)
 
@@ -468,3 +478,16 @@ class MainHandler(object):
     def tvscanlist_row_activated_cb(self, tvsl, path, view_column):
         _iter = tvsl.get_model().get_iter(path)
         self.load_catalog_from_filename(self._lsscanlist.get(_iter, 2)[0])
+        
+    def tvscanlist_button_press_event_cb(self, treeview, event):
+        if event.button == 3:
+            x = int(event.x)
+            y = int(event.y)
+            time = event.time
+            pathinfo = treeview.get_path_at_pos(x, y)
+            if pathinfo is not None:
+                path, col, cellx, celly = pathinfo
+                treeview.grab_focus()
+                treeview.set_cursor(path, col, 0)
+                self.scanlist_popup.popup(None, None, None, event.button, time)
+            return True

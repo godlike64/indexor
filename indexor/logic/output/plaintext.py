@@ -122,6 +122,7 @@ class PlainTextWriter(object):
             if isdir:
                 if (self.is_last_dir(parent, node)) & (len(parent.files)
                                                        == 0):
+#                if (self.is_last_dir(parent, node)):
                     self._matrix[self._dest][i] = LAST
                 else:
                     self._matrix[self._dest][i] = CHILD

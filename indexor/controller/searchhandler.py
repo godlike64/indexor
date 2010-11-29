@@ -16,6 +16,11 @@
 """Module for the handler of the search window"""
 
 import gtk
+import os
+import threading
+
+from logic.input.dbmanager import CATALOGDIR
+from logic.midput.search import Crawler
 
 class SearchHandler(object):
 
@@ -30,14 +35,14 @@ class SearchHandler(object):
         self._gladefile = "view/search.glade"
         self._mainhandler = mainhandler
         self._wtree = gtk.Builder()
-        self._wtree.add_from_file(gladefile)
+        self._wtree.add_from_file(self._gladefile)
         self._window = self._wtree.get_object("searchwindow")
         self._window.connect("destroy", self.destroy)
         self._btnjumpto = self._wtree.get_object("btnjumpto")
         self._btnjumpto.set_sensitive(False)
         self._entrysearch = self._wtree.get_object("txtsearch")
         self._wtree.connect_signals(self)
-        self._lssearch = gtk.ListStore(gtk.gdk.Pixbuf, str, str, str,
+        self._lssearch = gtk.ListStore(str, str, str, str,
                                        str, float)
         self._cellpb = gtk.CellRendererPixbuf()
         self._cellname = gtk.CellRendererText()
@@ -50,15 +55,49 @@ class SearchHandler(object):
         self._tvsearchcolname.pack_start(self._cellpb, False)
         self._tvsearchcolname.pack_start(self._cellname, False)
         self._tvsearchcolsize.pack_start(self._cellsize, False)
-        self._tvsearchcolname.set_attributes(self._cellpb, pixbuf = 0)
-        self._tvsearchcolname.set_attributes(self._cellname, markup = 1)
-        self._tvsearchcolsize.set_attributes(self._cellsize, text = 2)
+        self._tvsearchcolname.add_attribute(self._cellpb, "icon-name", 0)
+        self._tvsearchcolname.add_attribute(self._cellname, "markup", 1)
+        self._tvsearchcolsize.add_attribute(self._cellsize, "text", 2)
         self._tvsearchcolname.set_sort_column_id(1)
         self._tvsearchcolsize.set_sort_column_id(5)
         self._tvsearch = self._wtree.get_object("tvsearch")
         self._tvsearch.set_model(self._lssearch)
         self._tvsearch.columns_autosize()
+        
+        self._lssearchlocations = gtk.ListStore(str, str, str)
+        
+        self._tvsearchlocations = self._wtree.get_object("tvsearchlocations")
+        self._tvsearchlocations.set_model(self._lssearchlocations)
+        self._tvname = self._wtree.get_object("tvname")
+        self._tvcount = self._wtree.get_object("tvcount")
+        self._celllocpb = gtk.CellRendererPixbuf()
+        self._cellnameloc = gtk.CellRendererText()
+        self._cellcount = gtk.CellRendererText()
+        self._tvname.pack_start(self._celllocpb, False)
+        self._tvname.pack_start(self._cellnameloc, False)
+        self._tvcount.pack_start(self._cellcount, False)
+        self._tvname.add_attribute(self._celllocpb, "icon-name", 0)
+        self._tvname.add_attribute(self._cellnameloc, "text", 1)
+        self._tvcount.add_attribute(self._cellcount, "text", 2)
+        
+        
+        self._crawlers = []
+        self._crawlersstore = []
+        self._crawlersstore.append(gtk.ListStore(str, str, str, str,
+                                       str, float, str, str))
+        for catalog in os.listdir(CATALOGDIR):
+            crawler = Crawler(self, catalog)
+            self._crawlers.append(crawler)
+            self._crawlersstore.append(gtk.ListStore(str, str, str, str,
+                                                     str, float, str, str))
+            
         self._window.show_all()
+        
+    
+    def get_lssearch(self):
+        return self._lssearch
+    
+    lssearch = property(get_lssearch)
 
     def destroy(self, widget):
         """Destroys the window."""
@@ -66,9 +105,30 @@ class SearchHandler(object):
             self._window.destroy()
             self._window = None
 
-    def find_text(self, name, text):
-        """Returns the result of the search with lowercase values."""
-        return name.lower().find(text.lower())
+
+    def recreate_searchlocations(self):
+        self._lssearchlocations.append(["", "All", "0"])
+        for crawler in self._crawlers:
+            self._lssearchlocations.append(["folder", crawler.name, "0"])
+            
+    def clear_liststores(self):
+        self._tvsearch.get_selection().unselect_all()
+        self._tvsearchlocations.get_selection().unselect_all()
+        self._lssearch.clear()
+        self._lssearchlocations.clear()
+        for store in self._crawlersstore:
+            store.clear()
+        self._tvsearch.set_model(None)
+
+    
+    def notify_and_add(self, crawler, node):
+        index = self._crawlers.index(crawler) + 1
+        row = self._lssearchlocations[index]
+        row[2] = str(int(row[2]) + 1)
+        self._crawlersstore[index].append(node)
+        row = self._lssearchlocations[0]
+        row[2] = str(int(row[2]) + 1)
+        self._crawlersstore[0].append(node)
 
     def search_and_append(self, node, text):
         """Searches in the entire directory structure.
@@ -106,48 +166,30 @@ class SearchHandler(object):
     def btncancel_clicked_cb(self, widget):
         """Destroys the window."""
         self.destroy()
-
-    def btnjumpto_clicked_cb(self, widget):
-        """Binds the "Jump To" button to the row_activated callback.
         
-        Gets the necessary data in order to call the row_activated
-        callback, so we are not doing things twice.
-        """
-        (_model, _iter) = self._tvsearch.get_selection().get_selected()
-        _path = _model.get_path(_iter)
-        _column = self._tvsearch.get_column(0)
-        self.tvsearch_row_activated_cb(self._tvsearch, _path, _column)
+    def txtsearch_activate_cb(self, entry):
+        self.clear_liststores()
+        self.recreate_searchlocations()
+        for crawler in self._crawlers:
+            thread = threading.Thread(target = crawler.search, args = (entry.get_text(),))
+            thread.start()
+    
+    def tvsearchlocations_cursor_changed_cb(self, tvsl):
+        treeselection = tvsl.get_selection()
+        (model, iter_) = treeselection.get_selected()
+        path = self._lssearchlocations.get_path(iter_)
+        index = path[0]
+        self._tvsearch.set_model(self._crawlersstore[index])
 
-    def btnsearch_clicked_cb(self, widget):
-        """Starts the search."""
-        self._lssearch.clear()
-        self._tvsearch.columns_autosize()
-        self.search_and_append(self._root, self._entrysearch.get_text())
-
-    def txtsearch_activate_cb(self, widget):
-        """Starts the search."""
-        self.btnsearch_clicked_cb(widget)
-
-    def txtsearch_changed_cb(self, widget):
-        """Starts the search."""
-        self.btnsearch_clicked_cb(widget)
-
-    def btnclear_clicked_cb(self, widget):
-        """Clears the search store."""
-        self._lssearch.clear()
-        self._btnjumpto.set_sensitive(True)
-
-    def tvsearch_cursor_changed_cb(self, widget):
-        """Sets the "Jump To" button sensitive."""
-        self._btnjumpto.set_sensitive(True)
-
-    def tvsearch_row_activated_cb(self, tvdt, path, view_column):
-        """Jumps to the selected node in the main window.
-        
-        Gets all needed data and calls the relevant main handler's method
-        to jump to the selected node.
-        """
-        _iter = self._lssearch.get_iter(path)
-        _str = self._lssearch.get_value(_iter, 3)
-        _parent = self._lssearch.get_value(_iter, 4)
-        self._tvhandler.switch_to_node_from_fs_path(_str, _parent)
+    def tvsearch_row_activated_cb(self, tvs, path, view_column):
+        treeselection = self._tvsearchlocations.get_selection()
+        (model, iter_) = treeselection.get_selected()
+        pathloc = self._lssearchlocations.get_path(iter_)
+        index = pathloc[0]
+        filename = self._crawlersstore[index][path][6]
+        parent = self._crawlersstore[index][path][4]
+        absname = self._crawlersstore[index][path][3]
+        self._mainhandler.load_catalog_from_filename(CATALOGDIR + filename)
+        indexpage = self._mainhandler.notebook.get_current_page()
+        tvhandler = self._mainhandler.tvhandlers[indexpage]
+        tvhandler.switch_to_node_from_fs_path(absname, parent)

@@ -33,7 +33,7 @@ class MetaDir(SQLObject):
     time = IntCol()
     category = StringCol(default = "None")
 
-class File(InheritableSQLObject):
+class FileAbstract(InheritableSQLObject):
 
     parent = StringCol()
     name = StringCol()
@@ -50,11 +50,11 @@ class File(InheritableSQLObject):
     def __str__(self):
         return self.strabs
 
-class FileEntry(File):
+class File(FileAbstract):
     pass
 
 
-class Directory(File):
+class Directory(FileAbstract):
 
     #==========================================================================
     # parent = StringCol()
@@ -69,7 +69,7 @@ class Directory(File):
     # strabs = StringCol()
     # root = ForeignKey("Directory")
     #==========================================================================
-    entries = MultipleJoin("File", joinColumn = "root_id")
+    entries = MultipleJoin("FileAbstract", joinColumn = "root_id")
     #dirs = MultipleJoin("Directory", joinColumn = "root_id")
     #files = MultipleJoin("File", joinColumn = "root_id")
 

@@ -104,8 +104,8 @@ class MainHandler(object):
         self._tvcolsl_data.pack_start(self._cellsl_data, False)
         self._tvcolsl_data.add_attribute(self._cellsl_icon, "pixbuf", 0)
         self._tvcolsl_data.add_attribute(self._cellsl_data, "markup", 1)
-        #self._lsscanlist.append(["folder", "holaaa\n<b>despiertense todos</b>"])
 
+        self.scanlist_popup = self._wtree.get_object("scanlist_popup")
         self._mdmanager = MDManager(self, self._lsscanlist)
         self._mdmanager.populate_catalog_list()
 
@@ -478,3 +478,16 @@ class MainHandler(object):
     def tvscanlist_row_activated_cb(self, tvsl, path, view_column):
         _iter = tvsl.get_model().get_iter(path)
         self.load_catalog_from_filename(self._lsscanlist.get(_iter, 2)[0])
+        
+    def tvscanlist_button_press_event_cb(self, treeview, event):
+        if event.button == 3:
+            x = int(event.x)
+            y = int(event.y)
+            time = event.time
+            pathinfo = treeview.get_path_at_pos(x, y)
+            if pathinfo is not None:
+                path, col, cellx, celly = pathinfo
+                treeview.grab_focus()
+                treeview.set_cursor(path, col, 0)
+                self.scanlist_popup.popup(None, None, None, event.button, time)
+            return True

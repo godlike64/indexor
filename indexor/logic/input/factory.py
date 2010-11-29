@@ -24,7 +24,7 @@ try:
 except ImportError:
    NO_KAA = True
 
-from fs.entities import MetaDir, File, Directory, Video, Audio, Photo
+from fs.entities import MetaDir, FileAbstract, File, Directory, Video, Audio, Photo
 from logic.midput import SETTINGS
 from logic.logging import MANAGER
 
@@ -37,6 +37,7 @@ class Factory(object):
         self._dbmanager = dbmanager
         self._conn = dbmanager.conn
         MetaDir.createTable(connection = self._conn)
+        FileAbstract.createTable(connection = self._conn)
         File.createTable(connection = self._conn)
         Directory.createTable(connection = self._conn)
         Video.createTable(connection = self._conn)

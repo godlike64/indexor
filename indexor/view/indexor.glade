@@ -253,6 +253,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="headers_clickable">False</property>
+                    <signal name="button_press_event" handler="tvscanlist_button_press_event_cb"/>
                     <signal name="row_activated" handler="tvscanlist_row_activated_cb"/>
                     <child>
                       <object class="GtkTreeViewColumn" id="tvcolsl_data">
@@ -324,5 +325,24 @@
   <object class="GtkImage" id="image2">
     <property name="visible">True</property>
     <property name="stock">gtk-new</property>
+  </object>
+  <object class="GtkMenu" id="scanlist_popup">
+    <property name="visible">True</property>
+    <child>
+      <object class="GtkImageMenuItem" id="sl_edit">
+        <property name="label">gtk-edit</property>
+        <property name="visible">True</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="sl_delete">
+        <property name="label">gtk-delete</property>
+        <property name="visible">True</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+      </object>
+    </child>
   </object>
 </interface>

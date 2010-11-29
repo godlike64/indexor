@@ -63,9 +63,9 @@ class SearchHandler(object):
         self._tvsearch = self._wtree.get_object("tvsearch")
         self._tvsearch.set_model(self._lssearch)
         self._tvsearch.columns_autosize()
-        
+
         self._lssearchlocations = gtk.ListStore(str, str, str)
-        
+
         self._tvsearchlocations = self._wtree.get_object("tvsearchlocations")
         self._tvsearchlocations.set_model(self._lssearchlocations)
         self._tvname = self._wtree.get_object("tvname")
@@ -79,8 +79,8 @@ class SearchHandler(object):
         self._tvname.add_attribute(self._celllocpb, "icon-name", 0)
         self._tvname.add_attribute(self._cellnameloc, "text", 1)
         self._tvcount.add_attribute(self._cellcount, "text", 2)
-        
-        
+
+
         self._crawlers = []
         self._crawlersstore = []
         self._crawlersstore.append(gtk.ListStore(str, str, str, str,
@@ -90,13 +90,13 @@ class SearchHandler(object):
             self._crawlers.append(crawler)
             self._crawlersstore.append(gtk.ListStore(str, str, str, str,
                                                      str, float, str, str))
-            
+
         self._window.show_all()
-        
-    
+
+
     def get_lssearch(self):
         return self._lssearch
-    
+
     lssearch = property(get_lssearch)
 
     def destroy(self, widget):
@@ -110,7 +110,7 @@ class SearchHandler(object):
         self._lssearchlocations.append(["", "All", "0"])
         for crawler in self._crawlers:
             self._lssearchlocations.append(["folder", crawler.name, "0"])
-            
+
     def clear_liststores(self):
         self._tvsearch.get_selection().unselect_all()
         self._tvsearchlocations.get_selection().unselect_all()
@@ -120,7 +120,7 @@ class SearchHandler(object):
             store.clear()
         self._tvsearch.set_model(None)
 
-    
+
     def notify_and_add(self, crawler, node):
         index = self._crawlers.index(crawler) + 1
         row = self._lssearchlocations[index]
@@ -166,14 +166,14 @@ class SearchHandler(object):
     def btncancel_clicked_cb(self, widget):
         """Destroys the window."""
         self.destroy()
-        
+
     def txtsearch_activate_cb(self, entry):
         self.clear_liststores()
         self.recreate_searchlocations()
         for crawler in self._crawlers:
             thread = threading.Thread(target = crawler.search, args = (entry.get_text(),))
             thread.start()
-    
+
     def tvsearchlocations_cursor_changed_cb(self, tvsl):
         treeselection = tvsl.get_selection()
         (model, iter_) = treeselection.get_selected()

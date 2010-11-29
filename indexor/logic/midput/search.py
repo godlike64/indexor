@@ -1,11 +1,11 @@
 import sqlobject
 
 from logic.input.dbmanager import CATALOGDIR
-from fs.entities import File, MetaDir
+from fs.entities import FileAbstract, MetaDir
 from constants import ICONS, MIMES
 
 class Crawler(object):
-    
+
     def __init__(self, searchhandler, filename):
         self._searchhandler = searchhandler
         self._filename = filename
@@ -15,16 +15,16 @@ class Crawler(object):
 
     def get_name(self):
         return self._metadir.name
-    
+
     def get_target(self):
         return self._metadir.target
-    
+
     name = property(get_name)
     target = property(get_target)
-    
-    
+
+
     def search(self, term):
-        results = File.select("""file.name LIKE '%""" + term + """%'""", connection = self._con)
+        results = FileAbstract.select("""file_abstract.name LIKE '%""" + term + """%'""", connection = self._con)
         for file in results:
             index = self.find_text(file.name, term)
             name2 = file.name.decode("utf-8")
@@ -41,7 +41,7 @@ class Crawler(object):
             #                       file.strsize, file.__str__(), file.parent,
             #                       file.size])
             self._searchhandler.notify_and_add(self, node)
-    
+
     def find_text(self, name, text):
         """Returns the result of the search with lowercase values."""
         return name.lower().find(text.lower())

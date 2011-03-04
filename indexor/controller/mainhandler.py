@@ -39,7 +39,7 @@ from logic.midput.settings import CATALOGDIR
 #from controller import LOGHANDLER
 from controller.loghandler import LogHandler
 from controller.abouthandler import AboutHandler
-from controller.catalog_properties_handler import CatalogProperties
+from controller.catalog_properties import CatalogPropertiesHandler
 from logic.logging import MANAGER
 from logic.input.dbmanager import DBManager, get_scanned_path_from_catalog, get_correct_filename_from_catalog
 from logic.input.mdmanager import MDManager
@@ -346,7 +346,7 @@ class MainHandler(object):
             self._tbloadfile.set_sensitive(False)
             self.init_index_process(opendialog.get_filename())
         opendialog.destroy()
-        #CatalogProperties(self, None)
+        #CatalogPropertiesHandler(self, None)
         
 
     def tbsave_clicked_cb(self, widget):
@@ -515,7 +515,7 @@ class MainHandler(object):
         selection = self._tvscanlist.get_selection()
         metadirfile = self._lsscanlist.get(selection.get_selected()[1], 2)[0]
         metadir = self._mdmanager.metadir_dict[metadirfile]
-        CatalogProperties(self, metadir)
+        CatalogPropertiesHandler(self, metadir)
     
     def sl_delete_activate_cb(self, menuitem):
         selection = self._tvscanlist.get_selection()

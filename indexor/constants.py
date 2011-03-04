@@ -37,6 +37,16 @@ MEDIA_TYPES = {
                "External disk"  :   "drive-removable-media",
                "CD/DVD"         :   "drive-optical"
                }
+
+CATEGORIES = [
+              "Documents",
+              "Media",
+              "Misc",
+              "Music",
+              "Photos",
+              "Videos",
+              "Work",
+              ]
                
 
 MIMES = {

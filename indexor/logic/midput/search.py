@@ -18,9 +18,13 @@ class Crawler(object):
 
     def get_target(self):
         return self._metadir.target
+    
+    def get_metadir(self):
+        return self._metadir
 
     name = property(get_name)
     target = property(get_target)
+    metadir = property(get_metadir)
 
 
     def search(self, term):

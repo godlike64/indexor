@@ -97,6 +97,7 @@ class CatalogPropertiesHandler(object):
         for row in self._lscategories:
             if row[0] is True:
                 self._metadir.categories += row[1] + " "
+        self._mainhandler.mdmanager.populate_catalog_list()
         self.btncancel_clicked_cb(widget)
     
     def btncancel_clicked_cb(self, widget):

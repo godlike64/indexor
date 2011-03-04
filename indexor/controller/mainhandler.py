@@ -198,6 +198,9 @@ class MainHandler(object):
     
     def get_tvhandlers(self):
         return self._tvhandlers
+    
+    def get_mdmanager(self):
+        return self._mdmanager
 
     currentpath = property(get_currentpath, set_currentpath)
     currentnode = property(get_currentnode, set_currentnode)
@@ -209,6 +212,7 @@ class MainHandler(object):
     notebook = property(get_notebook)
     chkmninfopane = property(get_chkmninfopane)
     tvhandlers = property(get_tvhandlers)
+    mdmanager = property(get_mdmanager)
     #vwpscan = property(get_vwpscan)
 
     #################################

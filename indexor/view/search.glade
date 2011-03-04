@@ -30,7 +30,6 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="invisible_char">&#x2022;</property>
-                <signal name="changed" handler="txtsearch_changed_cb"/>
                 <signal name="activate" handler="txtsearch_activate_cb"/>
               </object>
               <packing>

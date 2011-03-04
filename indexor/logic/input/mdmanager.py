@@ -18,9 +18,8 @@ import os
 import gtk
 
 from fs.entities import MetaDir
-from logic.midput.settings import HOMEDIR
+from logic.midput.settings import CATALOGDIR
 
-CATALOGDIR = HOMEDIR + "/catalogs/"
 
 class MDManager(object):
 

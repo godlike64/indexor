@@ -32,7 +32,7 @@ import pango
 
 HOMEDIR = os.path.expanduser("~") + "/.indexor"
 SETTSFILE = HOMEDIR + "/settings"
-CATALOGDIR = HOMEDIR + "/catalogs"
+CATALOGDIR = HOMEDIR + "/catalogs/"
 
 class SettingsLoader(object):
 

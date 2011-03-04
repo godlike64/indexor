@@ -83,7 +83,6 @@ class CatalogPropertiesHandler(object):
             if row[0] == self._metadir.media_type:
                 selection.select_path(row.path)
                 break
-        print self._metadir.categories.split()
         for row in self._lscategories:
             if row[1] in self._metadir.categories.split():
                 row[0] = True

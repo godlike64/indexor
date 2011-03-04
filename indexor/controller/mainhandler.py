@@ -43,6 +43,7 @@ from controller.catalog_properties import CatalogPropertiesHandler
 from logic.logging import MANAGER
 from logic.input.dbmanager import DBManager, get_scanned_path_from_catalog, get_correct_filename_from_catalog
 from logic.input.mdmanager import MDManager
+from logic.utils import clean_catalog_dir
 
 
 class MainHandler(object):
@@ -54,6 +55,7 @@ class MainHandler(object):
     """
 
     def __init__(self, gladefile):
+        clean_catalog_dir()
         #======================================================================
         # MANAGER.loghandler = LOGHANDLER
         # LOGHANDLER.mainhandler = self

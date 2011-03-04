@@ -23,6 +23,7 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 import shutil
+import os
 
 #Local imports
 from fs.entities import File, Directory, Video, Audio, Photo
@@ -37,6 +38,7 @@ from logic.midput.settings import CATALOGDIR
 #from controller import LOGHANDLER
 from controller.loghandler import LogHandler
 from controller.abouthandler import AboutHandler
+from controller.catalog_properties_handler import CatalogProperties
 from logic.logging import MANAGER
 from logic.input.dbmanager import DBManager, get_scanned_path_from_catalog, get_correct_filename_from_catalog
 from logic.input.mdmanager import MDManager
@@ -329,6 +331,8 @@ class MainHandler(object):
             self._tbloadfile.set_sensitive(False)
             self.init_index_process(opendialog.get_filename())
         opendialog.destroy()
+        #CatalogProperties(self, None)
+        
 
     def tbsave_clicked_cb(self, widget):
         """Shows the "Save" dialog."""
@@ -491,3 +495,22 @@ class MainHandler(object):
                 treeview.set_cursor(path, col, 0)
                 self.scanlist_popup.popup(None, None, None, event.button, time)
             return True
+        
+    def sl_edit_activate_cb(self, menuitem):
+        selection = self._tvscanlist.get_selection()
+        metadirfile = self._lsscanlist.get(selection.get_selected()[1], 2)[0]
+        metadir = self._mdmanager.metadir_dict[metadirfile]
+        CatalogProperties(self, metadir)
+    
+    def sl_delete_activate_cb(self, menuitem):
+        selection = self._tvscanlist.get_selection()
+        metadirfile = self._lsscanlist.get(selection.get_selected()[1], 2)[0]
+        message = gtk.MessageDialog(self._window, gtk.DIALOG_MODAL, gtk.MESSAGE_INFO, gtk.BUTTONS_NONE, "Do you wish to delete the selected catalog?")
+        message.add_button(gtk.STOCK_OK, gtk.RESPONSE_OK)
+        message.add_button(gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT)
+        message.set_property("title", "Delete catalog?")
+        resp = message.run()
+        if resp == gtk.RESPONSE_OK:
+            os.remove(metadirfile)
+            self.populate_catalog_list()
+        message.destroy()

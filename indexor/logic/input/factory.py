@@ -57,8 +57,8 @@ class Factory(object):
 
     def new_metadir(self, date, target, files, dirs, size, strsize, name, time):
         return MetaDir(date = date, name = name, target = target, files = files, dirs = dirs,
-                       size = size, strsize = strsize, time = time,
-                       connection = self._conn)
+                       size = size, strsize = strsize, time = time, media_type = "folder",
+                       comments = "", connection = self._conn)
 
     def new_file(self, parent, name, relpath, mimetype, atime, mtime,
                  root, strabs, size = None, strsize = None, isdir = False):

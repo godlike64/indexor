@@ -27,6 +27,12 @@ class MDManager(object):
     def __init__(self, mainhandler, lsscanlist):
         self._mainhandler = mainhandler
         self._lsscanlist = lsscanlist
+        self._metadir_dict = {}
+        
+    def get_metadir_dict(self):
+        return self._metadir_dict
+    
+    metadir_dict = property(get_metadir_dict)
 
     def populate_catalog_list(self):
         self._lsscanlist.clear()
@@ -38,7 +44,8 @@ class MDManager(object):
                 metadir = selectmetadir.getOne()
                 self._lsscanlist.append([gtk.icon_theme_get_default().\
                                   load_icon("folder", 64, gtk.ICON_LOOKUP_FORCE_SVG),
-                                  "<b>" + metadir.name + "</b>\nFiles: " +
-                                  str(metadir.files) + "\nDirectories: " +
-                                  str(metadir.dirs) + "\nSize: " +
+                                  "<b>" + metadir.name + "</b>\nFiles: " + 
+                                  str(metadir.files) + "\nDirectories: " + 
+                                  str(metadir.dirs) + "\nSize: " + 
                                   metadir.strsize, CATALOGDIR + _file])
+                self._metadir_dict[CATALOGDIR + _file] = metadir

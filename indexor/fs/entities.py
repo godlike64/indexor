@@ -31,7 +31,9 @@ class MetaDir(SQLObject):
     size = FloatCol()
     strsize = StringCol()
     time = IntCol()
+    media_type = StringCol()
     category = StringCol(default = "None")
+    comments = StringCol()
 
 class FileAbstract(InheritableSQLObject):
 

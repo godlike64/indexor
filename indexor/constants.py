@@ -14,6 +14,8 @@
 #    along with Indexor.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
+import gtk
+
 
 if sys.platform == "win32":
     SEPARATOR = "\\"
@@ -28,6 +30,14 @@ EMAIL = "godlike64 at gm4il d0t c0m"
 DESC = "A file and directory indexing tool."
 
 NO_INFO = "No information available"
+
+MEDIA_TYPES = {
+               "Directory"      :   "folder",
+               "Hard disk"      :   "drive-harddisk",
+               "External disk"  :   "drive-removable-media",
+               "CD/DVD"         :   "drive-optical"
+               }
+               
 
 MIMES = {
         "audio/basic"                                   :   "audio",
@@ -65,23 +75,23 @@ MIMES = {
         "application/vnd.mozilla.xul+xml"               :   "html",
         "application/vnd.ms-cab-compressed"             :   "archive",
         "application/vnd.ms-excel"                      :   "spreadsheet",
-        "application/vnd.ms-excel.sheet." +
+        "application/vnd.ms-excel.sheet." + 
         "macroenabled.12"                               :   "spreadsheet",
         "application/vnd.ms-pki.seccat"                 :   "archive",
         "application/vnd.ms-powerpoint"                 :   "presentation",
         "application/vnd.ms-project"                    :   "document",
         "application/vnd.oasis.opendocument.database"   :   "document",
         "application/vnd.oasis.opendocument.formula"    :   "document",
-        "application/vnd.oasis.opendocument." +
+        "application/vnd.oasis.opendocument." + 
         "presentation"                                  :   "presentation",
-        "application/vnd.oasis.opendocument." +
+        "application/vnd.oasis.opendocument." + 
         "spreadsheet"                                   :   "spreadsheet",
         "application/vnd.oasis.opendocument.text"       :   "document",
-        "application/vnd.openxmlformats-" +
+        "application/vnd.openxmlformats-" + 
         "officedocument.presentationml.presentation"    :   "presentation",
-        "application/vnd.openxmlformats-" +
+        "application/vnd.openxmlformats-" + 
         "officedocument.spreadsheetml.sheet"            :   "spreadsheet",
-        "application/vnd.openxmlformats-" +
+        "application/vnd.openxmlformats-" + 
         "officedocument.wordprocessingml.document"      :   "document",
         "application/vnd.palm"                          :   "executable",
         "application/vnd.visio"                         :   "drawing",
@@ -224,7 +234,7 @@ MIMES = {
         }
 
 ICONS = {
-        "ascii"                 :   "text-x-generic",
+            "ascii"             :   "text-x-generic",
             "archive"           :   "package-x-generic",
             "audio"             :   "audio-x-generic",
             "calc"              :   "accessories-calculator",

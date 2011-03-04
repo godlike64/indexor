@@ -334,6 +334,7 @@
         <property name="visible">True</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
+        <signal name="activate" handler="sl_edit_activate_cb"/>
       </object>
     </child>
     <child>
@@ -342,6 +343,7 @@
         <property name="visible">True</property>
         <property name="use_underline">True</property>
         <property name="use_stock">True</property>
+        <signal name="activate" handler="sl_delete_activate_cb"/>
       </object>
     </child>
   </object>

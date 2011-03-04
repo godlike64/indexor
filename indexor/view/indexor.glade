@@ -347,4 +347,56 @@
       </object>
     </child>
   </object>
+  <object class="GtkMenu" id="tray_popup">
+    <property name="visible">True</property>
+    <child>
+      <object class="GtkImageMenuItem" id="try_scan_path1">
+        <property name="label" translatable="yes">Scan path</property>
+        <property name="visible">True</property>
+        <property name="image">image3</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="try_scan_path_activate_cb"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="try_open_catalog">
+        <property name="label" translatable="yes">Load catalog</property>
+        <property name="visible">True</property>
+        <property name="image">image4</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="try_open_catalog_activate_cb"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="try_show_hide">
+        <property name="visible">True</property>
+        <property name="label" translatable="yes">Show / hide</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="try_show_hide_activate_cb"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="menuitem1">
+        <property name="visible">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="try_close">
+        <property name="label">gtk-close</property>
+        <property name="visible">True</property>
+        <property name="tooltip_text" translatable="yes">Close Indexor</property>
+        <property name="use_stock">True</property>
+        <property name="always_show_image">True</property>
+        <signal name="activate" handler="try_close_activate_cb"/>
+      </object>
+    </child>
+  </object>
+  <object class="GtkImage" id="image3">
+    <property name="visible">True</property>
+    <property name="stock">gtk-new</property>
+  </object>
+  <object class="GtkImage" id="image4">
+    <property name="visible">True</property>
+    <property name="stock">gtk-open</property>
+  </object>
 </interface>

@@ -24,6 +24,7 @@ pygtk.require('2.0')
 import gtk
 import shutil
 import os
+import sys
 
 #Local imports
 from fs.entities import File, Directory, Video, Audio, Photo
@@ -120,6 +121,20 @@ class MainHandler(object):
         self._wtree.connect_signals(self)
         self._window.set_default_size(*SETTINGS.windowsize)
         #self._hplistpane.set_position(SETTINGS.infopanesize)
+        
+        self._tray_popup = self._wtree.get_object("tray_popup")
+        
+        self._tray = gtk.StatusIcon()
+        if sys.platform == "win32":
+            self._tray.set_from_file("icons/indexorapp.png")
+        else:
+            self._tray.set_from_file("icons/indexorapp.svg")
+        self._tray.set_tooltip("Indexor")
+        
+        self._tray.connect("activate", self.tray_activate_cb)
+        self._tray.connect("popup-menu", self.tray_popup_menu)
+        
+        
         if SETTINGS.windowmax is True:
             self._window.maximize()
         self._window.show_all()
@@ -514,3 +529,31 @@ class MainHandler(object):
             os.remove(metadirfile)
             self.populate_catalog_list()
         message.destroy()
+
+    def tray_activate_cb(self, tray):
+        if self._window.get_property("visible") is True:
+            self._window.hide()
+        else:
+            self._window.show()
+
+    def tray_popup_menu(self, widget, button, time):
+        self._tray_popup.popup(None, None, None, 3, time)
+        
+    def try_close_activate_cb(self, menuitem):
+        message = gtk.MessageDialog(self._window, gtk.DIALOG_MODAL, gtk.MESSAGE_WARNING, gtk.BUTTONS_NONE, "Do you wish to close Indexor?")
+        message.add_button(gtk.STOCK_OK, gtk.RESPONSE_OK)
+        message.add_button(gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT)
+        message.set_property("title", "Exit program?")
+        resp = message.run()
+        message.destroy()
+        if resp == gtk.RESPONSE_OK:
+            self._destroy(menuitem)
+            
+    def try_show_hide_activate_cb(self, menuitem):
+        self.tray_activate_cb(menuitem)
+    
+    def try_scan_path_activate_cb(self, menuitem):
+        self.tbnewpath_clicked_cb(menuitem)
+        
+    def try_open_catalog_activate_cb(self, menuitem):
+        self.tbloadfile_clicked_cb(menuitem)

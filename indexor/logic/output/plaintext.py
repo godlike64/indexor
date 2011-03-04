@@ -63,15 +63,6 @@ class PlainTextWriter(object):
         for line in lines:
             outputfile.write(line)
         outputfile.close()
-        #outputfile = open(filename, "r")
-        #lines = []
-        ##for line in outputfile.readlines():
-        #    lines.append(line.rstrip())
-        #outputfile.close()
-        #outputfile = open(filename, "w")
-        #for line in lines:
-        ##    outputfile.write(line + "\n")
-        #outputfile.close()
             
     def is_last_dir(self, parent, _dir):
         """Check if the directory is the last in its array."""

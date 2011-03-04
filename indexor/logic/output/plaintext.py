@@ -43,7 +43,6 @@ class PlainTextWriter(object):
             self._newline = "\\\n"
         else:
             self._newline = "/\n"
-        outputfile = open(filename, 'w')
         self._depth = 0
         self._count = 0
         self.get_depth_limit(root, self._depth + 1)
@@ -53,11 +52,26 @@ class PlainTextWriter(object):
             self._matrix.append([BLANK] * (self._depth + 2))
         self._dest = 0
         self.populate_matrix(root, 0, 0, None)
+        lines = []
         for row in self._matrix:
+            line = ""
             for item in row:
-                outputfile.write(item)
-            outputfile.write("\n")
+                line += item
+            line += "\n"
+            lines.append(line)
+        outputfile = open(filename, 'w')
+        for line in lines:
+            outputfile.write(line)
         outputfile.close()
+        #outputfile = open(filename, "r")
+        #lines = []
+        ##for line in outputfile.readlines():
+        #    lines.append(line.rstrip())
+        #outputfile.close()
+        #outputfile = open(filename, "w")
+        #for line in lines:
+        ##    outputfile.write(line + "\n")
+        #outputfile.close()
             
     def is_last_dir(self, parent, _dir):
         """Check if the directory is the last in its array."""

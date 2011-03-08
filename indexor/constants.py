@@ -23,7 +23,7 @@ else:
     SEPARATOR = "/"
 
 
-VERSION = "v0.1-alpha2"
+VERSION = "v0.5-beta"
 SITE = "http://www.vicarious.com.ar/blogs/indexor.php"
 AUTHOR = "Juan Manuel Santos"
 EMAIL = "godlike64 at gm4il d0t c0m"
@@ -37,6 +37,16 @@ MEDIA_TYPES = {
                "External disk"  :   "drive-removable-media",
                "CD/DVD"         :   "drive-optical"
                }
+
+CATEGORIES = [
+              "Documents",
+              "Media",
+              "Misc",
+              "Music",
+              "Photos",
+              "Videos",
+              "Work",
+              ]
                
 
 MIMES = {

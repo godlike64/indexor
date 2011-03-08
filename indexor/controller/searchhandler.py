@@ -109,7 +109,7 @@ class SearchHandler(object):
     def recreate_searchlocations(self):
         self._lssearchlocations.append(["", "All", "0"])
         for crawler in self._crawlers:
-            self._lssearchlocations.append(["folder", crawler.name, "0"])
+            self._lssearchlocations.append([crawler.metadir.media_type, crawler.name, "0"])
 
     def clear_liststores(self):
         self._tvsearch.get_selection().unselect_all()
@@ -171,7 +171,7 @@ class SearchHandler(object):
         self.clear_liststores()
         self.recreate_searchlocations()
         for crawler in self._crawlers:
-            thread = threading.Thread(target = crawler.search, args = (entry.get_text(),))
+            thread = threading.Thread(target = crawler.search, args = (self._entrysearch.get_text(),))
             thread.start()
 
     def tvsearchlocations_cursor_changed_cb(self, tvsl):
@@ -180,6 +180,10 @@ class SearchHandler(object):
         path = self._lssearchlocations.get_path(iter_)
         index = path[0]
         self._tvsearch.set_model(self._crawlersstore[index])
+        selection = self._tvsearch.get_selection()
+        iter_ = selection.get_selected()[1]
+        if iter_ is None:
+            self._btnjumpto.set_sensitive(False)
 
     def tvsearch_row_activated_cb(self, tvs, path, view_column):
         treeselection = self._tvsearchlocations.get_selection()
@@ -193,3 +197,31 @@ class SearchHandler(object):
         indexpage = self._mainhandler.notebook.get_current_page()
         tvhandler = self._mainhandler.tvhandlers[indexpage]
         tvhandler.switch_to_node_from_fs_path(absname, parent)
+        
+    def tvsearch_cursor_changed_cb(self, tvsl):
+        selection = self._tvsearch.get_selection()
+        iter_ = selection.get_selected()[1]
+        if iter_ is not None:
+            self._btnjumpto.set_sensitive(True)
+            
+    def btnjumpto_clicked_cb(self, widget):
+        treeselection = self._tvsearchlocations.get_selection()
+        (model, iter_) = treeselection.get_selected()
+        pathloc = self._lssearchlocations.get_path(iter_)
+        index = pathloc[0]
+        selection = self._tvsearch.get_selection()
+        iter_ = selection.get_selected()[1]
+        print iter_
+        path = self._crawlersstore[index].get_path(iter_)
+        print path
+        self.tvsearch_row_activated_cb(None, path, None)
+        
+    def btnclear_clicked_cb(self, widget):
+        for store in self._crawlersstore:
+            store.clear()
+        self._lssearchlocations.clear()
+        self._entrysearch.set_text("")
+        self._btnjumpto.set_sensitive(False)
+        
+    def btnsearch_clicked_cb(self, widget):
+        self.txtsearch_activate_cb(widget)

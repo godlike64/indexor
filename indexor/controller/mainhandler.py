@@ -40,10 +40,11 @@ from logic.midput.settings import CATALOGDIR
 #from controller import LOGHANDLER
 from controller.loghandler import LogHandler
 from controller.abouthandler import AboutHandler
-from controller.catalog_properties_handler import CatalogProperties
+from controller.catalog_properties import CatalogPropertiesHandler
 from logic.logging import MANAGER
 from logic.input.dbmanager import DBManager, get_scanned_path_from_catalog, get_correct_filename_from_catalog
 from logic.input.mdmanager import MDManager
+from logic.utils import clean_catalog_dir
 
 
 class MainHandler(object):
@@ -55,6 +56,7 @@ class MainHandler(object):
     """
 
     def __init__(self, gladefile):
+        clean_catalog_dir()
         #======================================================================
         # MANAGER.loghandler = LOGHANDLER
         # LOGHANDLER.mainhandler = self
@@ -198,6 +200,9 @@ class MainHandler(object):
     
     def get_tvhandlers(self):
         return self._tvhandlers
+    
+    def get_mdmanager(self):
+        return self._mdmanager
 
     currentpath = property(get_currentpath, set_currentpath)
     currentnode = property(get_currentnode, set_currentnode)
@@ -209,6 +214,7 @@ class MainHandler(object):
     notebook = property(get_notebook)
     chkmninfopane = property(get_chkmninfopane)
     tvhandlers = property(get_tvhandlers)
+    mdmanager = property(get_mdmanager)
     #vwpscan = property(get_vwpscan)
 
     #################################
@@ -348,7 +354,7 @@ class MainHandler(object):
             self._tbloadfile.set_sensitive(False)
             self.init_index_process(opendialog.get_filename())
         opendialog.destroy()
-        #CatalogProperties(self, None)
+        #CatalogPropertiesHandler(self, None)
         
 
     def tbsave_clicked_cb(self, widget):
@@ -517,7 +523,7 @@ class MainHandler(object):
         selection = self._tvscanlist.get_selection()
         metadirfile = self._lsscanlist.get(selection.get_selected()[1], 2)[0]
         metadir = self._mdmanager.metadir_dict[metadirfile]
-        CatalogProperties(self, metadir)
+        CatalogPropertiesHandler(self, metadir)
     
     def sl_delete_activate_cb(self, menuitem):
         selection = self._tvscanlist.get_selection()

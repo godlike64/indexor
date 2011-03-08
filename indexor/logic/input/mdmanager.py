@@ -18,9 +18,8 @@ import os
 import gtk
 
 from fs.entities import MetaDir
-from logic.midput.settings import HOMEDIR
+from logic.midput.settings import CATALOGDIR
 
-CATALOGDIR = HOMEDIR + "/catalogs/"
 
 class MDManager(object):
 
@@ -43,7 +42,7 @@ class MDManager(object):
             if selectmetadir.count() == 1:
                 metadir = selectmetadir.getOne()
                 self._lsscanlist.append([gtk.icon_theme_get_default().\
-                                  load_icon("folder", 64, gtk.ICON_LOOKUP_FORCE_SVG),
+                                  load_icon(metadir.media_type, 64, gtk.ICON_LOOKUP_FORCE_SVG),
                                   "<b>" + metadir.name + "</b>\nFiles: " + 
                                   str(metadir.files) + "\nDirectories: " + 
                                   str(metadir.dirs) + "\nSize: " + 

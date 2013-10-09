@@ -45,8 +45,7 @@ Install
 
 Currently there aren't any as I don't have a setup script or anything like
 that :P. Just make sure you have all the deps installed, and then run
-runner.py from the directory where it is located. This last step is CRITICAL,
-as Indexor will not work if you don't follow it.
+runner.py from the directory where it is located.
 
 
 License

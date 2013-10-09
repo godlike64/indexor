@@ -9,7 +9,7 @@ process, and error messages are logged in a separate window, giving the
 possibility to save the error list to a plain text file. The resulting catalog
 can be saved into a plain text file or into a binary file. If saved to binary,
 such file can later be loaded into an Indexor instance (in less time than it
-took to scan the directory), and all data will be there.
+took to scan the directory), and all data will still be there.
 
 Indexor also features an info pane, inspired by the one present in the Dolphin
 file manager. When visible, displays all metadata it was able to extract from

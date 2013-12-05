@@ -25,6 +25,7 @@ import gtk
 import shutil
 import os
 import sys
+import pynotify
 
 #Local imports
 from fs.entities import File, Directory, Video, Audio, Photo
@@ -60,6 +61,7 @@ class MainHandler(object):
         # MANAGER.loghandler = LOGHANDLER
         # LOGHANDLER.mainhandler = self
         #======================================================================
+        pynotify.init("Indexor")
         self._tvhandlers = []
         self._dbmanagers = []
         self._dbmanager = None

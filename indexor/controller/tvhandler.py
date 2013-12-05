@@ -18,6 +18,7 @@
 import gtk
 import pango
 import gobject
+import pynotify
 
 #import fs.entries
 from fs.entities import MetaDir, File, Directory, Video, Audio, Photo
@@ -302,6 +303,7 @@ class TVHandler(object):
         indexing process. Then does the needed thingies in the GUI to
         keep it consistent.
         """
+        
         self._is_scanning = False
         self._dbmanager.create_metadir()
         self._dbmanager.set_root_node()
@@ -322,6 +324,8 @@ class TVHandler(object):
             self.append_directories(self._rootiter, self._root)
             gobject.timeout_add(2000, self.hide_progressbar)
         self._mainhandler.set_buttons_sensitivity(True)
+        notification = pynotify.Notification("Indexing finished", "Indexing of " + root.name + " has finished successfully.")
+        notification.show()
 
 
     def generate_file_list(self, parent, lsfl):

@@ -1,10 +1,10 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
   <object class="GtkVBox" id="scanframe">
     <property name="visible">True</property>
-    <property name="orientation">vertical</property>
+    <property name="can_focus">False</property>
     <child>
       <object class="GtkHPaned" id="hptreelist">
         <property name="visible">True</property>
@@ -23,7 +23,7 @@
                 <property name="can_focus">True</property>
                 <property name="headers_clickable">False</property>
                 <property name="rules_hint">True</property>
-                <signal name="cursor_changed" handler="tvdirtree_cursor_changed_cb"/>
+                <signal name="cursor-changed" handler="tvdirtree_cursor_changed_cb" swapped="no"/>
                 <child>
                   <object class="GtkTreeViewColumn" id="tvcolnamedt">
                     <property name="sizing">autosize</property>
@@ -44,7 +44,7 @@
             <property name="can_focus">True</property>
             <property name="position">500</property>
             <property name="position_set">True</property>
-            <signal name="size_allocate" handler="hplistpane_size_allocate_cb"/>
+            <signal name="size-allocate" handler="hplistpane_size_allocate_cb" swapped="no"/>
             <child>
               <object class="GtkScrolledWindow" id="scrolledwindow2">
                 <property name="visible">True</property>
@@ -60,8 +60,8 @@
                     <property name="hover_expand">True</property>
                     <property name="enable_grid_lines">vertical</property>
                     <property name="tooltip_column">1</property>
-                    <signal name="cursor_changed" handler="tvfilelist_cursor_changed_cb"/>
-                    <signal name="row_activated" handler="tvfilelist_row_activated_cb"/>
+                    <signal name="cursor-changed" handler="tvfilelist_cursor_changed_cb" swapped="no"/>
+                    <signal name="row-activated" handler="tvfilelist_row_activated_cb" swapped="no"/>
                     <child>
                       <object class="GtkTreeViewColumn" id="tvcolnamefl">
                         <property name="resizable">True</property>
@@ -96,14 +96,17 @@
                 <child>
                   <object class="GtkViewport" id="viewport1">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="resize_mode">queue</property>
                     <child>
                       <object class="GtkTable" id="tblinfopane">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="n_rows">8</property>
                         <child>
                           <object class="GtkViewport" id="vwpinfoimg">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="resize_mode">queue</property>
                             <child>
                               <placeholder/>
@@ -119,16 +122,19 @@
                         <child>
                           <object class="GtkTable" id="tblgeninfo">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="n_rows">8</property>
                             <property name="n_columns">2</property>
                             <child>
                               <object class="GtkTable" id="tblinfoabspath">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="n_columns">2</property>
                                 <child>
                                   <object class="GtkLabel" id="label12">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">1</property>
                                     <property name="label" translatable="yes">Abs. Path: </property>
                                     <property name="justify">right</property>
@@ -144,6 +150,7 @@
                                   <object class="GtkLabel" id="lblinfoabspath">
                                     <property name="width_request">115</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">0</property>
                                     <property name="wrap">True</property>
                                     <property name="wrap_mode">char</property>
@@ -167,11 +174,13 @@
                             <child>
                               <object class="GtkTable" id="tblinforelpath">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="n_columns">2</property>
                                 <child>
                                   <object class="GtkLabel" id="lblinforelpath">
                                     <property name="width_request">115</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">0</property>
                                     <property name="wrap">True</property>
                                     <property name="wrap_mode">char</property>
@@ -189,6 +198,7 @@
                                   <object class="GtkLabel" id="label1">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">1</property>
                                     <property name="label" translatable="yes">Rel. Path: </property>
                                     <attributes>
@@ -209,11 +219,13 @@
                             <child>
                               <object class="GtkTable" id="tblinfosize">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="n_columns">2</property>
                                 <child>
                                   <object class="GtkLabel" id="lblinfosize">
                                     <property name="width_request">115</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">0</property>
                                     <property name="wrap">True</property>
                                     <property name="wrap_mode">word-char</property>
@@ -231,6 +243,7 @@
                                   <object class="GtkLabel" id="label2">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">1</property>
                                     <property name="label" translatable="yes">Size: </property>
                                     <attributes>
@@ -251,11 +264,13 @@
                             <child>
                               <object class="GtkTable" id="tblinfomime">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="n_columns">2</property>
                                 <child>
                                   <object class="GtkLabel" id="lblinfomime">
                                     <property name="width_request">115</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">0</property>
                                     <property name="wrap">True</property>
                                     <property name="wrap_mode">word-char</property>
@@ -273,6 +288,7 @@
                                   <object class="GtkLabel" id="label3">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">1</property>
                                     <property name="label" translatable="yes">Mimetype: </property>
                                     <attributes>
@@ -293,11 +309,13 @@
                             <child>
                               <object class="GtkTable" id="tblinfoatime">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="n_columns">2</property>
                                 <child>
                                   <object class="GtkLabel" id="lblinfoatime">
                                     <property name="width_request">115</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">0</property>
                                     <property name="wrap">True</property>
                                     <property name="wrap_mode">word-char</property>
@@ -314,6 +332,7 @@
                                   <object class="GtkLabel" id="label10">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">1</property>
                                     <property name="label" translatable="yes">Accessed: </property>
                                     <attributes>
@@ -334,11 +353,13 @@
                             <child>
                               <object class="GtkTable" id="tblinfomtime">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="n_columns">2</property>
                                 <child>
                                   <object class="GtkLabel" id="lblinfomtime">
                                     <property name="width_request">115</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">0</property>
                                     <property name="wrap">True</property>
                                     <property name="wrap_mode">word-char</property>
@@ -355,6 +376,7 @@
                                   <object class="GtkLabel" id="label11">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">1</property>
                                     <property name="label" translatable="yes">Modified: </property>
                                     <attributes>
@@ -375,6 +397,7 @@
                             <child>
                               <object class="GtkLabel" id="label17">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="xalign">0</property>
                                 <property name="label" translatable="yes">General</property>
                               </object>
@@ -387,6 +410,7 @@
                             <child>
                               <object class="GtkHSeparator" id="hseparator1">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                               </object>
                               <packing>
                                 <property name="right_attach">2</property>
@@ -405,15 +429,18 @@
                         <child>
                           <object class="GtkHBox" id="hbox2">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <child>
                               <object class="GtkLabel" id="label4">
                                 <property name="width_request">75</property>
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="xalign">1</property>
                                 <property name="label" translatable="yes">Name: </property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
+                                <property name="fill">True</property>
                                 <property name="position">0</property>
                               </packing>
                             </child>
@@ -421,6 +448,7 @@
                               <object class="GtkLabel" id="lblinfoname">
                                 <property name="width_request">130</property>
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="wrap">True</property>
                                 <property name="wrap_mode">char</property>
                                 <property name="selectable">True</property>
@@ -429,6 +457,8 @@
                                 </attributes>
                               </object>
                               <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
@@ -440,11 +470,13 @@
                         <child>
                           <object class="GtkTable" id="tblaudioinfo">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="n_rows">6</property>
                             <property name="n_columns">2</property>
                             <child>
                               <object class="GtkLabel" id="label16">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="xalign">0</property>
                                 <property name="label" translatable="yes">Audio</property>
                               </object>
@@ -456,6 +488,7 @@
                             <child>
                               <object class="GtkHSeparator" id="hseparator2">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                               </object>
                               <packing>
                                 <property name="right_attach">2</property>
@@ -466,15 +499,18 @@
                             <child>
                               <object class="GtkTable" id="tblaudiochan">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="n_columns">2</property>
                                 <child>
                                   <object class="GtkTable" id="tblaudiocha">
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="n_columns">2</property>
                                     <child>
                                       <object class="GtkLabel" id="lblaudiochan">
                                         <property name="width_request">115</property>
                                         <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
                                         <property name="xalign">0</property>
                                         <property name="wrap">True</property>
                                         <property name="wrap_mode">word-char</property>
@@ -492,6 +528,7 @@
                                       <object class="GtkLabel" id="label27">
                                         <property name="width_request">80</property>
                                         <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
                                         <property name="xalign">1</property>
                                         <property name="label" translatable="yes">Channels: </property>
                                         <attributes>
@@ -517,11 +554,13 @@
                             <child>
                               <object class="GtkTable" id="tblaudiobitrate">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="n_columns">2</property>
                                 <child>
                                   <object class="GtkLabel" id="lblaudiobitrate">
                                     <property name="width_request">115</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">0</property>
                                     <property name="wrap">True</property>
                                     <property name="wrap_mode">word-char</property>
@@ -539,6 +578,7 @@
                                   <object class="GtkLabel" id="label7">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">1</property>
                                     <property name="label" translatable="yes">Bitrate: </property>
                                     <attributes>
@@ -559,11 +599,13 @@
                             <child>
                               <object class="GtkTable" id="tblaudiosample">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="n_columns">2</property>
                                 <child>
                                   <object class="GtkLabel" id="lblaudiosample">
                                     <property name="width_request">115</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">0</property>
                                     <property name="selectable">True</property>
                                     <attributes>
@@ -579,6 +621,7 @@
                                   <object class="GtkLabel" id="label5">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">1</property>
                                     <property name="label" translatable="yes">Sample rate: </property>
                                     <attributes>
@@ -599,11 +642,13 @@
                             <child>
                               <object class="GtkTable" id="tblaudiocodec">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="n_columns">2</property>
                                 <child>
                                   <object class="GtkLabel" id="lblaudiocodec">
                                     <property name="width_request">115</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">0</property>
                                     <property name="selectable">True</property>
                                     <attributes>
@@ -619,6 +664,7 @@
                                   <object class="GtkLabel" id="label15">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">1</property>
                                     <property name="label" translatable="yes">Codec: </property>
                                     <attributes>
@@ -647,11 +693,13 @@
                         <child>
                           <object class="GtkTable" id="tblimginfo">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="n_rows">6</property>
                             <property name="n_columns">2</property>
                             <child>
                               <object class="GtkHSeparator" id="hseparator3">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                               </object>
                               <packing>
                                 <property name="right_attach">2</property>
@@ -662,6 +710,7 @@
                             <child>
                               <object class="GtkLabel" id="label18">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="xalign">0</property>
                                 <property name="label" translatable="yes">Image</property>
                               </object>
@@ -673,11 +722,13 @@
                             <child>
                               <object class="GtkTable" id="tblimgres">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="n_columns">2</property>
                                 <child>
                                   <object class="GtkLabel" id="lblimgres">
                                     <property name="width_request">115</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">0</property>
                                     <property name="wrap">True</property>
                                     <property name="wrap_mode">word-char</property>
@@ -695,6 +746,7 @@
                                   <object class="GtkLabel" id="label8">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">1</property>
                                     <property name="label" translatable="yes">Resolution: </property>
                                     <attributes>
@@ -715,11 +767,13 @@
                             <child>
                               <object class="GtkTable" id="tblimgdate">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="n_columns">2</property>
                                 <child>
                                   <object class="GtkLabel" id="lblimgdate">
                                     <property name="width_request">115</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">0</property>
                                     <property name="wrap">True</property>
                                     <property name="wrap_mode">word-char</property>
@@ -737,6 +791,7 @@
                                   <object class="GtkLabel" id="label9">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">1</property>
                                     <property name="label" translatable="yes">Date: </property>
                                     <attributes>
@@ -757,11 +812,13 @@
                             <child>
                               <object class="GtkTable" id="tblimgauthor">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="n_columns">2</property>
                                 <child>
                                   <object class="GtkLabel" id="lblimgauthor">
                                     <property name="width_request">115</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">0</property>
                                     <property name="wrap">True</property>
                                     <property name="wrap_mode">word-char</property>
@@ -779,6 +836,7 @@
                                   <object class="GtkLabel" id="label13">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">1</property>
                                     <property name="label" translatable="yes">Author: </property>
                                     <attributes>
@@ -799,11 +857,13 @@
                             <child>
                               <object class="GtkTable" id="tblimgsoft">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="n_columns">2</property>
                                 <child>
                                   <object class="GtkLabel" id="lblimgsoft">
                                     <property name="width_request">115</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">0</property>
                                     <property name="wrap">True</property>
                                     <property name="wrap_mode">word-char</property>
@@ -821,6 +881,7 @@
                                   <object class="GtkLabel" id="label14">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">1</property>
                                     <property name="label" translatable="yes">Software: </property>
                                     <attributes>
@@ -849,11 +910,13 @@
                         <child>
                           <object class="GtkTable" id="tblvideoinfo">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="n_rows">7</property>
                             <property name="n_columns">2</property>
                             <child>
                               <object class="GtkLabel" id="label19">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="xalign">0</property>
                                 <property name="label" translatable="yes">Video</property>
                               </object>
@@ -865,6 +928,7 @@
                             <child>
                               <object class="GtkHSeparator" id="hseparator4">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                               </object>
                               <packing>
                                 <property name="right_attach">2</property>
@@ -875,11 +939,13 @@
                             <child>
                               <object class="GtkTable" id="tblvideocodec">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="n_columns">2</property>
                                 <child>
                                   <object class="GtkLabel" id="lblvideocodec">
                                     <property name="width_request">115</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">0</property>
                                     <property name="wrap">True</property>
                                     <property name="wrap_mode">word-char</property>
@@ -897,6 +963,7 @@
                                   <object class="GtkLabel" id="label21">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">1</property>
                                     <property name="label" translatable="yes">Codec: </property>
                                     <attributes>
@@ -917,11 +984,13 @@
                             <child>
                               <object class="GtkTable" id="tblvideobitrate">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="n_columns">2</property>
                                 <child>
                                   <object class="GtkLabel" id="lblvideobitrate">
                                     <property name="width_request">115</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">0</property>
                                     <property name="wrap">True</property>
                                     <property name="wrap_mode">word-char</property>
@@ -939,6 +1008,7 @@
                                   <object class="GtkLabel" id="label25">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">1</property>
                                     <property name="label" translatable="yes">Bitrate: </property>
                                     <attributes>
@@ -959,11 +1029,13 @@
                             <child>
                               <object class="GtkTable" id="tblvideores">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="n_columns">2</property>
                                 <child>
                                   <object class="GtkLabel" id="lblvideores">
                                     <property name="width_request">115</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">0</property>
                                     <property name="wrap">True</property>
                                     <property name="wrap_mode">word-char</property>
@@ -981,6 +1053,7 @@
                                   <object class="GtkLabel" id="label22">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">1</property>
                                     <property name="label" translatable="yes">Resolution: </property>
                                     <attributes>
@@ -1001,11 +1074,13 @@
                             <child>
                               <object class="GtkTable" id="tblvideofps">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="n_columns">2</property>
                                 <child>
                                   <object class="GtkLabel" id="lblvideofps">
                                     <property name="width_request">115</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">0</property>
                                     <property name="wrap">True</property>
                                     <property name="wrap_mode">word-char</property>
@@ -1023,6 +1098,7 @@
                                   <object class="GtkLabel" id="label23">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">1</property>
                                     <property name="label" translatable="yes">FPS: </property>
                                     <attributes>
@@ -1043,11 +1119,13 @@
                             <child>
                               <object class="GtkTable" id="tblvideoar">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="n_columns">2</property>
                                 <child>
                                   <object class="GtkLabel" id="lblvideoar">
                                     <property name="width_request">115</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">0</property>
                                     <property name="wrap">True</property>
                                     <property name="wrap_mode">word-char</property>
@@ -1065,6 +1143,7 @@
                                   <object class="GtkLabel" id="label24">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">1</property>
                                     <property name="label" translatable="yes">Asp. Ratio: </property>
                                     <attributes>
@@ -1093,11 +1172,13 @@
                         <child>
                           <object class="GtkTable" id="tblmediainfo">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="n_rows">3</property>
                             <property name="n_columns">2</property>
                             <child>
                               <object class="GtkLabel" id="label20">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="xalign">0</property>
                                 <property name="label" translatable="yes">Media</property>
                               </object>
@@ -1108,6 +1189,7 @@
                             <child>
                               <object class="GtkHSeparator" id="hseparator5">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                               </object>
                               <packing>
                                 <property name="right_attach">2</property>
@@ -1118,11 +1200,13 @@
                             <child>
                               <object class="GtkTable" id="tblmedialength">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="n_columns">2</property>
                                 <child>
                                   <object class="GtkLabel" id="lblmedialength">
                                     <property name="width_request">115</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">0</property>
                                     <property name="wrap">True</property>
                                     <property name="wrap_mode">word-char</property>
@@ -1140,6 +1224,7 @@
                                   <object class="GtkLabel" id="label6">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">1</property>
                                     <property name="label" translatable="yes">Length: </property>
                                     <attributes>
@@ -1168,11 +1253,13 @@
                         <child>
                           <object class="GtkTable" id="tblsubinfo">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="n_rows">3</property>
                             <property name="n_columns">2</property>
                             <child>
                               <object class="GtkLabel" id="label26">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="xalign">0</property>
                                 <property name="label" translatable="yes">Subtitles</property>
                               </object>
@@ -1184,6 +1271,7 @@
                             <child>
                               <object class="GtkHSeparator" id="hseparator6">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                               </object>
                               <packing>
                                 <property name="right_attach">2</property>
@@ -1195,11 +1283,13 @@
                             <child>
                               <object class="GtkTable" id="tblsublangs">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="n_columns">2</property>
                                 <child>
                                   <object class="GtkLabel" id="lblsublangs">
                                     <property name="width_request">115</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">0</property>
                                     <property name="wrap">True</property>
                                     <property name="wrap_mode">char</property>
@@ -1217,6 +1307,7 @@
                                   <object class="GtkLabel" id="label28">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                     <property name="xalign">1</property>
                                     <property name="label" translatable="yes">Languages: </property>
                                     <attributes>
@@ -1259,19 +1350,25 @@
         </child>
       </object>
       <packing>
+        <property name="expand">True</property>
+        <property name="fill">True</property>
         <property name="position">0</property>
       </packing>
     </child>
     <child>
       <object class="GtkHBox" id="hbpbar">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <child>
           <object class="GtkProgressBar" id="pbar">
             <property name="height_request">25</property>
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="ellipsize">middle</property>
           </object>
           <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
             <property name="position">0</property>
           </packing>
         </child>
@@ -1282,16 +1379,18 @@
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <property name="use_stock">True</property>
-            <signal name="clicked" handler="btncancel_clicked_cb"/>
+            <signal name="clicked" handler="btncancel_clicked_cb" swapped="no"/>
           </object>
           <packing>
             <property name="expand">False</property>
+            <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
         </child>
       </object>
       <packing>
         <property name="expand">False</property>
+        <property name="fill">True</property>
         <property name="position">1</property>
       </packing>
     </child>

@@ -19,6 +19,7 @@ import gtk
 import pango
 import gobject
 import pynotify
+import threading
 
 #import fs.entries
 from fs.entities import MetaDir, File, Directory, Video, Audio, Photo
@@ -82,6 +83,7 @@ class TVHandler(object):
             self._infopane.show()
         else:
             self._infopane.hide()
+        
 
     #################################
     #Properties
@@ -262,9 +264,11 @@ class TVHandler(object):
         Called once after indexing.
         """
         for dirchild in _dir.dirs:
-            _iter = self._tsdirtree.append(piter, ['folder', dirchild.name,
-                                       dirchild.__str__()])
-            self.append_directories(_iter, dirchild)
+            data = ['folder', dirchild.name, dirchild.__str__()]
+            iter = self._tsdirtree.append(piter, data)
+            path = self._tsdirtree.get_path(iter)
+            gobject.idle_add(self._tsdirtree.row_inserted, path, iter)
+            self.append_directories(iter, dirchild)
 
     def check_if_counting_finished(self, fscountthread):
         """Checks if the counting process finished.
@@ -305,7 +309,7 @@ class TVHandler(object):
         """
         
         self._is_scanning = False
-        self._dbmanager.create_metadir()
+        was_scanned = self._dbmanager.create_metadir()
         self._dbmanager.set_root_node()
         rootselect = Directory.select(Directory.q.relpath == "/",
                                       connection = self._conn)
@@ -321,11 +325,15 @@ class TVHandler(object):
                                                      self._root.strsize + 
                                                      ")",
                                                      self._root.__str__()])
-            self.append_directories(self._rootiter, self._root)
+            #self.append_directories(self._rootiter, self._root)
+            t = threading.Thread(target=self.append_directories, args=(self._rootiter, self._root))
+            t.start()
             gobject.timeout_add(2000, self.hide_progressbar)
         self._mainhandler.set_buttons_sensitivity(True)
-        notification = pynotify.Notification("Indexing finished", "Indexing of " + root.name + " has finished successfully.")
-        notification.show()
+        
+        if was_scanned == 0:
+            notification = pynotify.Notification("Indexing finished", "Indexing of " + root.name + " has finished successfully.")
+            notification.show()
 
 
     def generate_file_list(self, parent, lsfl):

@@ -162,6 +162,9 @@ class DBManager(object):
                                       self._indexer.countfiles,
                                       self._indexer.countdirs, root.size,
                                       root.strsize, root.name, self._indexer.timer)
+            return 0
+        else:
+            return 1
 
     def get_time_consumed(self):
         return self._indexer.timer

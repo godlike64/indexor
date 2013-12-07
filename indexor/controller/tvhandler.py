@@ -20,11 +20,32 @@ import pango
 import gobject
 import pynotify
 import threading
+from multiprocessing import Process, Pipe
 
 #import fs.entries
-from fs.entities import MetaDir, File, Directory, Video, Audio, Photo
+from fs.entities import MetaDir, File, Directory, Video, Audio, Photo, FileAbstract
 from constants import ICONS, MIMES, SEPARATOR
 from logic.midput import SETTINGS
+
+
+class _IdleObject(gobject.GObject):
+    """
+    Override gobject.GObject to always emit signals in the main thread
+    by emmitting on an idle handler
+    """
+    
+    __gsignals__ =  { 
+        "data": (
+            gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
+            (gobject.TYPE_PYOBJECT,))
+        }
+
+    def __init__(self):
+        gobject.GObject.__init__(self)
+
+    def emit(self, *args):
+        gobject.idle_add(gobject.GObject.emit,self,*args)
+
 
 class TVHandler(object):
 
@@ -84,10 +105,14 @@ class TVHandler(object):
         else:
             self._infopane.hide()
         
+        self._io = _IdleObject()
+        self._io.connect('data', self._append)
+        self._pconn, self._cconn = Pipe()
+        
 
     #################################
     #Properties
-    #################################    
+    #################################   
     def get_root(self):
         """Property"""
         return self._root
@@ -257,6 +282,17 @@ class TVHandler(object):
         """Empties the stores."""
         self._tsdirtree.clear()
         self._lsfilelist.clear()
+    
+    def _append(self, object, datum):
+        data = datum['data']
+        piter = datum['piter']
+        iter = self._tsdirtree.append(piter, data)
+        path = self._tsdirtree.get_path(iter)
+
+        self._pconn.send(path)
+        #print self._pconn.recv()
+        #self._tsdirtree.append
+        
 
     def append_directories(self, piter, _dir):
         """Adds directories to the left treeview.
@@ -265,9 +301,15 @@ class TVHandler(object):
         """
         for dirchild in _dir.dirs:
             data = ['folder', dirchild.name, dirchild.__str__()]
-            iter = self._tsdirtree.append(piter, data)
-            path = self._tsdirtree.get_path(iter)
-            gobject.idle_add(self._tsdirtree.row_inserted, path, iter)
+            #self._cconn.send(data)
+            datum = {'data': data, 'piter': piter}
+            self._io.emit('data', datum)
+            path = self._cconn.recv()
+            iter = self._tsdirtree.get_iter(path)
+            #iter = self._tsdirtree.append(piter, data)
+            #path = self._tsdirtree.get_path(iter)
+            #model_data = (iter, path)
+            #gobject.idle_add(self._tsdirtree.row_inserted, path, iter)
             self.append_directories(iter, dirchild)
 
     def check_if_counting_finished(self, fscountthread):
@@ -469,7 +511,6 @@ class TVHandler(object):
                 if hasattr(node, "_sublangs"):
                     self._tblsubinfo.show()
                     self._lblsublangs.set_text(node.sublangs)
-                print node.length
                 self._lblmedialength.set_text(node.length)
                 self._lblvideocodec.set_text(node.videocodec)
                 self._lblvideobitrate.set_text(node.videobitrate)
@@ -580,9 +621,7 @@ class TVHandler(object):
         """
         (_model, _iter) = tvfl.get_selection().get_selected()
         path = tvfl.get_model().get_value(_iter, 3)
-        #node = self._mainhandler.find_dir_or_file_with_fs_path(path,
-        #                                                       self._root)
-        node = File.select(File.q.strabs == path, connection = self._conn)
+        node = FileAbstract.select(FileAbstract.q.strabs == path, connection = self._conn)
         node = node[0]
         self.set_infopane_content(node)
 

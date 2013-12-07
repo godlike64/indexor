@@ -24,6 +24,7 @@ import datetime
 import time
 import inspect
 
+
 from logic.midput import SETTINGS
 
 
@@ -51,7 +52,7 @@ class Event(object):
 
     #################################
     #Properties
-    #################################        
+    #################################
     def get_msg(self):
         """Property"""
         return self._msg

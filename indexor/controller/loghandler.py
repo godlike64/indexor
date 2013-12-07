@@ -16,10 +16,31 @@
 """Module for the handler of the logs window"""
 
 import gtk
+import gobject
+from multiprocessing import Pipe
 
 from logic.logging import MANAGER
 from logic.logging.event import TYPES
 from logic.midput import SETTINGS
+
+class _IdleObject(gobject.GObject):
+    """
+    Override gobject.GObject to always emit signals in the main thread
+    by emmitting on an idle handler
+    """
+    
+    __gsignals__ =  { 
+        "log": (
+            gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
+            (gobject.TYPE_PYOBJECT,))
+        }
+
+    def __init__(self):
+        gobject.GObject.__init__(self)
+
+    def emit(self, *args):
+        gobject.idle_add(gobject.GObject.emit,self,*args)
+
 
 class LogHandler(object):
     
@@ -70,7 +91,12 @@ class LogHandler(object):
         self._tvcolfilename.set_sort_column_id(1)
         self._tvcoldate.set_sort_column_id(5)
         self._populate_logviewer()
-        self._window.show_all()
+        
+        self._io = _IdleObject()
+        self._io.connect('log', self._log)
+        self._pconn, self._cconn = Pipe()
+        
+        #self._window.show_all()
 
     def get_mainhandler(self):
         """Property"""
@@ -85,6 +111,26 @@ class LogHandler(object):
     #################################
     #Methods
     #################################
+    def show(self):
+        self._window.show_all()
+    
+    def hide(self):
+        self._window.hide()
+    
+    def _log(self, object, logum):
+        """    def _append(self, object, datum):
+        data = datum['data']
+        piter = datum['piter']
+        iter = self._tsdirtree.append(piter, data)
+        path = self._tsdirtree.get_path(iter)
+
+        self._pconn.send(path)
+        #print self._pconn.recv()
+        #self._tsdirtree.append"""
+        data = logum['logum']
+        self._lslogviewer.append(data)
+        
+        
     def _populate_logviewer(self):
         """Fills log viewer with occurred events"""
         if MANAGER.events is not None:
@@ -93,9 +139,12 @@ class LogHandler(object):
         
     def add_event_to_store(self, event):
         """Adds a single event to the treestore"""
-        self._lslogviewer.append([event.msg, event.filename, event.err,
-                                     TYPES[event.type], event.location,
-                                     event.date])
+        logum = {'logum': [event.msg, event.filename, event.err, 
+                           TYPES[event.type], event.location, event.date]}
+        self._io.emit('log', logum)
+        #self._lslogviewer.append([event.msg, event.filename, event.err,
+        #                             TYPES[event.type], event.location,
+        #                             event.date])
         
     def hide_or_show(self, active):
         """Hides or shows the window

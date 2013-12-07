@@ -26,6 +26,8 @@ from multiprocessing import Process, Pipe
 from fs.entities import MetaDir, File, Directory, Video, Audio, Photo, FileAbstract
 from constants import ICONS, MIMES, SEPARATOR
 from logic.midput import SETTINGS
+from logic.logging import MANAGER
+
 
 
 class _IdleObject(gobject.GObject):
@@ -286,6 +288,7 @@ class TVHandler(object):
     def _append(self, object, datum):
         data = datum['data']
         piter = datum['piter']
+        MANAGER.append_event(piter, '', '', 1)
         iter = self._tsdirtree.append(piter, data)
         path = self._tsdirtree.get_path(iter)
 

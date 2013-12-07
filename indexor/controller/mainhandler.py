@@ -121,6 +121,8 @@ class MainHandler(object):
         self._currentpath = None
 
         self._chkmnlog = self._wtree.get_object("chkmnlog")
+        self._loghandler = LogHandler(self)
+        MANAGER.loghandler = self._loghandler
 
         self._wtree.connect_signals(self)
         self._window.set_default_size(*SETTINGS.windowsize)
@@ -447,12 +449,9 @@ class MainHandler(object):
     def chkmnlog_toggled_cb(self, widget):
         """Shows/hides the log viewer window"""
         if widget.get_active() is True:
-            self._loghandler = LogHandler(self)
-            MANAGER.loghandler = self._loghandler
+            self._loghandler.show()
         else:
-            MANAGER.loghandler = None
-            self._loghandler.btnclose_clicked_cb(self)
-            self._loghandler = None
+            self._loghandler.hide()
 
     def chkmninfopane_toggled_cb(self, widget):
         """Shows/hides the info pane."""
